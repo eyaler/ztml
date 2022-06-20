@@ -1,0 +1,6 @@
+bitarray
+numpy
+pypng
+selenium
+webdriver_manager
+zopflipy
