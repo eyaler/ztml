@@ -20,6 +20,8 @@
 
 [ ] Save Huffman metadata in image? Maybe in image metadata?
 
+[ ] [dynEncode](https://github.com/eshaz/simple-yenc/pull/3)-like offset to minimize CR and template literal escapes
+
 [ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)?
 
 [ ] Compress the JS itself and use eval?
