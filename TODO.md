@@ -11,6 +11,8 @@
 
 [ ] Online GUI
 
+[ ] Add validation testing for Safari and maybe other browsers
+
 
 ### Encoding / Compression
 

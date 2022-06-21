@@ -28,4 +28,10 @@ ZTML pipeline:
      2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
 7. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
 
-*Automatic capitalization recovery is currently partial. 
+*Automatic capitalization recovery is currently partial.
+
+Note: If the decoding is mangled on Safari, this may be due to serving JS with gzip content encoding.
+Upgrade to a modern browser, or try adding in the server's .htaccess:
+```    
+BrowserMatch Safari gzip-only-text/html
+```

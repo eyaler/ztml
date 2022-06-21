@@ -67,10 +67,10 @@ def encode(text: str,
 
 
 def get_js_decoder(charset: str,
-                          canonical_table: str,
-                          bitarray_name: str = default_names.bitarray,
-                          text_name: str = default_names.text
-                          ) -> str:
+                   canonical_table: str,
+                   bitarray_name: str = default_names.bitarray,
+                   text_name: str = default_names.text
+                   ) -> str:
     return '''s=CHARSET
 d=CANONICAL_TABLE
 j=0
@@ -86,9 +86,9 @@ TEXT_NAME+=s[d[k][1]+m]}
 
 
 def get_legacy_js_decoder(lengths: str,
-                         bitarray_name: str = default_names.bitarray,
-                         text_name: str = default_names.text
-                         ) -> str:
+                          bitarray_name: str = default_names.bitarray,
+                          text_name: str = default_names.text
+                          ) -> str:
     return '''s=LENGTHS
 d={}
 for(j=0,c='';j<s.length;j+=2){

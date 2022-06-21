@@ -5,8 +5,7 @@ from typing import Optional
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver import chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
@@ -14,14 +13,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 from . import text_utils
 
 
-chrome_options = Options()
+chrome_options = chrome.options.Options()
 chrome_options.headless = True
-service = Service(ChromeDriverManager(log_level=0).install())
+chrome_service = chrome.service.Service(ChromeDriverManager(log_level=0).install())
 default_element_name = 'body'
 
 
 def render_html(filename: str, element_name: str = default_element_name) -> Optional[str]:
-    with webdriver.Chrome(service=service, options=chrome_options) as browser:
+    with webdriver.Chrome(service=chrome_service, options=chrome_options) as browser:
         browser.get('file:///' + os.path.abspath(filename))
         try:
             return WebDriverWait(browser, 60).until(lambda x: x.find_element(by=By.TAG_NAME, value=element_name).text)
@@ -74,7 +73,6 @@ def validate_files(filenames: dict[str, str],
                    ) -> None:
     text_size = None
     base64_size = None
-    overhead = ''
     for label, filename in filenames.items():
         ext = os.path.splitext(filename)[-1][1:]
         if not ext.endswith(('txt', 'html')):
