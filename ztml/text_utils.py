@@ -90,7 +90,7 @@ def get_js_decoder(caps: bool = True,
     if the:
         js_decoder += ".replace(/(^| ) /gm,'$1the ')"
     if caps:
-        js_decoder += '.replace(/(^|[.?!])\\P{L}*.|(?<!\\p{L})i(?!\\p{L})/gmu,c=>c.toUpperCase())'
+        js_decoder += '.replace(/(^|[.?!])\\P{L}*.|(^|\\P{L})i(?!\\p{L})/gmu,c=>c.toUpperCase())'  # avoid lookbehind to support Safari
     if js_decoder:
         js_decoder = f'{text_name}={text_name}' + js_decoder + '\n'
     return js_decoder
