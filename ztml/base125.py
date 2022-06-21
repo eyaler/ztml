@@ -11,7 +11,7 @@ alternatively, if these are the final 7 bits, we instead encode as: 1100010x 10x
 We then embed in JS template literals quotes ``, after escaping ${ with a \
 The decoder further takes care of HTML character override for NUL.
 A minimalistic JS decoder code is generated.
-The overhead is ~15% (compared to 33.3% for Base64).
+The overhead is ~ 8/log2(125)-1 ~ 15% (compared to 33.3% for Base64).
 References:
 https://blog.kevinalbs.com/base122
 https://github.com/kevinAlbs/Base122

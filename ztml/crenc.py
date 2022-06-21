@@ -1,12 +1,14 @@
 """crEnc encoding based on yEnc and optimized for inline HTML / JS text compression
 
-If we can set the HTML or JS charset to a single-byte encoding as cp1252 (ascii, latin1),
+In the premise of yEnc (why encode?), we only encode symbols where absolutely required,
+which in this use case is just the carriage-return (CR).
+When the HTML or JS charset can be set to a single-byte encoding as cp1252 (ascii, latin1),
 we can use 254 byte values out of 256 (excluding only CR and an escape character),
 and embed in JS template literals quotes ``, after escaping \, ` and ${ with a \
-The escape character can be predetermined or optimized per message.
+The escape character can be predetermined or optimized per message as an infrequent symbol.
 The decoder further takes care of HTML character overrides for NUL and codes in 128 - 159.
 A minimalistic JS decoder code is generated.
-The overhead is ~1.6% (compared to 33.3% for Base64).
+The overhead is ~ 4/256 ~ 1.6% (compared to 33.3% for Base64).
 References:
 http://www.yenc.org
 https://github.com/eshaz/simple-yenc

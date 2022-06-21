@@ -25,11 +25,11 @@ S = 'style'
 '''
 
 
-def aliasify(script: AnyStr,
-             aliases: str = default_aliases,
-             min_cnt: int = 2,
-             add_used_aliases: bool = True
-             ) -> AnyStr:
+def uglify(script: AnyStr,
+           aliases: str = default_aliases,
+           min_cnt: int = 2,
+           add_used_aliases: bool = True
+           ) -> AnyStr:
     orig_len = len(script)
     shorts = set()
     for alias in reversed(aliases.strip().splitlines()):
@@ -87,5 +87,5 @@ def html_wrap(script: AnyStr,
         html_footer = html_footer.encode()
         newline = newline.encode()
     if aliases:
-        script = aliasify(script, aliases)
+        script = uglify(script, aliases)
     return newline.join([html_header, script.strip(), html_footer])

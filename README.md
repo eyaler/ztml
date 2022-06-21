@@ -5,16 +5,15 @@
 #### https://eyalgruss.com
 
 On-chain media storage may require efficient inline text compression for HTML / JS.
+Here is a custom pipeline to generate stand-alone HTML or JS files, embedded with self-extracting text, and file sizes of ~50% the original.
+The approach makes sense and is optimized for small texts, but performs well also on large texts.
 
-ZTML provides a custom pipeline to generate stand-alone HTML or JS files with embedded self-extracting text, and file sizes of ~50% the original.
-It is currently optimized for small English texts but performs well also on large texts.
 
-
-|                                   | War and Peace | Micromegas    | 
-|-----------------------------------|---------------|---------------|
-| Project Gutenberg plain text utf8 | 3.2 MB        | 63.7 kB       |
-| ZTML (utf8 charset with Base125)  | 1.6 MB (50%)  | 35.0 kB (55%) |
-| ZTML (cp1252 charset with crEnc)  | 1.4 MB (44%)  | 31.3 kB (49%) |
+|                                   | War and Peace (en) | Micromegas (en) | 
+|-----------------------------------|--------------------|-----------------|
+| Project Gutenberg plain text utf8 | 3.2 MB             | 63.7 kB         |
+| ZTML (utf8 charset with Base125)  | 1.6 MB (50%)       | 35.0 kB (55%)   |
+| ZTML (cp1252 charset with crEnc)  | 1.4 MB (44%)       | 31.3 kB (49%)   |
 
 ZTML pipeline:
 
@@ -27,6 +26,6 @@ ZTML pipeline:
 5. [Binary to text encoding](https://en.wikipedia.org/wiki/Binary-to-text_encoding) embedded in JS template literals:
      1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant with 1.6% overhead, to be used with single-byte charset)
      2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
-7. [Minification](ztml/webify.py) of JS script
+7. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
 
 *Automatic capitalization recovery is currently partial. 
