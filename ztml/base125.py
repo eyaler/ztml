@@ -20,7 +20,7 @@ https://github.com/kevinAlbs/Base122
 
 from typing import Optional
 
-from ztml import default_names
+from . import default_names
 
 
 illegal = ['', 13, 92, 96]

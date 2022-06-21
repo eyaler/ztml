@@ -20,7 +20,7 @@ from bitarray import bitarray
 from bitarray.util import ba2int, canonical_decode, canonical_huffman
 import numpy as np
 
-from ztml import default_names
+from . import default_names
 
 
 no_huffman = False  # note: not implemented in decoder

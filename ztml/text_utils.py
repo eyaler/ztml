@@ -1,7 +1,7 @@
 import re
 from typing import Tuple
 
-from ztml import default_names
+from . import default_names
 
 
 newline = '\n\v\f\r\x85\u2028\u2029'

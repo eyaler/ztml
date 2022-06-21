@@ -22,7 +22,7 @@ from typing import List, Iterable
 import png
 import zopfli
 
-from ztml import default_names
+from . import default_names
 
 
 max_dim = 32767

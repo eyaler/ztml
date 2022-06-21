@@ -21,7 +21,7 @@ from collections import Counter
 import re
 from typing import Optional, Tuple, Union
 
-from ztml import default_names
+from . import default_names
 
 
 def find_best_escape(data: bytes) -> int:
