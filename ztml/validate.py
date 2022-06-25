@@ -69,6 +69,7 @@ def validate_files(filenames: dict[str, str],
                    eos: str = text_utils.default_eos,
                    ignore_regex: str = '',
                    element_name: str = default_element_name,
+                   validate: bool = True,
                    verbose: bool = True
                    ) -> None:
     text_size = None
@@ -80,9 +81,10 @@ def validate_files(filenames: dict[str, str],
         size = os.path.getsize(filename)
         if text is None:
             assert ext == 'txt', filename
-            text_size = size
             with open(filename, 'rb') as f:
                 text = text_utils.normalize(f.read().decode(), reduce_whitespace, fix_newline, fix_punct)
+        if text_size is None:
+            text_size = size if ext == 'txt' else len(text.encode())
         if label == 'base64_html':
             base64_size = size * 3 / 4
         if verbose:
@@ -94,13 +96,17 @@ def validate_files(filenames: dict[str, str],
             stats = ' '.join(stats)
             if stats:
                 stats = f' ({stats})'
-            print(f'{filename} {size:,} B{stats}', end='' if ext == 'html' else None)
+            if (mb := size / 1024**2) >= 0.1:
+                stats = f' = {round(mb, 1):,} MB' + stats
+            if (kb := size / 1024) >= 0.1:
+                stats = f' = {round(kb, 1):,} kB' + stats
+            print(f'{filename} {size:,} B{stats}', end='' if validate and ext == 'html' else None)
         start_time = time()
-        if ext == 'html':
-            validate = validate_html(filename, text, compare_caps, eos, ignore_regex, element_name, verbose)
-            assert validate is not False, filename
+        if validate and ext == 'html':
+            valid = validate_html(filename, text, compare_caps, eos, ignore_regex, element_name, verbose)
+            assert valid is not False, filename
             if verbose:
-                if validate:
+                if valid:
                     print(f' rendering took {time() - start_time :.1f} s')
                 else:
                     print(' - NOT validated due to rendering timeout!')

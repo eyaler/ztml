@@ -17,7 +17,7 @@ start_time = time()
 os.makedirs(output_folder, exist_ok=True)
 filenames = {k: os.path.join(output_folder, v) for k, v in filenames.items()}
 
-# optionally, download an example text file from the web
+# If missing, download an example text file from the web
 if not os.path.exists(filenames['text']):
     from gutenberg.acquire.text import load_etext
     with open(filenames['text'], 'wb') as f:

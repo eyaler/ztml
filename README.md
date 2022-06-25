@@ -13,7 +13,7 @@ The approach makes sense and is optimized for small texts, but performs well als
 |-----------------------------------|--------------------|-----------------|
 | Project Gutenberg plain text utf8 | 3.2 MB             | 63.7 kB         |
 | ZTML (utf8 charset with Base125)  | 1.6 MB (50%)       | 35.0 kB (55%)   |
-| ZTML (cp1252 charset with crEnc)  | 1.4 MB (44%)       | 31.3 kB (49%)   |
+| ZTML (cp1252 charset with crEnc)  | 1.4 MB (45%)       | 31.3 kB (49%)   |
 
 ZTML pipeline:
 

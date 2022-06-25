@@ -75,11 +75,12 @@ def uglify(script: AnyStr,
 
 def html_wrap(script: AnyStr,
               aliases: str = default_aliases,
+              lang: str = 'en',
               encoding: str = 'utf8',
               add_mobile: bool = False
               ) -> AnyStr:
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' if add_mobile else ''
-    html_header = f'<!DOCTYPE html><html lang=en><head><meta charset={encoding}>{mobile_meta}</head><body><script>'
+    html_header = f'<!DOCTYPE html><html lang={lang}><head><meta charset={encoding}>{mobile_meta}</head><body><script>'
     html_footer = '</script></body></html>'
     newline = '\n'
     if isinstance(script, bytes):

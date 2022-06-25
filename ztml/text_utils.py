@@ -45,7 +45,7 @@ def remove_the(text: str) -> str:
 
 
 def check_quq(text: str) -> int:
-    return len(re.findall("q([^\\Wu']|u\\b(?!['’]))", text, flags=re.IGNORECASE))
+    return len(re.findall("q([^\\Wu]|['’]\\w|u\\b(?!['’]\\w))", text, flags=re.IGNORECASE))
 
 
 def encode(text: str,
@@ -86,11 +86,13 @@ def get_js_decoder(caps: bool = True,
     if eos:
         js_decoder += f".replace(/{eos.encode('unicode_escape').decode()}+.*$/,'')"
     if quq:
-        js_decoder += ".replace(/q(?=[\\p{L}'\\u2019])/giu,'$&u')"  # \u2019 is ’
+        if not caps:
+            js_decoder += ".replace(/Q(?=['\\u2019]?\\p{Lu})/gu,'$&U')"
+        js_decoder += ".replace(/[Qq](?=['\\u2019]?\\p{Ll})/gu,'$&u')"  # \u2019 is ’
     if the:
         js_decoder += ".replace(/(^| ) /gm,'$1the ')"
     if caps:
-        js_decoder += '.replace(/(^|[.?!])\\P{L}*.|(^|\\P{L})i(?!\\p{L})/gmu,c=>c.toUpperCase())'  # avoid lookbehind to support Safari
+        js_decoder += '.replace(/(^|[.?!])\\P{L}*.|(^|\\P{L})i(?!\\p{L})/gmu,s=>s.toUpperCase())'  # avoid lookbehind to support Safari
     if js_decoder:
         js_decoder = f'{text_name}={text_name}' + js_decoder + '\n'
     return js_decoder

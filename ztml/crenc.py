@@ -19,7 +19,7 @@ https://stackoverflow.com/a/10081375/664456
 
 from collections import Counter
 import re
-from typing import Optional, Tuple, Union
+from typing import AnyStr, Optional, Tuple, Union
 
 from . import default_names
 
@@ -30,11 +30,13 @@ def find_best_escape(data: bytes) -> int:
     return sorted([c for c in chars if c not in b'\x0c\r'], key=lambda c: [c != x for x in b'\\`$'])[-1]
 
 
-def encode(data: bytes, escape: Optional[int] = None) -> Union[bytes, Tuple[bytes, int]]:
+def encode(data: bytes, escape: Optional[Union[int, AnyStr]] = None) -> Union[bytes, Tuple[bytes, int]]:
     return_escape = False
     if escape is None:
         escape = find_best_escape(data)
         return_escape = True
+    elif isinstance(escape, (bytes, str)):
+        escape = ord(escape)
     out = bytearray()
     for byte in data:
         if byte in [13, escape]:
@@ -48,11 +50,13 @@ def encode(data: bytes, escape: Optional[int] = None) -> Union[bytes, Tuple[byte
 
 
 def get_js_decoder(data: bytes,
-                   escape: Optional[int] = None,
+                   escape: Optional[Union[int, AnyStr]] = None,
                    output_name: str = default_names.bytearray
                    ) -> bytes:
     if escape is None:
         escape = find_best_escape(data)
+    elif isinstance(escape, (bytes, str)):
+        escape = ord(escape)
     last_part = '''`
 OUTPUT_NAME=new Uint8Array(s.length)
 j=e=0
