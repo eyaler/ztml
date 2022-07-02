@@ -1,6 +1,7 @@
 bitarray
 numpy
 pypng
+regex
 selenium
 webdriver_manager
 zopflipy

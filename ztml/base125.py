@@ -20,7 +20,10 @@ https://github.com/kevinAlbs/Base122
 
 from typing import Optional
 
-from . import default_names
+if __name__ == '__main__':
+    import default_names
+else:
+    from . import default_names
 
 
 illegal = ['', 13, 92, 96]

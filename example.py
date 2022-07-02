@@ -21,7 +21,7 @@ filenames = {k: os.path.join(output_folder, v) for k, v in filenames.items()}
 if not os.path.exists(filenames['text']):
     from gutenberg.acquire.text import load_etext
     with open(filenames['text'], 'wb') as f:
-        f.write(load_etext(30123).encode())
+        f.write(load_etext(2600).encode())
 
 with open(filenames['text'], 'rb') as f:
     text = f.read().decode()
