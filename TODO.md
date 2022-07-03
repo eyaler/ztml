@@ -11,7 +11,7 @@
 
 [ ] Online GUI
 
-[ ] Add validation testing for Safari and maybe other browsers
+[ ] Add validation testing for Safari
 
 
 ### Encoding / Compression
@@ -33,7 +33,7 @@
 
 ### Minification
 
-[ ] Factor out all minifications to a dedicated post process
+[ ] Factor out all minification to a dedicated post process
 
 [ ] Strip whitespace from lines not part of content strings
 

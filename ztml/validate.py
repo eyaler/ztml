@@ -1,31 +1,44 @@
+import logging
 import os
 import re
 from time import time
 from typing import Optional
 
-from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import chrome
+from selenium.webdriver import Chrome, Edge, Firefox, chrome, edge, firefox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 from . import text_utils
 
 
-chrome_options = chrome.options.Options()
-chrome_options.headless = True
-chrome_service = chrome.service.Service(ChromeDriverManager(log_level=0).install())
+default_browsers = ['chrome', 'edge', 'firefox']
 default_element_name = 'body'
+default_timeout = 60
 
 
-def render_html(filename: str, element_name: str = default_element_name) -> Optional[str]:
-    with webdriver.Chrome(service=chrome_service, options=chrome_options) as browser:
-        browser.get('file:///' + os.path.abspath(filename))
-        try:
-            return WebDriverWait(browser, 60).until(lambda x: x.find_element(by=By.TAG_NAME, value=element_name).text)
-        except TimeoutException:
-            return None
+options = {}
+webdriver = {}
+logging.getLogger('WDM').setLevel(logging.NOTSET)
+for browser, driver, Driver, Manager in zip(default_browsers,
+                                            [chrome, edge, firefox],
+                                            [Chrome, Edge, Firefox],
+                                            [ChromeDriverManager, EdgeChromiumDriverManager, GeckoDriverManager]):
+    options[browser] = driver.options.Options()
+    options[browser].headless = True
+    webdriver[browser] = Driver(service=driver.service.Service(Manager().install()), options=options[browser])
+
+
+def render_html(filename: str, browser: str = default_browsers[0], timeout: int = default_timeout, element_name: str = default_element_name) -> Optional[str]:
+    b = webdriver[browser]
+    b.get('file:///' + os.path.abspath(filename))
+    try:
+        return WebDriverWait(b, timeout).until(lambda x: x.find_element(by=By.TAG_NAME, value=element_name).text)
+    except TimeoutException:
+        return None
 
 
 def validate_html(filename: str,
@@ -33,10 +46,12 @@ def validate_html(filename: str,
                   compare_caps: bool = True,
                   eos: str = text_utils.default_eos,
                   ignore_regex: str = '',
+                  browser: str = default_browsers[0],
+                  timeout: int = default_timeout,
                   element_name: str = default_element_name,
                   verbose: bool = True
                   ) -> Optional[bool]:
-    render = render_html(filename, element_name)
+    render = render_html(filename, browser, timeout, element_name)
     if render is None:
         return None
     if not compare_caps:
@@ -69,9 +84,13 @@ def validate_files(filenames: dict[str, str],
                    eos: str = text_utils.default_eos,
                    ignore_regex: str = '',
                    element_name: str = default_element_name,
+                   browsers: Optional[list[str]] = None,
+                   timeout: int = default_timeout,
                    validate: bool = True,
                    verbose: bool = True
                    ) -> None:
+    if browsers is None:
+        browsers = default_browsers
     text_size = None
     base64_size = None
     for label, filename in filenames.items():
@@ -101,12 +120,12 @@ def validate_files(filenames: dict[str, str],
             if (kb := size / 1024) >= 0.1:
                 stats = f' = {round(kb, 1):,} kB' + stats
             print(f'{filename} {size:,} B{stats}', end='' if validate and ext == 'html' else None)
-        start_time = time()
         if validate and ext == 'html':
-            valid = validate_html(filename, text, compare_caps, eos, ignore_regex, element_name, verbose)
-            assert valid is not False, filename
+            times = ''
+            for browser in browsers:
+                start_time = time()
+                valid = validate_html(filename, text, compare_caps, eos, ignore_regex, browser, timeout, element_name, verbose)
+                assert valid is not False, filename
+                times += f' {browser}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(timeout)')
             if verbose:
-                if valid:
-                    print(f' rendering took {time() - start_time :.1f} s')
-                else:
-                    print(' - NOT validated due to rendering timeout!')
+                print(f' rendering secs:{times}')
