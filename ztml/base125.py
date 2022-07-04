@@ -117,13 +117,7 @@ def get_js_decoder(data: bytes, output_name: str = default_names.bytearray) -> b
 OUTPUT_NAME=new Uint8Array(s.length*2)
 j=k=n=0
 p=(b,l=7)=>{n|=b<<(l<8)>>k>>(l>8);k+=l;k>7&&(OUTPUT_NAME[j++]=n,k-=8,n=b<<8-k)}
-for(c of s){
-i=c.charCodeAt()%65533
-if(i>127){
-e=i>>9
-e&&p([ILLEGAL_STR][e]) 
-p(i<<2*!e&511,9)}
-else p(i)}
+for(c of s)(i=c.charCodeAt()%65533)>127?(e=i>>9,e&&p([ILLEGAL_STR][e]),p(i<<2*!e&511,9)):p(i)
 OUTPUT_NAME=OUTPUT_NAME.slice(0,j)
 '''.replace('OUTPUT_NAME', output_name).replace('ILLEGAL_STR', illegal_str)
     return b's=`' + encode(data) + last_part.encode()

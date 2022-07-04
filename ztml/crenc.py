@@ -60,13 +60,7 @@ def get_js_decoder(data: bytes,
     last_part = '''`
 OUTPUT_NAME=new Uint8Array(s.length)
 j=e=0
-for(c of s){
-i=c.charCodeAt()%65533
-if(i>>8)i=128+'€ ‚ƒ„…†‡ˆ‰Š‹Œ Ž  ‘’“”•–—˜™š›œ žŸ'.indexOf(c)
-if(i==ESCAPE&&!e)e=1
-else{
-e&&(e=0,i--)
-OUTPUT_NAME[j++]=i}}
+for(c of s)i=c.charCodeAt()%65533,i>>8&&(i=128+'€ ‚ƒ„…†‡ˆ‰Š‹Œ Ž  ‘’“”•–—˜™š›œ žŸ'.indexOf(c)),i==ESCAPE&&!e?e=1:(e&&(e=0,i--),OUTPUT_NAME[j++]=i)
 OUTPUT_NAME=OUTPUT_NAME.slice(0,j)
 '''.replace('OUTPUT_NAME', output_name).replace('ESCAPE', str(escape))
     return b's=`' + encode(data, escape) + last_part.encode('cp1252')
