@@ -109,7 +109,7 @@ def get_js_decoder(caps: str = 'auto',
     if eos:
         js_decoder += f".replace(/{eos.encode('unicode_escape').decode()}+.*$/,'')"
     if quq:
-        js_decoder += ".replace(/[Qq](?=['’](?!\\p{Lu})|\\p{Ll})/gu,'$&u')"
+        js_decoder += ".replace(/[Qq](?=['\\u2019](?!\\p{Lu})|\\p{Ll})/gu,'$&u')"  # \u2019 is ’
     if the:
         js_decoder += ".replace(/(^| ) /gm,'$1the ')"
     if caps == 'auto':
