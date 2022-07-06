@@ -12,6 +12,8 @@ https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/comp
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy
 https://github.com/jhildenbiddle/canvas-size#test-results
+https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit
+https://bugs.webkit.org/show_bug.cgi?id=230855
 """
 
 
@@ -73,7 +75,7 @@ def get_js_create_image(bytearray_name: str = default_names.bytearray,
                         image_name: str = default_names.image
                         ) -> str:
     return '''IMAGE_NAME=new Image
-IMAGE_NAME.src=URL.createObjectURL(new Blob([BYTEARRAY_NAME],{type:'image/png'}))
+IMAGE_NAME.src=URL.createObjectURL(new Blob([BYTEARRAY_NAME]))
 '''.replace('IMAGE_NAME', image_name).replace('BYTEARRAY_NAME', bytearray_name)
 
 
@@ -85,7 +87,6 @@ def get_js_image_data(after_script: str = '',
 c=document.createElement('canvas')
 x=c.getContext('2d')
 c=[c.width,c.height]=[IMAGE_NAME.width,IMAGE_NAME.height]
-x.imageSmoothingEnabled=0
 x.drawImage(IMAGE_NAME,0,0)
 BITARRAY_NAME=x.getImageData(0,0,...c).data
 AFTER_SCRIPT})'''.replace('AFTER_SCRIPT', after_script.strip()).replace('IMAGE_NAME', image_name).replace('BITARRAY_NAME', bitarray_name)

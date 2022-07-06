@@ -30,8 +30,4 @@ ZTML pipeline:
 
 *Automatic capitalization recovery is currently partial.
 
-Note: If the decoding is mangled on Safari, this may be due to serving JS with gzip content encoding.
-Upgrade to a modern browser, or try adding in the server's .htaccess:
-```    
-BrowserMatch Safari gzip-only-text/html
-```
+Note: files larger than a few MB may not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safary 15](https://bugs.webkit.org/show_bug.cgi?id=230855)

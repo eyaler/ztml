@@ -73,8 +73,8 @@ def get_js_decoder(charset: str,
                    ) -> str:
     return '''s=CHARSET
 d=CANONICAL_TABLE
-for(j=0,TEXT_NAME='';j<BITARRAY_NAME.length;TEXT_NAME+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j+=4)c+=BITARRAY_NAME[j]&1
-'''.replace('CHARSET', charset).replace('CANONICAL_TABLE', canonical_table).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)
+for(j=0,TEXT_NAME='';j<BITARRAY_NAME.length;TEXT_NAME+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j+=4)c+=BITARRAY_NAME[j]>>
+'''.replace('CHARSET', charset).replace('CANONICAL_TABLE', canonical_table).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)  # note using >>7 instead of &1 to deal with safari rendering inaccduracy
 
 
 def get_legacy_js_decoder(lengths: str,
@@ -84,8 +84,8 @@ def get_legacy_js_decoder(lengths: str,
     return '''s=LENGTHS
 d={}
 for(j=0,c='';j<s.length;j+=2)c+='0'.repeat(parseInt(s[j],36)),d[c]=s[j+1],c=(parseInt(c,2)+1).toString(2).padStart(c.length,0)
-for(j=0,c=TEXT_NAME='';j<BITARRAY_NAME.length;j+=4)(c+=BITARRAY_NAME[j]&1)in d&&(TEXT_NAME+=d[c],c='')
-'''.replace('LENGTHS', lengths).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)
+for(j=0,c=TEXT_NAME='';j<BITARRAY_NAME.length;j+=4)(c+=BITARRAY_NAME[j]>>7)in d&&(TEXT_NAME+=d[c],c='')
+'''.replace('LENGTHS', lengths).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)  # note using >>7 instead of &1 to deal with safari rendering inaccduracy
 
 
 def encode_and_get_js_decoder(text: str,

@@ -1,6 +1,6 @@
 import logging
 import os
-import re
+import regex
 from time import time
 from typing import Optional
 
@@ -46,6 +46,7 @@ def validate_html(filename: str,
                   compare_caps: bool = True,
                   eos: str = text_utils.default_eos,
                   ignore_regex: str = '',
+                  unicode_A: int = 0,
                   browser: str = default_browsers[0],
                   timeout: int = default_timeout,
                   element_name: str = default_element_name,
@@ -58,7 +59,9 @@ def validate_html(filename: str,
         render = render.lower()
         text = text.lower()
     text = text.rstrip(eos)
-    render = re.sub(ignore_regex, '', render)
+    render = regex.sub(ignore_regex, '', render)
+    if unicode_A:
+        render = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), render)
     if render == text:
         return True
     if verbose:
@@ -83,6 +86,7 @@ def validate_files(filenames: dict[str, str],
                    compare_caps: bool = True,
                    eos: str = text_utils.default_eos,
                    ignore_regex: str = '',
+                   unicode_A: int = 0,
                    element_name: str = default_element_name,
                    browsers: Optional[list[str]] = None,
                    timeout: int = default_timeout,
@@ -124,7 +128,7 @@ def validate_files(filenames: dict[str, str],
             times = ''
             for browser in browsers:
                 start_time = time()
-                valid = validate_html(filename, text, compare_caps, eos, ignore_regex, browser, timeout, element_name, verbose)
+                valid = validate_html(filename, text, compare_caps, eos, ignore_regex, unicode_A, browser, timeout, element_name, verbose)
                 assert valid is not False, filename
                 times += f' {browser}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(timeout)')
             if verbose:
