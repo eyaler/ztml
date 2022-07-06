@@ -13,6 +13,8 @@
 
 [ ] Add validation testing for Safari
 
+[ ] Keep browsers open for faster validation and quit when finished
+
 
 ### Encoding / Compression
 

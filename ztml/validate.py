@@ -15,30 +15,26 @@ from webdriver_manager.firefox import GeckoDriverManager
 from . import text_utils
 
 
-default_browsers = ['chrome', 'edge', 'firefox']
-default_element_name = 'body'
 default_timeout = 60
+default_element_name = 'body'
 
 
-options = {}
-webdriver = {}
 logging.getLogger('WDM').setLevel(logging.NOTSET)
-for browser, driver, Driver, Manager in zip(default_browsers,
-                                            [chrome, edge, firefox],
-                                            [Chrome, Edge, Firefox],
-                                            [ChromeDriverManager, EdgeChromiumDriverManager, GeckoDriverManager]):
-    options[browser] = driver.options.Options()
-    options[browser].headless = True
-    webdriver[browser] = Driver(service=driver.service.Service(Manager().install()), options=options[browser])
+drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager().install()],
+               edge=[Edge, edge, EdgeChromiumDriverManager().install()],
+               firefox=[Firefox, firefox, GeckoDriverManager().install()]
+               )
 
 
-def render_html(filename: str, browser: str = default_browsers[0], timeout: int = default_timeout, element_name: str = default_element_name) -> Optional[str]:
-    b = webdriver[browser]
-    b.get('file:///' + os.path.abspath(filename))
-    try:
-        return WebDriverWait(b, timeout).until(lambda x: x.find_element(by=By.TAG_NAME, value=element_name).text)
-    except TimeoutException:
-        return None
+def render_html(filename: str, browser: str = list(drivers)[0], timeout: int = default_timeout, element_name: str = default_element_name) -> Optional[str]:
+    options = drivers[browser][1].options.Options()
+    options.headless = True
+    with drivers[browser][0](service=drivers[browser][1].service.Service(drivers[browser][2], log_path=os.devnull), options=options) as b:
+        b.get('file:///' + os.path.abspath(filename))
+        try:
+            return WebDriverWait(b, timeout).until(lambda x: x.find_element(by=By.TAG_NAME, value=element_name).text)
+        except TimeoutException:
+            return None
 
 
 def validate_html(filename: str,
@@ -47,7 +43,7 @@ def validate_html(filename: str,
                   eos: str = text_utils.default_eos,
                   ignore_regex: str = '',
                   unicode_A: int = 0,
-                  browser: str = default_browsers[0],
+                  browser: str = list(drivers)[0],
                   timeout: int = default_timeout,
                   element_name: str = default_element_name,
                   verbose: bool = True
@@ -94,7 +90,7 @@ def validate_files(filenames: dict[str, str],
                    verbose: bool = True
                    ) -> None:
     if browsers is None:
-        browsers = default_browsers
+        browsers = list(drivers)
     text_size = None
     base64_size = None
     for label, filename in filenames.items():
