@@ -73,7 +73,7 @@ def get_js_decoder(charset: str,
                    ) -> str:
     return '''s=CHARSET
 d=CANONICAL_TABLE
-for(j=0,TEXT_NAME='';j<BITARRAY_NAME.length;TEXT_NAME+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j+=4)c+=BITARRAY_NAME[j]>>
+for(j=0,TEXT_NAME='';j<BITARRAY_NAME.length;TEXT_NAME+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j+=4)c+=BITARRAY_NAME[j]>>7
 '''.replace('CHARSET', charset).replace('CANONICAL_TABLE', canonical_table).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)  # note using >>7 instead of &1 to deal with safari rendering inaccduracy
 
 
