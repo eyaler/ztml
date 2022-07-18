@@ -7,36 +7,30 @@
 
 [ ] Example for image compression use case
 
-[ ] Provide pure JS libs where relevant
+[ ] Expose more parameters and allow skipping steps in CLI / generate(), via arguments or config file
+
+[ ] Provide pure JS libraries where relevant
 
 [ ] Online GUI
 
-[ ] Add validation testing for Safari
+[ ] Validation testing for Safari
 
-[ ] Keep browsers open for faster validation and quit when finished
+[ ] Fix slow rendering with Selenium in validation
 
+### Compression
 
-### Encoding / Compression
+[ ] Respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)
 
-[ ] Add a respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)
+[ ] Dictionary compression for long texts
 
-[ ] Consider dictionary compression for long texts
+[ ] Pre-Huffman BWT+MTF step
 
 [ ] [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
 
-[ ] Save Huffman metadata in image? Maybe in image metadata?
+[ ] Save (e.g. Huffman) metadata in image / in png metadata
 
-[ ] [dynEncode](https://github.com/eshaz/simple-yenc/pull/3)-like offset to minimize CR and template literal escapes (for crEnc, and for Base125 for which we can consider shifts of different kinds)
+[ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
 
-[ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)?
+[ ] Compress the JS itself and use eval
 
-[ ] Compress the JS itself and use eval?
-
-
-### Minification
-
-[ ] Factor out all minification to a dedicated post process
-
-[ ] Strip whitespace from lines not part of content strings
-
-[ ] Explicitly skip uglification for template literals
+[ ] Strip whitespace from lines not part of multi-line content strings

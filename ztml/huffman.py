@@ -14,16 +14,20 @@ https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_re
 from collections import Counter
 import json
 import re
+import sys
 from typing import Dict, List, Tuple
 
 from bitarray import bitarray
 from bitarray.util import ba2int, canonical_decode, canonical_huffman
 import numpy as np
 
-from . import default_names
+if not __package__:
+    import default_vars
+else:
+    from . import default_vars
 
 
-no_huffman = False  # note: not implemented in decoder
+no_huffman = False  # Note: not implemented in decoder
 
 
 def encode(text: str,
@@ -45,7 +49,7 @@ def encode(text: str,
         charset = json.dumps(''.join(symbols[::-1]))
         max_diff = len(max(re.findall('0*', ''.join(str(int(c > 0)) for c in counts[1:])), key=len)) + 1
         if max_diff >= 36:
-            print(f'Warning: the naive huffman decoded implementation cannot be used with max_diff={max_diff}')
+            print(f'Warning: the naive huffman decoded implementation cannot be used with max_diff={max_diff}', file=sys.stderr)
         else:
             lengths = json.dumps(''.join(np.base_repr(len(v) - (len(list(codebook.items())[i - 1][1]) if i else 0), 36)[-1] + k for i, (k, v) in enumerate(codebook.items())))
         canonical_table = {len(code): [ba2int(code), len(codebook) - i - 1] for i, (symbol, code) in enumerate(codebook.items())}
@@ -55,47 +59,33 @@ def encode(text: str,
     if codebook:
         bits.encode(codebook, text)
     if verbose:
-        print(sorted([(k, v.to01()) for k, v in codebook.items()], key=lambda x: -counter[x[0]]))
+        print(sorted([(k, v.to01()) for k, v in codebook.items()], key=lambda x: -counter[x[0]]), file=sys.stderr)
         if charset:
-            print(len(charset), charset)
-            print(canonical_table)
+            print(len(charset), charset, file=sys.stderr)
+            print(canonical_table, file=sys.stderr)
     if validate:
-        assert not codebook or text == ''.join(bits.decode(codebook))
-        assert no_huffman or text == ''.join(canonical_decode(bits, counts, symbols))
+        assert not codebook or ''.join(bits.decode(codebook)) == text
+        assert no_huffman or ''.join(canonical_decode(bits, counts, symbols)) == text
     rev_codebook = {v.to01(): k for k, v in codebook.items()}
     return bits.tolist(), charset, canonical_table, lengths, rev_codebook
 
 
 def get_js_decoder(charset: str,
                    canonical_table: str,
-                   bitarray_name: str = default_names.bitarray,
-                   text_name: str = default_names.text
+                   text_var: str = default_vars.text,
+                   bitarray_var: str = default_vars.bitarray,
                    ) -> str:
-    return '''s=CHARSET
-d=CANONICAL_TABLE
-for(j=0,TEXT_NAME='';j<BITARRAY_NAME.length;TEXT_NAME+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j+=4)c+=BITARRAY_NAME[j]>>7
-'''.replace('CHARSET', charset).replace('CANONICAL_TABLE', canonical_table).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)  # note using >>7 instead of &1 to deal with safari rendering inaccduracy
-
-
-def get_legacy_js_decoder(lengths: str,
-                          bitarray_name: str = default_names.bitarray,
-                          text_name: str = default_names.text
-                          ) -> str:
-    return '''s=LENGTHS
-d={}
-for(j=0,c='';j<s.length;j+=2)c+='0'.repeat(parseInt(s[j],36)),d[c]=s[j+1],c=(parseInt(c,2)+1).toString(2).padStart(c.length,0)
-for(j=0,c=TEXT_NAME='';j<BITARRAY_NAME.length;j+=4)(c+=BITARRAY_NAME[j]>>7)in d&&(TEXT_NAME+=d[c],c='')
-'''.replace('LENGTHS', lengths).replace('BITARRAY_NAME', bitarray_name).replace('TEXT_NAME', text_name)  # note using >>7 instead of &1 to deal with safari rendering inaccduracy
+    return f'''s={charset}
+d={canonical_table}
+for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j++)c+={bitarray_var}[j]&1
+'''
 
 
 def encode_and_get_js_decoder(text: str,
-                              legacy: bool = False,
-                              bitarray_name: str = default_names.bitarray,
-                              text_name: str = default_names.text,
+                              text_var: str = default_vars.text,
+                              bitarray_var: str = default_vars.bitarray,
                               validate: bool = True,
                               verbose: bool = False
                               ) -> Tuple[List[int], str]:
     bits, charset, canonical_table, lengths, _ = encode(text, validate, verbose)
-    if legacy:
-        return bits, get_legacy_js_decoder(lengths, bitarray_name, text_name)
-    return bits, get_js_decoder(charset, canonical_table, bitarray_name, text_name)
+    return bits, get_js_decoder(charset, canonical_table, text_var, bitarray_var)

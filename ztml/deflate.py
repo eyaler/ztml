@@ -19,12 +19,16 @@ https://bugs.webkit.org/show_bug.cgi?id=230855
 
 from io import BytesIO
 import math
+import sys
 from typing import List, Iterable
 
 import png
 import zopfli
 
-from . import default_names
+if not __package__:
+    import default_vars
+else:
+    from . import default_vars
 
 
 max_dim = 32767
@@ -38,6 +42,7 @@ def to_png(bits: Iterable[int],
            filename: str = '',
            verbose: bool = False) -> bytes:
     bits = list(bits)
+    assert len(bits)
     width = height = pad_len = 0
     length = None
     padding = list(padding_sep_code)
@@ -49,7 +54,7 @@ def to_png(bits: Iterable[int],
         length = len(bits)
         assert length <= max_len, length
         height = int(math.sqrt(length))
-        while height > 1 and length % height and length // (height-1) <= max_dim:
+        while length % height and height > 1 and length // (height-1) <= max_dim:
             height -= 1
         width = length // height
         assert width <= max_dim, width
@@ -58,43 +63,48 @@ def to_png(bits: Iterable[int],
     png.Writer(width, height, greyscale=True, bitdepth=1, compression=9).write(png_data, bits)
     png_data.seek(0)
     png_data = png_data.read()
-    zop_data = zopfli.ZopfliPNG(filter_strategies='01234mepb', iterations=15, iterations_large=5).optimize(png_data)
+    zop_data = zopfli.ZopfliPNG(filter_strategies='01234mepb', iterations=15, iterations_large=5).optimize(png_data)  # Time-consuming op
     if verbose:
-        print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} zop={len(zop_data)}')
+        print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} zop={len(zop_data)}', file=sys.stderr)
     if filename:
         with open(filename, 'wb') as f:
             f.write(zop_data)
     return zop_data
 
 
+encode = to_png
+
+
 def load_png(filename: str) -> List[int]:
     return png.Reader(filename=filename).read_flat()[2].tolist()
 
 
-def get_js_create_image(bytearray_name: str = default_names.bytearray,
-                        image_name: str = default_names.image
+def get_js_create_image(image_var: str = default_vars.image,
+                        bytearray_var: str = default_vars.bytearray
                         ) -> str:
-    return '''IMAGE_NAME=new Image
-IMAGE_NAME.src=URL.createObjectURL(new Blob([BYTEARRAY_NAME]))
-'''.replace('IMAGE_NAME', image_name).replace('BYTEARRAY_NAME', bytearray_name)
+    return f'''{image_var}=new Image
+{image_var}.src=URL.createObjectURL(new Blob([{bytearray_var}]))
+'''
 
 
-def get_js_image_data(after_script: str = '',
-                      bitarray_name: str = default_names.bitarray,
-                      image_name: str = default_names.image
+def get_js_image_data(length: int,
+                      render_script: str = '',
+                      image_var: str = default_vars.image,
+                      bitarray_var: str = default_vars.bitarray
                       ) -> str:
-    return '''IMAGE_NAME.decode().then(()=>{
+    return f'''{image_var}.decode().then(()=>{{
 c=document.createElement('canvas')
 x=c.getContext('2d')
-c=[c.width,c.height]=[IMAGE_NAME.width,IMAGE_NAME.height]
-x.drawImage(IMAGE_NAME,0,0)
-BITARRAY_NAME=x.getImageData(0,0,...c).data
-AFTER_SCRIPT})'''.replace('AFTER_SCRIPT', after_script.strip()).replace('IMAGE_NAME', image_name).replace('BITARRAY_NAME', bitarray_name)
+c=[c.width,c.height]=[{image_var}.width,{image_var}.height]
+x.drawImage({image_var},0,0)
+{bitarray_var}=Array.from(x.getImageData(0,0,...c).data).flatMap((i,j)=>j%4||j>{length*4 - 1}?[]:[i>>7])
+{render_script.strip()}}})'''  # Using >>7 to deal with safari rendering inaccuracy
 
 
-def get_js_image_decoder(after_script: str = '',
-                         bytearray_name: str = default_names.bytearray,
-                         bitarray_name: str = default_names.bitarray,
-                         image_name: str = default_names.image
+def get_js_image_decoder(length: int,
+                         render_script: str = '',
+                         image_var: str = default_vars.image,
+                         bytearray_var: str = default_vars.bytearray,
+                         bitarray_var: str = default_vars.bitarray
                          ) -> str:
-    return get_js_create_image(bytearray_name, image_name) + get_js_image_data(after_script, bitarray_name, image_name)
+    return get_js_create_image(image_var, bytearray_var) + get_js_image_data(length, render_script, image_var, bitarray_var)
