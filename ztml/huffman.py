@@ -12,14 +12,11 @@ https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_re
 
 
 from collections import Counter
-import json
-import re
 import sys
 from typing import Dict, List, Tuple
 
 from bitarray import bitarray
 from bitarray.util import ba2int, canonical_decode, canonical_huffman
-import numpy as np
 
 if not __package__:
     import default_vars
@@ -27,14 +24,14 @@ else:
     from . import default_vars
 
 
-no_huffman = False  # Note: not implemented in decoder
+no_huffman = False  # Note: this is just for benchmarking and is not implemented in decoder
 
 
 def encode(text: str,
            validate: bool = True,
            verbose: bool = False
-           ) -> Tuple[List[int], str, str, str, Dict[str, str]]:
-    charset = canonical_table = lengths = ''
+           ) -> Tuple[List[int], str, str, Dict[str, str]]:
+    charset = canonical_table = ''
     counter = Counter(text)
     if no_huffman:
         code_len = len(bin(ord(max(counter)))) - 2
@@ -46,14 +43,9 @@ def encode(text: str,
             codebook = {}
             counts = []
             symbols = []
-        charset = json.dumps(''.join(symbols[::-1]))
-        max_diff = len(max(re.findall('0*', ''.join(str(int(c > 0)) for c in counts[1:])), key=len)) + 1
-        if max_diff >= 36:
-            print(f'Warning: the naive huffman decoded implementation cannot be used with max_diff={max_diff}', file=sys.stderr)
-        else:
-            lengths = json.dumps(''.join(np.base_repr(len(v) - (len(list(codebook.items())[i - 1][1]) if i else 0), 36)[-1] + k for i, (k, v) in enumerate(codebook.items())))
+        charset = ''.join(symbols[::-1])
         canonical_table = {len(code): [ba2int(code), len(codebook) - i - 1] for i, (symbol, code) in enumerate(codebook.items())}
-        canonical_table = json.dumps(canonical_table).replace(' ', '').replace('"', '')
+        canonical_table = str(canonical_table).replace(' ', '').replace("'", '')
 
     bits = bitarray()
     if codebook:
@@ -67,7 +59,7 @@ def encode(text: str,
         assert not codebook or ''.join(bits.decode(codebook)) == text
         assert no_huffman or ''.join(canonical_decode(bits, counts, symbols)) == text
     rev_codebook = {v.to01(): k for k, v in codebook.items()}
-    return bits.tolist(), charset, canonical_table, lengths, rev_codebook
+    return bits.tolist(), charset, canonical_table, rev_codebook
 
 
 def get_js_decoder(charset: str,
@@ -75,7 +67,8 @@ def get_js_decoder(charset: str,
                    text_var: str = default_vars.text,
                    bitarray_var: str = default_vars.bitarray,
                    ) -> str:
-    return f'''s={charset}
+    charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
+    return f'''s=[...'{charset}']
 d={canonical_table}
 for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j++)c+={bitarray_var}[j]&1
 '''
@@ -87,5 +80,5 @@ def encode_and_get_js_decoder(text: str,
                               validate: bool = True,
                               verbose: bool = False
                               ) -> Tuple[List[int], str]:
-    bits, charset, canonical_table, lengths, _ = encode(text, validate, verbose)
+    bits, charset, canonical_table, _ = encode(text, validate, verbose)
     return bits, get_js_decoder(charset, canonical_table, text_var, bitarray_var)

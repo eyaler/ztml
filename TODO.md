@@ -19,11 +19,11 @@
 
 ### Compression
 
+[ ] evaluate BWT-MTF variants, and improve js MTF decoding times for large files
+
 [ ] Respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)
 
 [ ] Dictionary compression for long texts
-
-[ ] Pre-Huffman BWT+MTF step
 
 [ ] [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
 

@@ -35,7 +35,7 @@ for book in books:
         ext = os.path.splitext(filename)[-1][1:]
         if ext not in ['js', 'html']:
             continue
-        file = ztml.generate(text, filename=filename, bin2txt=label.split('_', 1)[0], js=ext == 'js')
+        file = ztml.generate(text, filename, bin2txt=label.split('_', 1)[0], js=ext == 'js')
 
     print(f'All encodings of {book} took {(time()-book_start_time) / 60 :.1f} min.')
 

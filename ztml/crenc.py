@@ -83,7 +83,7 @@ def get_js_decoder(data: bytes,
                    output_var: str = default_vars.bytearray
                    ) -> bytes:
     if offset is None:
-        encoded, offset, saved = optimize_encode(data, escape)  # Time-consuming op
+        encoded, offset, saved = optimize_encode(data, escape)  # Time-consuming op.
     else:
         encoded = encode(data, escape, offset)
     if escape is None:

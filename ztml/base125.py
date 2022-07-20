@@ -134,7 +134,7 @@ def get_js_decoder(data: bytes,
                    validate: bool = True
                    ) -> bytes:
     if offset is None:
-        encoded, offset, saved = optimize_encode(data, validate)  # Time-consuming op
+        encoded, offset, saved = optimize_encode(data, validate)  # Time-consuming op.
     else:
         encoded = encode(data, offset, validate)
     illegal_str = ','.join(str(i) for i in illegal)

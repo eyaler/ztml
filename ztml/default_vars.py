@@ -1,4 +1,5 @@
 bytearray = 'o'
 bitarray = 'b'
+bwt_func = '_'
 image = 'i'
 text = 't'

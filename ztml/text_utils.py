@@ -10,16 +10,16 @@ else:
 
 
 newline = '\n\v\f\r\x85\u2028\u2029'
-single_quote = '`\u2018-\u201b'
+single_quote = '\u2018-\u201b'
 double_quote = '\u201c-\u201f'
 caps_modes = 'auto', 'lower', 'raw', 'upper'
 default_caps_mode = 'auto'
 
 
 def normalize(text: str,
-              reduce_whitespace: bool = True,
-              fix_newline: bool = True,
-              fix_punct: bool = True
+              reduce_whitespace: bool = False,
+              fix_newline: bool = False,
+              fix_punct: bool = False
               ) -> str:
     if reduce_whitespace:
         text = regex.sub('\\s*[' + newline + ']\\s*[' + newline + ']\\s*', '\n\n', text)
@@ -126,16 +126,17 @@ def encode_and_get_js_decoder(text: str,
                               caps_warn: bool = False,
                               quq_warn: bool = True,
                               caps_fallback: bool = False,
-                              quq_fallback: bool = True,
                               text_var: str = default_vars.text
                               ) -> Tuple[str, str]:
     if caps_fallback and caps == 'auto' and not count_bad_auto_caps(text, verbose=caps_warn):
         caps = 'raw'
         if caps_warn:
             print(f"Falling back to caps='{caps}'", file=sys.stderr)
+    if the and '  ' in text:
+        the = False
     if quq and len(encode(text, caps, the, quq=False)) - len(encode(text, caps, the, quq=True, quq_warn=False)) < len(quq_js_decoder):
         quq = False
-    if quq_fallback and quq and count_bad_quq(text, caps, verbose=quq_warn):
+    if quq and count_bad_quq(text, caps, verbose=quq_warn):
         quq = False
         if quq_warn:
             print(f'Falling back to quq={quq}', file=sys.stderr)

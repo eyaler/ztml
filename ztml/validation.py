@@ -1,5 +1,4 @@
 from contextlib import ExitStack, redirect_stdout
-import logging
 import os
 import sys
 from tempfile import NamedTemporaryFile
@@ -28,7 +27,7 @@ default_element = 'body'
 webdriver_paths_filename = 'webdriver_paths.txt'
 
 
-logging.getLogger('WDM').setLevel(logging.NOTSET)
+os.environ['WDM_LOG'] = '0'
 drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
                edge=[Edge, edge, EdgeChromiumDriverManager],
                firefox=[Firefox, firefox, GeckoDriverManager]
@@ -84,6 +83,20 @@ def render_html(file: AnyStr,
             return None
 
 
+def find_first_diff(render: str, text: str, verbose: bool = True) -> int:
+    i = -1
+    for i, (r, t) in enumerate(zip(render, text)):
+        if r != t:
+            break
+    else:
+        i += 1
+    if verbose:
+        print(f'\nFirst difference found at {i} / {len(render)}', file=sys.stderr)
+        print('Original:', repr(text[max(i - 30, 0) : i]), '->', repr(text[i : i + 50]), file=sys.stderr)
+        print('Rendered:', repr(render[max(i - 30, 0) : i]), '->', repr(render[i : i + 50]), '\n', file=sys.stderr)
+    return i
+
+
 def validate_html(file: AnyStr,
                   text: str,
                   compare_caps: bool = True,
@@ -106,23 +119,15 @@ def validate_html(file: AnyStr,
     if render == text:
         return True
     if verbose:
-        i = -1
-        for i, (r, t) in enumerate(zip(render, text)):
-            if r != t:
-                break
-        else:
-            i += 1
-        print(f'\nFirst difference found at {i} / {len(render)}', file=sys.stderr)
-        print('Original:', repr(text[max(i - 30, 0) : i]), '->', repr(text[i : i + 50]), file=sys.stderr)
-        print('Rendered:', repr(render[max(i - 30, 0) : i]), '->', repr(render[i : i + 50]), '\n', file=sys.stderr)
+        find_first_diff(render, text)
     return False
 
 
 def validate_files(filenames: dict[str, str],
                    text: Optional[str] = None,
-                   reduce_whitespace: bool = True,
-                   fix_newline: bool = True,
-                   fix_punct: bool = True,
+                   reduce_whitespace: bool = False,
+                   fix_newline: bool = False,
+                   fix_punct: bool = False,
                    compare_caps: bool = True,
                    ignore_regex: str = '',
                    unicode_A: int = 0,

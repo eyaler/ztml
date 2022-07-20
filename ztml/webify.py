@@ -26,15 +26,21 @@ S = 'style'
 '''
 
 
+def get_encoding_errors(encoding: str):
+    if encoding is None:
+        encoding = 'utf8'
+    errors = 'strict' if encoding.lower().replace('-', '') == 'utf8' else 'backslashreplace'
+    return encoding, errors
+
+
 def uglify(script: AnyStr,
            aliases: str = default_aliases,
            min_cnt: int = 2,
            add_used_aliases: bool = True,
            encoding: Optional[str] = None
-          ) -> AnyStr:
-    if encoding is None:
-        encoding = 'utf8'
-    orig_len = len(script.encode(encoding) if isinstance(script, str) else script)
+           ) -> AnyStr:
+    encoding, errors = get_encoding_errors(encoding)
+    orig_len = len(script.encode(encoding, errors) if isinstance(script, str) else script)
     shorts = set()
     for alias in reversed(aliases.strip().splitlines()):
         alias = alias.replace(' ', '')
@@ -62,9 +68,9 @@ def uglify(script: AnyStr,
             long += '\\b'
         literals = r'(`(?:\\.|[^`\\])*`)'
         if isinstance(script, bytes):
-            long = long.encode(encoding)
-            short = short.encode(encoding)
-            literals = literals.encode(encoding)
+            long = long.encode(encoding, errors)
+            short = short.encode(encoding, errors)
+            literals = literals.encode(encoding, errors)
         sub = script[:0]
         cnt = 0
         for i, part in enumerate(re.split(literals, script)):
@@ -77,10 +83,10 @@ def uglify(script: AnyStr,
             if add_used_aliases:
                 alias += '\n'
                 if isinstance(script, bytes):
-                    alias = alias.encode(encoding)
+                    alias = alias.encode(encoding, errors)
                 if alias not in script:
                     script = alias + script.lstrip()
-    new_len = len(script.encode(encoding) if isinstance(script, str) else script)
+    new_len = len(script.encode(encoding, errors) if isinstance(script, str) else script)
     if new_len > orig_len:
         print(f'Warning size has grown: {new_len} B > {orig_len} B', file=sys.stderr)
     return script
@@ -95,16 +101,15 @@ def html_wrap(script: AnyStr,
               ) -> AnyStr:
     if lang is None:
         lang = 'en'
-    if encoding is None:
-        encoding = 'utf8'
+    encoding, errors = get_encoding_errors(encoding)
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' if add_mobile else ''
     html_header = f'<!DOCTYPE html><html lang={lang}><head><meta charset={encoding}>{mobile_meta}</head><body><script>'
     html_footer = '</script></body></html>'
     newline = '\n'
     if isinstance(script, bytes):
-        html_header = html_header.encode(encoding)
-        html_footer = html_footer.encode(encoding)
-        newline = newline.encode(encoding)
+        html_header = html_header.encode(encoding, errors)
+        html_footer = html_footer.encode(encoding, errors)
+        newline = newline.encode(encoding, errors)
     if aliases:
         script = uglify(script, aliases, min_cnt, encoding=encoding)
     return newline.join([html_header, script.strip(), html_footer])
