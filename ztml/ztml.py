@@ -19,19 +19,19 @@ bin2txt_encodings = 'base64', 'base125', 'crenc'
 default_bin2txt = 'crenc'
 
 
-def generate(text: str,
-             filename: str = '',
-             reduce_whitespace: bool = False,
-             fix_newline: bool = False,
-             fix_punct: bool = False,
-             caps: str = text_utils.default_caps_mode,
-             bin2txt: str = default_bin2txt,
-             js: bool = False,
-             validate: bool = False,
-             compare_caps: bool = True,
-             browser: validation.BrowserType = validation.default_browser,
-             verbose: bool = False
-             ) -> Union[bytes, Tuple[bytes, int]]:
+def ztml(text: str,
+         filename: str = '',
+         reduce_whitespace: bool = False,
+         fix_newline: bool = False,
+         fix_punct: bool = False,
+         caps: str = text_utils.default_caps_mode,
+         bin2txt: str = default_bin2txt,
+         js: bool = False,
+         validate: bool = False,
+         compare_caps: bool = True,
+         browser: validation.BrowserType = validation.default_browser,
+         verbose: bool = False
+         ) -> Union[bytes, Tuple[bytes, int]]:
     start_time = time()
     encoding = 'cp1252' if bin2txt == 'crenc' else None
     text = text_utils.normalize(text, reduce_whitespace, fix_newline, fix_punct)  # Reduce whitespace
@@ -98,7 +98,7 @@ if __name__ == '__main__':
                     text = text.decode()
                 else:
                     raise
-    out = generate(text, args.output_filename, args.reduce_whitespace, args.fix_newline, args.fix_punct, args.caps, args.bin2txt, args.js, args.validate, not args.skip_compare_caps, args.browser, args.verbose)
+    out = ztml(text, args.output_filename, args.reduce_whitespace, args.fix_newline, args.fix_punct, args.caps, args.bin2txt, args.js, args.validate, not args.skip_compare_caps, args.browser, args.verbose)
     result = False
     if args.validate:
         out, result = out

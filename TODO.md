@@ -7,7 +7,7 @@
 
 [ ] Example for image compression use case
 
-[ ] Expose more parameters and allow skipping steps in CLI / generate(), via arguments or config file
+[ ] Expose more parameters and allow skipping steps in CLI / ztml(), via arguments or config file
 
 [ ] Provide pure JS libraries where relevant
 

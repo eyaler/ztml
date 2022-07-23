@@ -188,5 +188,5 @@ def validate_files(filenames: dict[str, str],
                         print(f' {browser.name}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(timeout)'), end='', file=sys.stderr)
                 if verbose:
                     print(file=sys.stderr)
-        if verbose:
-            print('Note: above rendering times from Selenium are much slower than actual browser rendering', file=sys.stderr)
+        if verbose and validate:
+            print('Note: above rendering times from Selenium are much longer than actual browser rendering', file=sys.stderr)

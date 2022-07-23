@@ -35,8 +35,8 @@ for browser in browsers:
                 with open(input_filename, 'wb') as f:
                     f.write((text if enc.startswith('utf') else 'אבגדהוזחטיךכלםמןנסעףפץצקרשת').encode(enc))
                 if enc == 'utf8':
-                    out1, result1 = ztml.generate(text, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
-                    out2, result2 = ztml.generate(text, output_filename, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
+                    out1, result1 = ztml.ztml(text, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
+                    out2, result2 = ztml.ztml(text, output_filename, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
                     with open(output_filename, 'rb') as f:
                         assert not result1 and not result2 and out1 == out2 == f.read(), (result1, result2, output_filename)
                 result1 = os.system(f'python ztml.py "{input_filename}" "{output_filename}" --bin2txt {bin2txt} --validate --skip_compare_caps --browser {browser} --verbose')

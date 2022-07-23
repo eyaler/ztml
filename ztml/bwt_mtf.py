@@ -80,12 +80,12 @@ def get_js_decoder(index: int,
     if data_var is None:
         data_var = default_vars.text if is_str else default_vars.bitarray
     js_decoder = ''
-    if mtf and data_var != default_vars.bitarray:
+    if mtf:
         if is_str:
             js_decoder += f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n'
         js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>Math.max(a,b+1),0)).keys()]
 j=0
-for(k of {data_var}){data_var}[j++]=d[k],d.unshift(d.splice(k,1)[0])
+for(k of {data_var})d.unshift({data_var}[j++]=d.splice(k,1)[0])
 '''
         if is_str:
             js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
@@ -105,6 +105,8 @@ def encode_and_get_js_decoder(data: DataType,
                               data_var: Optional[str] = None,
                               validate: bool = True
                               ) -> Tuple[DataType, str]:
+    if data_var == default_vars.bitarray:
+        mtf = False
     trans, index = encode(data, mtf, validate)
     return trans, get_js_decoder(index, isinstance(data, str), mtf, add_bwt_func, bwt_func_var, data_var)
 

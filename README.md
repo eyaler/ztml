@@ -5,7 +5,7 @@
 
 On-chain media storage may require efficient inline text compression for HTML / JS.
 Here is a custom pipeline to generate stand-alone HTML or JS files, embedding competitively compressed self-extracting text, and having file sizes of 25% - 40% the original.
-These file sizes include the decoder code which is less than 1.6 kB.
+These file sizes include the decoder code (including auxiliary variables) which is less than 1.6 kB.
 The approach makes sense and is optimized for small texts, but performs quite well also on large texts.
 
 |                                        | File format   | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) |
@@ -17,7 +17,7 @@ The approach makes sense and is optimized for small texts, but performs quite we
 | ZTML crEnc (no text normalization)     | html (cp1252) | 838 kB (26%)                                                      | 23.3 kB (37%)                                                    |
 
 ### Usage
-A standard simplified pipeline can be run by calling `generate()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
+A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252. [Base125](ztml/base125.py) is the second best option if one must stick with utf8. 
 
