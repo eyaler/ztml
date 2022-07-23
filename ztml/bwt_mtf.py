@@ -1,8 +1,12 @@
 """Burrows–Wheeler and Move-to-front transforms
 
+Implementation follows pydivsufsort tests, to unnecessitate adding an EOF token.
+Benchmarked and rejected the following variations of [Balkenhol & Shtarkov 1999]: vowel-sorted bwt, mtf-1, mtf-2.
+
 References:
 https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf
 https://github.com/louisabraham/pydivsufsort/blob/master/tests/reference.py
+[Balkenhol & Shtarkov 1999] https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.43.1175&rep=rep1&type=pdf
 """
 
 
@@ -52,8 +56,8 @@ def decode(trans: DataType, index: int, mtf: bool = True) -> DataType:
             trans = trans[:]
         ranks = list(range(max(trans, default=-1) + 1))
         for i, rank in enumerate(trans):
-            trans[i] = ranks[rank]
-            ranks.insert(0, ranks.pop(rank))
+            trans[i] = ranks.pop(rank)
+            ranks.insert(0, trans[i])
         if is_str:
             trans = ''.join([chr(i) for i in trans])
     ordered = [(c, i - (i <= index)) for i, c in enumerate(trans)]
@@ -76,7 +80,7 @@ def get_js_decoder(index: int,
     if data_var is None:
         data_var = default_vars.text if is_str else default_vars.bitarray
     js_decoder = ''
-    if mtf:
+    if mtf and data_var != default_vars.bitarray:
         if is_str:
             js_decoder += f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n'
         js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>Math.max(a,b+1),0)).keys()]

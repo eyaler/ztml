@@ -4,20 +4,20 @@
 ### By [Eyal Gruss](https://eyalgruss.com)
 
 On-chain media storage may require efficient inline text compression for HTML / JS.
-Here is a custom pipeline to generate stand-alone HTML or JS files, embedding self-extracting text, and having file sizes of 25% - 40% the original.
+Here is a custom pipeline to generate stand-alone HTML or JS files, embedding competitively compressed self-extracting text, and having file sizes of 25% - 40% the original.
 These file sizes include the decoder code which is less than 1.6 kB.
 The approach makes sense and is optimized for small texts, but performs quite well also on large texts.
 
-|                                        | File format | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) |
-|----------------------------------------|-------------|-------------------------------------------------------------------|------------------------------------------------------------------|
-| Project Gutenberg plain text utf8      | txt         | 3.2 MB                                                            | 63.7 kB                                                          |
-| 7-Zip 9 Ultra PPMd (excluding decoder) | 7z          | 746 kB (23%)                                                      | 20.8 kB (32%)                                                    |
-| 7-Zip 9 Ultra PPMd (self extracting)   | exe         | 958 kB (29%)                                                      | 232 kB (364%)                                                    |
-| ZTML Base125 (no normalization)        | html        | 939 kB (29%)                                                      | 26.0 kB (41%)                                                    |
-| ZTML crEnc (no normalization)          | html        | 838 kB (26%)                                                      | 23.3 kB (37%)                                                    |
+|                                        | File format   | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) |
+|----------------------------------------|---------------|-------------------------------------------------------------------|------------------------------------------------------------------|
+| Project Gutenberg plain text utf8      | txt           | 3.2 MB                                                            | 63.7 kB                                                          |
+| 7-Zip 9 Ultra PPMd (excluding decoder) | 7z            | 746 kB (23%)                                                      | 20.8 kB (32%)                                                    |
+| 7-Zip 9 Ultra PPMd (self extracting)   | exe           | 958 kB (29%)                                                      | 232 kB (364%)                                                    |
+| ZTML Base125 (no text normalization)   | html (utf8)   | 939 kB (29%)                                                      | 26.0 kB (41%)                                                    |
+| ZTML crEnc (no text normalization)     | html (cp1252) | 838 kB (26%)                                                      | 23.3 kB (37%)                                                    |
 
 ### Usage
-The standard simplified pipeline can be run by calling `generate()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
+A standard simplified pipeline can be run by calling `generate()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252. [Base125](ztml/base125.py) is the second best option if one must stick with utf8. 
 

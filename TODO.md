@@ -19,7 +19,11 @@
 
 ### Compression
 
-[ ] evaluate BWT-MTF variants, and improve js MTF decoding times for large files
+[ ] Ablation benchmarks
+
+[ ] Improve JS MTF decoding times for large files
+
+[ ] Run length encoding after MTF
 
 [ ] Respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)
 

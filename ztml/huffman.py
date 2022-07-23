@@ -4,6 +4,7 @@ Even though we later compress with DEFLATE which does its own Huffman encoding i
 I found that for text compression, it is significantly beneficial to pre-encode with Huffman.
 Canonical encoding alleviates the necessity to save or to reconstruct the codebook.
 A minimalistic JS decoder code is generated.
+
 References:
 https://wikipedia.org/wiki/Canonical_Huffman_code
 https://github.com/ilanschnell/bitarray/blob/master/doc/canonical.rst

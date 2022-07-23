@@ -13,6 +13,7 @@ An optimal overall offset can be added to minimize escaping as suggested in dynE
 The decoder further takes care of HTML character override for NUL.
 A minimalistic JS decoder code is generated.
 The overhead is ~ 8/log2(125)-1 ~ 15% (compared to 33.3% for Base64).
+
 References:
 https://blog.kevinalbs.com/base122
 https://github.com/kevinAlbs/Base122

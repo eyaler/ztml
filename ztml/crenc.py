@@ -10,6 +10,7 @@ An optimal overall offset can be added to minimize escaping as suggested in dynE
 The decoder further takes care of HTML character overrides for NUL and codes in 128 - 159.
 A minimalistic JS decoder code is generated.
 The overhead is ~ 4/256 ~ 1.6% (compared to 33.3% for Base64).
+
 References:
 http://www.yenc.org
 https://github.com/eshaz/simple-yenc

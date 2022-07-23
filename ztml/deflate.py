@@ -7,6 +7,7 @@ The data is then read from the HTML canvas element.
 The image aspect ratio is optimized to minimize the necessary padding to a rectangle.
 We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
 A minimalistic JS decoder code is generated.
+
 References:
 https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/compression-using-canvas-and-png.html
 https://github.com/google/zopfli
