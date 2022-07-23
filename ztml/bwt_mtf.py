@@ -105,10 +105,13 @@ def encode_and_get_js_decoder(data: DataType,
                               data_var: Optional[str] = None,
                               validate: bool = True
                               ) -> Tuple[DataType, str]:
+    is_str = isinstance(data, str)
+    if data_var is None:
+        data_var = default_vars.text if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
         mtf = False
     trans, index = encode(data, mtf, validate)
-    return trans, get_js_decoder(index, isinstance(data, str), mtf, add_bwt_func, bwt_func_var, data_var)
+    return trans, get_js_decoder(index, is_str, mtf, add_bwt_func, bwt_func_var, data_var)
 
 
 def test() -> None:
