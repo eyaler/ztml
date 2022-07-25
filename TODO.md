@@ -39,4 +39,4 @@
 
 [ ] Compress the JS itself and use eval
 
-[ ] Strip whitespace from lines not part of multi-line content strings
+[ ] Strip whitespace from scripts lines not part of multi-line content strings

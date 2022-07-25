@@ -71,7 +71,7 @@ def get_js_decoder(charset: str,
     charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
     return f'''s=[...'{charset}']
 d={canonical_table}
-for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-parseInt(c,2))>=0);j++)c+={bitarray_var}[j]&1
+for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-('0b'+c))>=0);j++)c+={bitarray_var}[j]&1
 '''
 
 

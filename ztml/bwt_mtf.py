@@ -193,10 +193,10 @@ for(k of {data_var}){mtf_op}
             if not is_str:
                 js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
             js_decoder += f'''d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
-{data_var}={data_var}.map(c=>{"d[c]||c).join('')" if is_str else '(d[c]||c).codePointAt())'}
+{data_var}={data_var}.map(c=>{'d[c]||c).join``' if is_str else '(d[c]||c).codePointAt())'}
 '''
     if is_str and not dyn_orders:
-        js_decoder += f"{data_var}={data_var}.join('')\n"
+        js_decoder += f'{data_var}={data_var}.join``\n'
     return js_decoder
 
 

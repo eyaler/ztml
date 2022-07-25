@@ -10,15 +10,15 @@ B = document.body
 C = 'textContent'
 D = 'dataset'
 E = e => document.createElement(e)
-F = speechSynthesis
+F = String.fromCodePoint
 G = 'width'
 H = 'height'
-I = parseInt
+I = setInterval
 J = 'background'
 K = 'color'
 L = 'length'
 M = (e, d) => e.setAttribute('style', d)
-N = setInterval
+N = speechSynthesis
 O = setTimeout
 P = 'parentElement'
 R = 'target'

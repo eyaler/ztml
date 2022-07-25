@@ -176,7 +176,7 @@ def validate_files(filenames: dict[str, str],
                     stats = f' = {round(mb, 1):,} MB' + stats
                 if (kb := size / 1024) >= 0.1:
                     stats = f' = {round(kb, 1):,} kB' + stats
-                print(f"{filename} {size:,} B{stats}", end='' if validate and ext == 'html' else None, file=sys.stderr)
+                print(f"file:///{os.path.realpath(filename).replace(os.sep, '/')} {size:,} B{stats}", end='' if validate and ext == 'html' else None, file=sys.stderr)
             if validate and ext == 'html':
                 for i, browser in enumerate(browsers):
                     start_time = time()
@@ -185,7 +185,7 @@ def validate_files(filenames: dict[str, str],
                     if verbose:
                         if not i:
                             print(f' rendering secs:', end='', file=sys.stderr)
-                        print(f' {browser.name}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(timeout)'), end='', file=sys.stderr)
+                        print(f' {browser.name}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(TIMEOUT)'), end='', file=sys.stderr)
                 if verbose:
                     print(file=sys.stderr)
         if verbose and validate:

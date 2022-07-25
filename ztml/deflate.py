@@ -94,8 +94,8 @@ def get_js_image_data(length: int,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
     return f'''{image_var}.decode().then(()=>{{
-c=document.createElement('canvas')
-x=c.getContext('2d')
+c=document.createElement`canvas`
+x=c.getContext`2d`
 c=[c.width,c.height]=[{image_var}.width,{image_var}.height]
 x.drawImage({image_var},0,0)
 {bitarray_var}=[...x.getImageData(0,0,...c).data].flatMap((i,j)=>j%4||j>{length*4 - 1}?[]:[i>>7])
