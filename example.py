@@ -6,11 +6,12 @@ start_time = time()
 from ztml import validation, ztml
 
 
-books = [30123, 2600]
+books = 30123, 2600
+mtf_variants = 0, 80
 output_folder = 'output'
 
 
-for book in books:
+for book, mtf in zip(books, mtf_variants):
     book_start_time = time()
     filenames = dict(text=f'{book}.txt',
                      base64_js=f'{book}_64.js',
@@ -35,7 +36,7 @@ for book in books:
         ext = os.path.splitext(filename)[-1][1:]
         if ext not in ['js', 'html']:
             continue
-        file = ztml.ztml(text, filename, bin2txt=label.split('_', 1)[0], js=ext == 'js')
+        file = ztml.ztml(text, filename, mtf=mtf, bin2txt=label.split('_', 1)[0], js=ext == 'js')
 
     print(f'All encodings of {book} took {(time()-book_start_time) / 60 :.1f} min.')
 

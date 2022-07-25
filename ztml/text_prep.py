@@ -18,7 +18,7 @@ default_caps_mode = 'auto'
 
 def normalize(text: str,
               reduce_whitespace: bool = False,
-              fix_newline: bool = False,
+              fix_newline: bool = True,
               fix_punct: bool = False
               ) -> str:
     if reduce_whitespace:

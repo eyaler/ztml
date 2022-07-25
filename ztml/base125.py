@@ -29,7 +29,7 @@ else:
     from . import default_vars
 
 
-illegal = ['', 13, 92, 96]
+illegal = '', 13, 92, 96
 
 
 def encode(data: bytes, offset: int = 0, validate: bool = True) -> bytes:

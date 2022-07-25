@@ -23,6 +23,8 @@
 
 [ ] Improve JS MTF decoding times for large files
 
+[ ] Benchmark alternatives to MTF
+
 [ ] Run length encoding after MTF
 
 [ ] Respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)

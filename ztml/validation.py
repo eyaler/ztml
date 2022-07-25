@@ -16,13 +16,13 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 if not __package__:
-    import text_utils
+    import text_prep
 else:
-    from . import text_utils
+    from . import text_prep
 
 
 default_browser = 'chrome'
-default_timeout = 60
+default_timeout = 120
 default_element = 'body'
 webdriver_paths_filename = 'webdriver_paths.txt'
 
@@ -126,7 +126,7 @@ def validate_html(file: AnyStr,
 def validate_files(filenames: dict[str, str],
                    text: Optional[str] = None,
                    reduce_whitespace: bool = False,
-                   fix_newline: bool = False,
+                   fix_newline: bool = True,
                    fix_punct: bool = False,
                    compare_caps: bool = True,
                    ignore_regex: str = '',
@@ -153,7 +153,7 @@ def validate_files(filenames: dict[str, str],
             if text is None:
                 assert ext == 'txt', filename
                 with open(filename, 'rb') as f:
-                    text = text_utils.normalize(f.read().decode(), reduce_whitespace, fix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
+                    text = text_prep.normalize(f.read().decode(), reduce_whitespace, fix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
             if text_size is None:
                 text_size = size if ext == 'txt' else len(text.encode())
             if label == 'base64_html':
@@ -168,7 +168,7 @@ def validate_files(filenames: dict[str, str],
                     with open(filename, 'rb') as f:
                         script = f.read()
                         script = regex.sub(rb'`(\\.|[^`\\])*`', b'``', script)
-                    stats.append(f'code={len(script):,} B')
+                    stats.append(f'code: {len(script):,} B = {round(len(script) / 1024, 1):,} kB')
                 stats = ' '.join(stats)
                 if stats:
                     stats = f' ({stats})'

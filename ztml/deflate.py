@@ -4,7 +4,7 @@ Encoding data as a PNG image gives efficient DEFLATE compression,
 while allowing use of the browser's native decompression capability,
 thus avoiding the need of external decompression library dependencies.
 The data is then read from the HTML canvas element.
-The image aspect ratio is optimized to minimize the necessary padding to a rectangle.
+The image aspect ratio is optimized to be squarish (for higher browser compatibility) with minimal padding.
 We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
 A minimalistic JS decoder code is generated.
 

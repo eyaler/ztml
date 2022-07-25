@@ -25,7 +25,7 @@ else:
     from . import default_vars
 
 
-no_huffman = False  # Note: this is just for benchmarking and is not implemented in decoder
+DEBUG_SKIP_HUFFMAN = False  # Note: this is just for benchmarking and is not implemented in JS decoder
 
 
 def encode(text: str,
@@ -34,7 +34,7 @@ def encode(text: str,
            ) -> Tuple[List[int], str, str, Dict[str, str]]:
     charset = canonical_table = ''
     counter = Counter(text)
-    if no_huffman:
+    if DEBUG_SKIP_HUFFMAN:
         code_len = len(bin(ord(max(counter)))) - 2
         codebook = {c: bitarray(bin(ord(c))[2:].zfill(code_len)) for c in counter}
     else:
@@ -45,7 +45,7 @@ def encode(text: str,
             counts = []
             symbols = []
         charset = ''.join(symbols[::-1])
-        canonical_table = {len(code): [ba2int(code), len(codebook) - i - 1] for i, (symbol, code) in enumerate(codebook.items())}
+        canonical_table = {len(code): [2**len(code) - ba2int(code), len(codebook) - i - 1] for i, (symbol, code) in enumerate(codebook.items())}
         canonical_table = str(canonical_table).replace(' ', '').replace("'", '')
 
     bits = bitarray()
@@ -58,7 +58,7 @@ def encode(text: str,
             print(canonical_table, file=sys.stderr)
     if validate:
         assert not codebook or ''.join(bits.decode(codebook)) == text
-        assert no_huffman or ''.join(canonical_decode(bits, counts, symbols)) == text
+        assert DEBUG_SKIP_HUFFMAN or ''.join(canonical_decode(bits, counts, symbols)) == text
     rev_codebook = {v.to01(): k for k, v in codebook.items()}
     return bits.tolist(), charset, canonical_table, rev_codebook
 
@@ -71,7 +71,7 @@ def get_js_decoder(charset: str,
     charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
     return f'''s=[...'{charset}']
 d={canonical_table}
-for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=d[++k]?.[0]-parseInt(c,2))>=0);j++)c+={bitarray_var}[j]&1
+for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-parseInt(c,2))>=0);j++)c+={bitarray_var}[j]&1
 '''
 
 

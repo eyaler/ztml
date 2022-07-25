@@ -7,12 +7,12 @@ import chardet
 import re
 import sys
 from time import time
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 if not __package__:
-    import base125, bwt_mtf, crenc, default_vars, deflate, huffman, text_utils, validation, webify
+    import base125, bwt_mtf, crenc, default_vars, deflate, huffman, text_prep, validation, webify
 else:
-    from . import base125, bwt_mtf, crenc, default_vars, deflate, huffman, text_utils, validation, webify
+    from . import base125, bwt_mtf, crenc, default_vars, deflate, huffman, text_prep, validation, webify
 
 
 bin2txt_encodings = 'base64', 'base125', 'crenc'
@@ -22,9 +22,10 @@ default_bin2txt = 'crenc'
 def ztml(text: str,
          filename: str = '',
          reduce_whitespace: bool = False,
-         fix_newline: bool = False,
+         fix_newline: bool = True,
          fix_punct: bool = False,
-         caps: str = text_utils.default_caps_mode,
+         caps: str = text_prep.default_caps_mode,
+         mtf: Optional[int] = bwt_mtf.default_mtf_variant,
          bin2txt: str = default_bin2txt,
          js: bool = False,
          validate: bool = False,
@@ -34,9 +35,9 @@ def ztml(text: str,
          ) -> Union[bytes, Tuple[bytes, int]]:
     start_time = time()
     encoding = 'cp1252' if bin2txt == 'crenc' else None
-    text = text_utils.normalize(text, reduce_whitespace, fix_newline, fix_punct)  # Reduce whitespace
-    condensed, string_decoder = text_utils.encode_and_get_js_decoder(text, caps)  # Lower case and shorten common strings
-    bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, add_bwt_func=False)  # Burrows–Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
+    text = text_prep.normalize(text, reduce_whitespace, fix_newline, fix_punct)  # Reduce whitespace
+    condensed, string_decoder = text_prep.encode_and_get_js_decoder(text, caps)  # Lower case and shorten common strings
+    bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False)  # Burrows–Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
     bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text)  # Huffman encode
     bwt_bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(bits)  # Burrows–Wheeler transform on bits
     zop_data = deflate.to_png(bwt_bits)  # PNG encode. Time-consuming op.
@@ -75,14 +76,15 @@ if __name__ == '__main__':
     parser.add_argument('output_filename', nargs='?', default='')
     parser.add_argument('--input_encoding')
     parser.add_argument('--reduce_whitespace', action='store_true')
-    parser.add_argument('--fix_newline', action='store_true')
+    parser.add_argument('--skip_fix_newline', action='store_true')
     parser.add_argument('--fix_punct', action='store_true')
-    parser.add_argument('--caps', choices=text_utils.caps_modes, default=text_utils.default_caps_mode)
-    parser.add_argument('--bin2txt', choices=bin2txt_encodings, default=default_bin2txt)
+    parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps_mode)
+    parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants, default=bwt_mtf.default_mtf_variant)
+    parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--js', action='store_true')
     parser.add_argument('--validate', action='store_true')
     parser.add_argument('--skip_compare_caps', action='store_true')
-    parser.add_argument('--browser', choices=list(validation.drivers), default=validation.default_browser)
+    parser.add_argument('--browser', type=str.lower, choices=list(validation.drivers), default=validation.default_browser)
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     with open(args.input_filename, 'rb') as f:
@@ -98,7 +100,7 @@ if __name__ == '__main__':
                     text = text.decode()
                 else:
                     raise
-    out = ztml(text, args.output_filename, args.reduce_whitespace, args.fix_newline, args.fix_punct, args.caps, args.bin2txt, args.js, args.validate, not args.skip_compare_caps, args.browser, args.verbose)
+    out = ztml(text, args.output_filename, args.reduce_whitespace, not args.skip_fix_newline, args.fix_punct, args.caps, args.mtf, args.bin2txt, args.js, args.validate, not args.skip_compare_caps, args.browser, args.verbose)
     result = False
     if args.validate:
         out, result = out
