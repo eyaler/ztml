@@ -15,7 +15,7 @@ max_char_code = 10000
 browsers = list(validation.drivers)[:1]
 input_encodings = ['utf8', 'cp1255']
 bin2txt_encodings = ztml.bin2txt_encodings
-mtf_variants = bwt_mtf.mtf_variants
+mtf_variants = [None, 0, 52, 80]  # bwt_mtf.mtf_variants
 temp_folder = 'tmp'
 cleanup = True
 
@@ -58,4 +58,4 @@ if cleanup:
         os.rmdir(temp_folder)
     except OSError:
         pass
-print(f'Total took {time() - start_time :,.0f} sec.', file=sys.stderr)
+print(f'Total took {(time()-start_time) / 60 :.1f} min.', file=sys.stderr)
