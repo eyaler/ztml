@@ -63,7 +63,7 @@ def ztml(text: str,
         with open(filename, 'wb') as f:
             f.write(out)
     if verbose:
-        print(f'Encoding took {(time()-start_time) / 60 :.1f} min.', file=sys.stderr)
+        print(f'Encoding took {time() - start_time :,.1f} sec.', file=sys.stderr)
     if validate:
         valid = validation.validate_html(webify.html_wrap(out, aliases='', encoding=encoding) if js else filename or out, text, compare_caps, browser=browser, verbose=True)
         out = out, not valid
