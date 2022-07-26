@@ -22,7 +22,7 @@ else:
 
 
 default_browser = 'chrome'
-default_timeout = 120
+default_timeout = 60
 default_element = 'body'
 webdriver_paths_filename = 'webdriver_paths.txt'
 
