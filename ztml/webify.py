@@ -74,9 +74,6 @@ def uglify(script: AnyStr,
         sub = script[:0]
         cnt = 0
 
-        if alias == "L = 'length'" and '.length' in script:
-            print('hau')
-
         for i, part in enumerate(re.split(literals, script, maxsplit=1)):
             if not i % 2:
                 part, c = re.subn(long, short, part)

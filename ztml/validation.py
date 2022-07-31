@@ -2,11 +2,11 @@ from contextlib import ExitStack, redirect_stdout
 import os
 import sys
 from tempfile import NamedTemporaryFile
-from time import time
+from time import sleep, time
 from typing import AnyStr, Iterable, Optional, Union
 
 import regex
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver import Chrome, Edge, Firefox, chrome, edge, firefox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -41,6 +41,10 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
     options = drivers[browser][1].options.Options()
     options.headless = True
     try:
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    except Exception:
+        pass
+    try:
         with redirect_stdout(None):
             service = drivers[browser][2]().install()
         with open(webdriver_paths_filename, 'a', encoding='utf8') as f:
@@ -51,7 +55,14 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
                 b, service = line.split(',', 1)
                 if b == browser:
                     break
-    browser = drivers[browser][0](service=drivers[browser][1].service.Service(service, log_path=os.devnull), options=options)
+    while isinstance(browser, str):
+        try:
+            browser = drivers[browser][0](service=drivers[browser][1].service.Service(service, log_path=os.devnull), options=options)
+        except WebDriverException as e:
+            print(e, file=sys.stderr)
+            sleep(30)
+        except Exception:
+            raise
     if stack:
         browser = stack.enter_context(browser)
     return browser
