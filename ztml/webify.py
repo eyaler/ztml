@@ -1,3 +1,14 @@
+""" Minification by way of aliasing AKA uglification
+
+Warnings:
+1. The first literal template is assumed to be the payload (but it will probably work anyway)
+2. The two-parameter aliases do not support func`str` syntax (even if you add them explicitly, but it will probably not break your code)
+3. Aliases do not support some complex function compositions (which can break your code). E.g.:
+    a.appendChild(b=document.createElement`c`)  # works => A(a,b=E`c`)
+    a.appendChild(b=document.createElement`c`).setAttribute('style', d)  # will break your code
+"""
+
+
 import re
 import sys
 from typing import AnyStr, Optional

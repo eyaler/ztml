@@ -42,7 +42,7 @@ for browser in browsers:
                         out2, result2 = ztml.ztml(text, output_filename, mtf=mtf, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
                         with open(output_filename, 'rb') as f:
                             out = f.read()
-                        assert not result1 and not result2 and out1 == out2 == out, (result1, result2, len(out1), len(out2), output_filename, len(out))
+                        assert not result1 and not result2 and out1 == out2 == out, (result1, result2, len(out1), len(out2), validation.full_path(output_filename), len(out))
                     result1 = os.system(f'python ztml.py "{input_filename}" "{output_filename}" --mtf {mtf} --bin2txt {bin2txt} --validate --skip_compare_caps --browser {browser} --verbose')
                     result2 = os.system(f'python ztml.py "{input_filename}" --mtf {mtf} --bin2txt {bin2txt} --validate --skip_compare_caps --browser {browser} --verbose > {output_stream}')
                     with open(output_filename, 'rb') as f1:
@@ -50,7 +50,7 @@ for browser in browsers:
                     with open(output_stream, 'rb') as f2:
                         out2 = f2.read()
                     assert not out2.endswith(b'\x1b[0m'), 'If running from PyCharm: enable Run -> Edit configurations -> tests -> Emulate terminal in output console'
-                    assert not result1 and not result2 and out1 == out2, (result1, result2, output_filename, len(out1), output_stream, len(out2))
+                    assert not result1 and not result2 and out1 == out2, (result1, result2, validation.full_path(output_filename), len(out1), validation.full_path(output_stream), len(out2))
                     if cleanup:
                         for filename in [input_filename, output_filename, output_stream]:
                             try:

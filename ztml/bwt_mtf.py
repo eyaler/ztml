@@ -11,7 +11,7 @@ http://groups.di.unipi.it/~gulli/tutorial/burrows_wheeler.pdf (note: has errors 
 """
 
 
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, overload, Tuple, Union
 
 import numpy as np
 from pydivsufsort import divsufsort
@@ -28,8 +28,6 @@ order1 = 'AOUIEVWXYZaouievwxyz'
 order2 = 'VWXYZAOUIEvwxyzaouie'
 
 
-DataType = Union[str, Iterable[int]]
-OutputType = Union[str, List[int]]
 reorder_table = str.maketrans(order1, order2)
 reverse_reorder_table = str.maketrans(order2, order1)
 
@@ -82,11 +80,21 @@ def mtf_decode(data: Iterable[int], mtf: Optional[int] == default_mtf_variant) -
     return out
 
 
-def encode(data: DataType,
+@overload
+def encode(data: str, reorder=..., mtf=..., validate=...) -> Tuple[str, int]:
+    ...
+
+
+@overload
+def encode(data: Iterable[int], reorder=..., mtf=..., validate=...) -> Tuple[List[int], int]:
+    ...
+
+
+def encode(data,
            reorder: bool = True,
            mtf: Optional[int] = default_mtf_variant,
            validate: bool = True
-           ) -> Tuple[OutputType, int]:
+           ):
     assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
     out = list(data)
@@ -111,11 +119,17 @@ def encode(data: DataType,
     return out, index
 
 
-def decode(data: DataType,
-           index: int,
-           reorder: bool = True,
-           mtf: Optional[int] = default_mtf_variant
-           ) -> OutputType:
+@overload
+def decode(data: str, index, reorder=..., mtf=...) -> str:
+    ...
+
+
+@overload
+def decode(data: Iterable[int], index, reorder=..., mtf=...) -> List[int]:
+    ...
+
+
+def decode(data, index: int, reorder: bool = True, mtf: Optional[int] = default_mtf_variant):
     assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
     out = list(data)
@@ -140,7 +154,7 @@ def decode(data: DataType,
     return out
 
 
-def get_js_decoder(data: DataType,
+def get_js_decoder(data: Union[str, Iterable[int]],
                    index: int,
                    reorder: bool = True,
                    mtf: Optional[int] = default_mtf_variant,
@@ -170,14 +184,14 @@ def get_js_decoder(data: DataType,
             mtf_op = f'd.splice(k*{mtf / 100}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])'
         if is_str:
             js_decoder += f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n'
-        js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>a>b?a:b+1,0)).keys()]      
+        js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>a>b?a:b+1,0)).keys()]
 j=0
 for(k of {data_var}){mtf_op}
 '''
         if is_str:
             js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
     if add_bwt_func:
-        js_decoder += f'{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j=0;j<s.length;)[d[j++],k]=s[k]}}\n'
+        js_decoder += f'{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j in s)[d[j],k]=s[k]}}\n'
     expand = f'=[...{data_var}]' if is_str else ''
     js_decoder += f'{bwt_func_var}({data_var}{expand},{index})\n'
     dyn_orders = None
@@ -200,14 +214,26 @@ for(k of {data_var}){mtf_op}
     return js_decoder
 
 
-def encode_and_get_js_decoder(data: DataType,
+@overload
+def encode_and_get_js_decoder(data: str, reorder=..., mtf=..., add_bwt_func=...,
+                              bwt_func_var=..., data_var=..., validate=...) -> Tuple[str, str]:
+    ...
+
+
+@overload
+def encode_and_get_js_decoder(data: Iterable[int], reorder=..., mtf=..., add_bwt_func=...,
+                              bwt_func_var=..., data_var=..., validate=...) -> Tuple[List[int], str]:
+    ...
+
+
+def encode_and_get_js_decoder(data,
                               reorder: bool = True,
                               mtf: Optional[int] = default_mtf_variant,
                               add_bwt_func: bool = True,
                               bwt_func_var: str = default_vars.bwt_func,
                               data_var: Optional[str] = None,
                               validate: bool = True
-                              ) -> Tuple[OutputType, str]:
+                              ):
     assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
     if data_var is None:

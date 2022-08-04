@@ -22,7 +22,12 @@ https://stackoverflow.com/a/10081375/664456
 
 from collections import Counter
 import re
-from typing import AnyStr, Optional, Tuple, Union
+from typing import AnyStr, Optional, overload, Tuple, Union
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 if not __package__:
     import default_vars
@@ -36,10 +41,17 @@ def find_best_escape(data: bytes) -> int:
     return sorted([c for c in chars if c not in b'\f\r'], key=lambda c: [c != x for x in b'\\`[_$#'])[-1]
 
 
-def encode(data: bytes,
-           escape: Optional[Union[int, AnyStr]] = None,
-           offset: int = 0
-           ) -> Union[bytes, Tuple[bytes, int]]:
+@overload
+def encode(data: bytes, escape: Literal[None] = ..., offset=...) -> Tuple[bytes, int]:
+    ...
+
+
+@overload
+def encode(data: bytes, escape: Union[int, AnyStr] = ..., offset=...) -> bytes:
+    ...
+
+
+def encode(data: bytes, escape=None, offset: int = 0):
     if offset:
         data = bytes(byte+offset & 255 for byte in data)
     return_escape = False
@@ -62,9 +74,17 @@ def encode(data: bytes,
     return out
 
 
-def optimize_encode(data: bytes,
-                    escape: Optional[Union[int, AnyStr]] = None
-                    ) -> Tuple[Union[bytes, Tuple[bytes, int]], int, int]:
+@overload
+def optimize_encode(data, escape: Literal[None] = ...) -> Tuple[Tuple[bytes, int], int, int]:
+    ...
+
+
+@overload
+def optimize_encode(data, escape: Union[int, AnyStr] = ...) -> Tuple[bytes, int, int]:
+    ...
+
+
+def optimize_encode(data: bytes, escape=None):
     best_offset = 0
     for offset in range(256):
         out = encode(data, escape, offset)

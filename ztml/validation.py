@@ -1,3 +1,4 @@
+from collections import Mapping
 from contextlib import ExitStack, redirect_stdout
 import os
 import sys
@@ -35,6 +36,10 @@ drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
 BrowserType = Union[str, WebDriver]
 
 
+def full_path(filename):
+    return f"file:///{os.path.realpath(filename).replace(os.sep, '/')}"
+
+
 def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebDriver:
     if isinstance(browser, WebDriver):
         return browser
@@ -42,7 +47,7 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
     options.headless = True
     try:
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    except Exception:
+    except AttributeError:
         pass
     try:
         with redirect_stdout(None):
@@ -61,8 +66,6 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
         except WebDriverException as e:
             print(e, file=sys.stderr)
             sleep(30)
-        except Exception:
-            raise
     if stack:
         browser = stack.enter_context(browser)
     return browser
@@ -81,7 +84,7 @@ def render_html(file: AnyStr,
             with NamedTemporaryFile(suffix='.html', delete=False) as f:
                 f.write(file)
                 filename = f.name
-        browser.get('file:///' + os.path.realpath(filename))
+        browser.get(full_path(filename))
         if isinstance(file, bytes):
             try:
                 os.remove(filename)
@@ -134,7 +137,7 @@ def validate_html(file: AnyStr,
     return False
 
 
-def validate_files(filenames: dict[str, str],
+def validate_files(filenames: Mapping[str, str],
                    text: Optional[str] = None,
                    reduce_whitespace: bool = False,
                    fix_newline: bool = True,
@@ -187,7 +190,7 @@ def validate_files(filenames: dict[str, str],
                     stats = f' = {round(mb, 1):,} MB' + stats
                 if (kb := size / 1024) >= 0.1:
                     stats = f' = {round(kb, 1):,} kB' + stats
-                print(f"file:///{os.path.realpath(filename).replace(os.sep, '/')} {size:,} B{stats}", end='' if validate and ext == 'html' else None, file=sys.stderr)
+                print(f"{full_path(filename)} {size:,} B{stats}", end='' if validate and ext == 'html' else None, file=sys.stderr)
             if validate and ext == 'html':
                 for i, browser in enumerate(browsers):
                     start_time = time()

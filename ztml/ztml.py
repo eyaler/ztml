@@ -1,4 +1,4 @@
-"""Extreme inline text compression for HTML / JS"""
+"""ZTML - Extreme inline text compression for HTML / JS"""
 
 
 import argparse
@@ -7,7 +7,12 @@ import chardet
 import re
 import sys
 from time import time
-from typing import Optional, Tuple, Union
+from typing import Optional, overload, Tuple
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 if not __package__:
     import base125, bwt_mtf, crenc, default_vars, deflate, huffman, text_prep, validation, webify
@@ -17,6 +22,20 @@ else:
 
 bin2txt_encodings = 'base64', 'base125', 'crenc'
 default_bin2txt = 'crenc'
+
+
+@overload
+def ztml(text, filename=..., reduce_whitespace=..., fix_newline=..., fix_punct=...,
+         caps=..., mtf=..., bin2txt=..., js=..., validate: Literal[True] = ...,
+         compare_caps=..., browser=..., verbose=...) -> bytes:
+    ...
+
+
+@overload
+def ztml(text, filename=..., reduce_whitespace=..., fix_newline=..., fix_punct=...,
+         caps=..., mtf=..., bin2txt=..., js=..., validate: Literal[False] = ...,
+         compare_caps=..., browser=..., verbose=...) -> Tuple[bytes, int]:
+    ...
 
 
 def ztml(text: str,
@@ -32,7 +51,7 @@ def ztml(text: str,
          compare_caps: bool = True,
          browser: validation.BrowserType = validation.default_browser,
          verbose: bool = False
-         ) -> Union[bytes, Tuple[bytes, int]]:
+         ):
     start_time = time()
     encoding = 'cp1252' if bin2txt == 'crenc' else None
     text = text_prep.normalize(text, reduce_whitespace, fix_newline, fix_punct)  # Reduce whitespace
@@ -43,7 +62,8 @@ def ztml(text: str,
     zop_data = deflate.to_png(bwt_bits)  # PNG encode. Time-consuming op.
     render = f"{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}document.body.style.whiteSpace='pre';document.body.textContent={default_vars.text}"
     if bin2txt == 'base64':  # Note: this is just for benchmarking and is not recommended
-        image = b"i=new Image;i.src='data:image/png;base64," + b64encode(zop_data) + b"'\n"
+        image_var = default_vars.image
+        image = f"{image_var}=new Image;{image_var}.src='data:image/png;base64,".encode() + b64encode(zop_data) + b"'\n"
         script = image + deflate.get_js_image_data(len(bwt_bits), render).encode()
     elif bin2txt == 'base125':
         script = base125.get_js_decoder(zop_data)  # Time-consuming op. when offset==None
