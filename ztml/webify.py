@@ -1,11 +1,12 @@
 """ Minification by way of aliasing AKA uglification
 
 Warnings:
-1. The first literal template is assumed to be the payload (but it will probably work anyway)
+1. The largest literal template chunk is assumed to be the payload (but it will probably work anyway)
 2. The two-parameter aliases do not support func`str` syntax (even if you add them explicitly, but it will probably not break your code)
-3. Aliases do not support some complex function compositions (which can break your code). E.g.:
+3. Aliases do not support some complex method compositions (which can break your code). E.g.:
     a.appendChild(b=document.createElement`c`)  # works => A(a,b=E`c`)
     a.appendChild(b=document.createElement`c`).setAttribute('style', d)  # will break your code
+4. Non-static method aliases support only specific argument forms as appearing in default_aliases (and others will break your code)
 """
 
 
@@ -44,6 +45,10 @@ def get_encoding_errors(encoding: str):
     return encoding, errors
 
 
+def get_len(script, encoding):
+    return len(script.encode(*get_encoding_errors(encoding)) if isinstance(script, str) else script)
+
+
 def uglify(script: AnyStr,
            aliases: str = default_aliases,
            min_cnt: int = 2,
@@ -51,7 +56,7 @@ def uglify(script: AnyStr,
            encoding: Optional[str] = None
            ) -> AnyStr:
     encoding, errors = get_encoding_errors(encoding)
-    orig_len = len(script.encode(encoding, errors) if isinstance(script, str) else script)
+    orig_len = get_len(script, encoding)
     shorts = set()
     for alias in reversed(aliases.strip().splitlines()):
         alias = alias.replace(' ', '')
@@ -85,8 +90,11 @@ def uglify(script: AnyStr,
         sub = script[:0]
         cnt = 0
 
-        for i, part in enumerate(re.split(literals, script, maxsplit=1)):
-            if not i % 2:
+        parts = re.split(literals, script)
+        literal_parts = [part for i, part in enumerate(parts) if not i % 2]
+        payload_index = 2 * max(range(len(literal_parts)), key=lambda i: get_len(literal_parts[i], encoding))
+        for i, part in enumerate(parts):
+            if i != payload_index:
                 part, c = re.subn(long, short, part)
                 cnt += c
             sub += part
@@ -98,7 +106,7 @@ def uglify(script: AnyStr,
                     alias = alias.encode(encoding, errors)
                 if alias not in script:
                     script = alias + script.lstrip()
-    new_len = len(script.encode(encoding, errors) if isinstance(script, str) else script)
+    new_len = get_len(script, encoding)
     if new_len > orig_len:
         print(f'Warning size has grown: {new_len} B > {orig_len} B', file=sys.stderr)
     return script
