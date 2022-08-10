@@ -8,7 +8,7 @@ from ztml import validation, ztml
 
 books = 30123, 2600
 mtf_variants = 0, 80
-output_folder = 'output'
+output_folder = 'output_oct08'
 
 
 for book, mtf in zip(books, mtf_variants):
