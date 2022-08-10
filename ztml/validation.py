@@ -182,8 +182,6 @@ def validate_files(filenames: Mapping[str, str],
                 if ext == 'html' and label != 'base64_html':
                     with open(filename, 'rb') as f:
                         script = f.read()
-                        if label == 'crenc_html':
-                            print('hi')
                         script = script.replace(max(regex.finditer(webify.get_literals_regex(payload_var).encode(), script), key=lambda m: len(m[0]), default=b'')[0].split(b'`', 1)[1].rsplit(b'`', 1)[0], b'')
                     stats.append(f'code: {len(script):,} B = {round(len(script) / 1024, 1):,} kB')
                 stats = ' '.join(stats)
