@@ -14,8 +14,8 @@ The pipeline includes efficient alternatives to base64 which are also useful for
 | Project Gutenberg plain text utf8              | txt           | 3.2 MB                                                            | 63.7 kB                                                          |
 | 7-Zip 9 Ultra PPMd (excluding decoder)         | 7z            | 746 kB (23%)                                                      | 20.8 kB (32%)                                                    |
 | 7-Zip 9 Ultra PPMd (self extracting)           | exe           | 958 kB (29%)                                                      | 232 kB (364%)                                                    |
-| ZTML Base125 (keep whitespace and punctuation) | html (utf8)   | 908 kB (28%) using mtf=80                                         | 26.1 kB (41%) using mtf=0                                        |
-| ZTML crEnc (keep whitespace and punctuation)   | html (cp1252) | 811 kB (25%) using mtf=80                                         | 23.4 kB (37%) using mtf=0                                        |
+| ZTML Base125 (keep whitespace and punctuation) | html (utf8)   | 910 kB (28%) using mtf=80                                         | 26.1 kB (41%) using mtf=0                                        |
+| ZTML crEnc (keep whitespace and punctuation)   | html (cp1252) | 813 kB (25%) using mtf=80                                         | 23.4 kB (37%) using mtf=0                                        |
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).

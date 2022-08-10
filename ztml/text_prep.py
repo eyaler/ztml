@@ -12,6 +12,8 @@ else:
 newline = '\n\v\f\r\x85\u2028\u2029'
 single_quote = '\u2018-\u201b'
 double_quote = '\u201c-\u201f'
+apos = "'\\u2019\\uff07"
+nonword = '\\p{L}\\p{M}\\p{N}'
 caps_modes = 'auto', 'lower', 'raw', 'upper'
 default_caps_mode = 'auto'
 
@@ -22,16 +24,16 @@ def normalize(text: str,
               fix_punct: bool = False
               ) -> str:
     if reduce_whitespace:
-        text = regex.sub('\\s*[' + newline + ']\\s*[' + newline + ']\\s*', '\n\n', text)
-        text = regex.sub('[^\\S' + newline + ']*[' + newline + '][^\\S' + newline + ']*', '\n', text)
-        text = regex.sub('[^\\S' + newline + ']+', ' ', text)
+        text = regex.sub(f'\\s*[{newline}]\\s*[{newline}]\\s*', '\n\n', text)
+        text = regex.sub(f'[^\\S{newline}]*[{newline}][^\\S{newline}]*', '\n', text)
+        text = regex.sub(f'[^\\S{newline}]+', ' ', text)
         text = text.strip()
     elif fix_newline:
         text = regex.sub('\r\n?', '\n', text)
     if fix_punct:
         text = regex.sub('\\p{Pd}', '-', text)
-        text = regex.sub('[' + single_quote + ']', "'", text)
-        text = regex.sub('[' + double_quote + ']', '"', text)
+        text = regex.sub(f'[{single_quote}]', "'", text)
+        text = regex.sub(f'[{double_quote}]', '"', text)
         text = regex.sub('\u2026', '...', text)
     return text.lstrip('\ufeff')  # Remove BOM
 
@@ -45,8 +47,11 @@ def encode_caps(text: str, caps: str = default_caps_mode, caps_warn: bool = Fals
     return text
 
 
+caps_regex = f'(\\n\\n|\\r\\r|\\r\\n\\r\\n|[.?!])\\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
+
+
 def auto_upper(text: str) -> str:
-    return regex.sub('(^|[.?!])\\W*.|(?<!\\w)i(?!\\w)', lambda m: m[0].upper(), text, flags=regex.MULTILINE)
+    return regex.sub(caps_regex, lambda m: m[0].upper(), text)
 
 
 def count_bad_auto_caps(text: str, verbose: bool = False) -> int:
@@ -61,22 +66,28 @@ def remove_the(text: str) -> str:
     return regex.sub('(^| )the ', '\\1 ', text, flags=regex.MULTILINE)
 
 
-def encode_quq(text: str, warn_for_caps: Optional[str] = None) -> str:
-    if warn_for_caps:
-        count_bad_quq(text, warn_for_caps, verbose=True)
-    return regex.sub("([Qq])u(?=['’](?!\\p{Lu})|\\p{Ll})", '\\1', text)
+def get_qu_regex(case_letter: str) -> str:
+    u = 'U' if case_letter == 'u' else 'u'
+    return f'(?=[{apos}]?[^{u}\\P{{L{case_letter}}}])'
 
 
-def decode_quq(text: str) -> str:
-    return regex.sub("[Qq](?=['’](?!\\p{Lu})|\\p{Ll})", '\\g<0>u', text)
+def encode_quq(text: str, caps_for_warn: Optional[str] = None) -> str:
+    if caps_for_warn:
+        count_bad_quq(text, caps_for_warn, verbose=True)
+    return regex.sub(f"QU{get_qu_regex('u')}", 'Q', regex.sub(f"([Qq])u{get_qu_regex('l')}", '\\1', text))
 
 
-quq_js_decoder = ".replace(/[Qq](?=['\\u2019](?!\\p{Lu})|\\p{Ll})/gu,'$&u')"  # \u2019 is ’
+def decode_quq(text: str, caps: str) -> str:
+    return regex.sub(f"Q{get_qu_regex('u')}", 'QU', regex.sub(f"[Qq]{get_qu_regex('l')}", '\\g<0>u', text)) if caps == 'raw' else regex.sub(f"q{get_qu_regex('')}", 'qu', text)
+
+
+def get_quq_js_decoder(caps: str) -> str:
+    return f".replace(/[Qq]{get_qu_regex('l')}/gu,'$&u').replace(/Q{get_qu_regex('u')}/gu,'QU')" if caps == 'raw' else f".replace(/q{get_qu_regex('')}/gu,'qu')"
 
 
 def count_bad_quq(text: str, caps: str, verbose: bool = False) -> int:
     text = encode_caps(text, caps)
-    recon = decode_quq(encode_quq(text))
+    recon = decode_quq(encode_quq(text), caps)
     text = regex.split('[Qq]', text)
     recon = regex.split('[Qq]', recon)
     cnt = sum(a != b for a, b in zip(recon, text)) + abs(len(recon) - len(text))
@@ -96,7 +107,7 @@ def encode(text: str,
     if the:
         text = remove_the(text)
     if quq:
-        text = encode_quq(text, caps if quq_warn else None)
+        text = encode_quq(text, caps_for_warn=caps if quq_warn else None)
     return text
 
 
@@ -107,15 +118,15 @@ def get_js_decoder(caps: str = default_caps_mode,
                    ) -> str:
     js_decoder = ''
     if quq:
-        js_decoder += quq_js_decoder
+        js_decoder += get_quq_js_decoder(caps)
     if the:
         js_decoder += ".replace(/(^| ) /gm,'$1the ')"
     if caps == 'auto':
-        js_decoder += '.replace(/(^|[.?!])\\P{L}*.|(^|\\P{L})i(?!\\p{L})/gmu,s=>s.toUpperCase())'  # Avoid lookbehind to support Safari
+        js_decoder += f'.replace(/{caps_regex}/gu,s=>s.toUpperCase())'
     elif caps == 'upper':
         js_decoder += '.toUpperCase()'
     if js_decoder:
-        js_decoder = f'{text_var}={text_var}' + js_decoder + '\n'
+        js_decoder = f'{text_var}={text_var}{js_decoder}\n'
     return js_decoder
 
 
@@ -134,7 +145,7 @@ def encode_and_get_js_decoder(text: str,
             print(f"Falling back to caps='{caps}'", file=sys.stderr)
     if the and '  ' in text:
         the = False
-    if quq and len(encode(text, caps, the, quq=False)) - len(encode(text, caps, the, quq=True, quq_warn=False)) < len(quq_js_decoder):
+    if quq and len(encode(text, caps, the, quq=False)) - len(encode(text, caps, the, quq=True, quq_warn=False)) < len(get_quq_js_decoder(caps)):
         quq = False
     if quq and count_bad_quq(text, caps, verbose=quq_warn):
         quq = False
@@ -147,15 +158,16 @@ def test_quq() -> None:
     bad = 0
     for caps in caps_modes:
         for q in 'Qq':
-            for u in 'Uu':
-                for a in "Aa'":
-                    orig = f'{q}{u}{a}'
-                    text = encode_caps(orig, caps)
-                    enc = encode_quq(text, caps)
-                    dec = decode_quq(enc)
-                    if text != dec:
-                        print(f'caps={caps:>5}: orig={orig} -> text={text} -> enc={enc} -> dec={dec}', file=sys.stderr)
-                        bad += 1
+            for u in ['U', 'u', ' ', "' "]:
+                for a in "AaUu'’ ":
+                    for b in 'Bb ':
+                        orig = f'{q}{u}{a}{b}'
+                        text = encode_caps(orig, caps)
+                        enc = encode_quq(text, caps_for_warn=caps)
+                        dec = decode_quq(enc, caps)
+                        if text != dec:
+                            print(f'caps={caps:>5}: orig={orig} -> text={text} -> enc={enc} -> dec={dec}', file=sys.stderr)
+                            bad += 1
     print(f'Found {bad} bad cases', file=sys.stderr)
 
 

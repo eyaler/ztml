@@ -35,7 +35,7 @@ def encode(text: str,
     charset = canonical_table = ''
     counter = Counter(text)
     if DEBUG_SKIP_HUFFMAN:
-        code_len = len(bin(ord(max(counter)))) - 2
+        code_len = len(bin(ord(max(counter, default='\0')))) - 2
         codebook = {c: bitarray(bin(ord(c))[2:].zfill(code_len)) for c in counter}
     else:
         if len(counter):

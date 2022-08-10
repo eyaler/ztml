@@ -17,9 +17,9 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 if not __package__:
-    import text_prep
+    import default_vars, text_prep, webify
 else:
-    from . import text_prep
+    from . import default_vars, text_prep, webify
 
 
 default_browser = 'chrome'
@@ -36,7 +36,7 @@ drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
 BrowserType = Union[str, WebDriver]
 
 
-def full_path(filename):
+def full_path(filename: str) -> str:
     return f"file:///{os.path.realpath(filename).replace(os.sep, '/')}"
 
 
@@ -148,6 +148,7 @@ def validate_files(filenames: Mapping[str, str],
                    element: str = default_element,
                    browsers: Optional[Union[BrowserType, Iterable[BrowserType]]] = None,
                    timeout: int = default_timeout,
+                   payload_var: str = default_vars.payload,
                    validate: bool = True,
                    verbose: bool = True
                    ) -> None:
@@ -181,7 +182,7 @@ def validate_files(filenames: Mapping[str, str],
                 if ext == 'html' and label != 'base64_html':
                     with open(filename, 'rb') as f:
                         script = f.read()
-                        script = regex.sub(rb'`(\\.|[^`\\])*`', b'``', script)
+                        script = script.replace(max(regex.finditer(webify.get_literals_regex(payload_var).encode(), script), key=lambda m: len(m[0]), default=b'')[0].split(b'`')[1], b'')
                     stats.append(f'code: {len(script):,} B = {round(len(script) / 1024, 1):,} kB')
                 stats = ' '.join(stats)
                 if stats:

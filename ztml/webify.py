@@ -1,18 +1,22 @@
 """ Minification by way of aliasing AKA uglification
 
 Warnings:
-1. The largest literal template chunk is assumed to be the payload (but it will probably work anyway)
-2. The two-parameter aliases do not support func`str` syntax (even if you add them explicitly, but it will probably not break your code)
-3. Aliases do not support some complex method compositions (which can break your code). E.g.:
-    a.appendChild(b=document.createElement`c`)  # works => A(a,b=E`c`)
+1. The two-parameter aliases do not support func`str` syntax (even if you add them explicitly, but it will probably not break your code)
+2. Aliases do not support some complex method compositions (which can break your code). E.g.:
+    a.appendChild(b=document.createElement`c`).textContent='hi'  # works => A(a,b=E`c`).C='hi'
     a.appendChild(b=document.createElement`c`).setAttribute('style', d)  # will break your code
-4. Non-static method aliases support only specific argument forms as appearing in default_aliases (and others will break your code)
+3. Non-static method aliases support only specific argument forms as appearing in default_aliases (and others will break your code)
 """
 
 
 import re
 import sys
 from typing import AnyStr, Optional
+
+if not __package__:
+    import default_vars
+else:
+    from . import default_vars
 
 
 default_aliases = '''
@@ -38,6 +42,10 @@ S = 'style'
 '''
 
 
+def get_literals_regex(payload_var: str = default_vars.payload) -> str:
+    return rf'(\b{payload_var}=`(?:\\.|[^`\\])*`)'
+
+
 def get_encoding_errors(encoding: str):
     if encoding is None:
         encoding = 'utf8'
@@ -45,7 +53,7 @@ def get_encoding_errors(encoding: str):
     return encoding, errors
 
 
-def get_len(script, encoding):
+def get_len(script: str, encoding: str) -> int:
     return len(script.encode(*get_encoding_errors(encoding)) if isinstance(script, str) else script)
 
 
@@ -53,7 +61,8 @@ def uglify(script: AnyStr,
            aliases: str = default_aliases,
            min_cnt: int = 2,
            add_used_aliases: bool = True,
-           encoding: Optional[str] = None
+           encoding: Optional[str] = None,
+           payload_var: str = default_vars.payload
            ) -> AnyStr:
     encoding, errors = get_encoding_errors(encoding)
     orig_len = get_len(script, encoding)
@@ -82,19 +91,18 @@ def uglify(script: AnyStr,
             long = '\\b' + long
         if re.match('\\w', long[-1]):
             long += '\\b'
-        literals = r'(`(?:\\.|[^`\\])*`)'
+        literals_regex = get_literals_regex(payload_var)
         if isinstance(script, bytes):
             long = long.encode(encoding, errors)
             short = short.encode(encoding, errors)
-            literals = literals.encode(encoding, errors)
+            literals_regex = literals_regex.encode(encoding, errors)
         sub = script[:0]
         cnt = 0
-
-        parts = re.split(literals, script)
-        literal_parts = [part for i, part in enumerate(parts) if not i % 2]
-        payload_index = 2 * max(range(len(literal_parts)), key=lambda i: get_len(literal_parts[i], encoding))
+        parts = re.split(literals_regex, script)
+        literals_parts = [part for i, part in enumerate(parts) if i % 2]
+        payload_index = max(range(len(literals_parts)), key=lambda i: get_len(literals_parts[i], encoding), default=None)
         for i, part in enumerate(parts):
-            if i != payload_index:
+            if (i-1) / 2 != payload_index or not payload_var:
                 part, c = re.subn(long, short, part)
                 cnt += c
             sub += part

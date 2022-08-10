@@ -33,6 +33,8 @@
 
 [ ] [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
 
+[ ] Investigate effect of PNG aspect ratio on compression
+
 [ ] Save (e.g. Huffman) metadata in image / in png metadata
 
 [ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)

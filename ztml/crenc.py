@@ -101,6 +101,7 @@ def optimize_encode(data: bytes, escape=None):
 def get_js_decoder(data: bytes,
                    escape: Optional[Union[int, AnyStr]] = None,
                    offset: Optional[int] = None,
+                   payload_var: str = default_vars.payload,
                    output_var: str = default_vars.bytearray
                    ) -> bytes:
     if offset is None:
@@ -112,9 +113,9 @@ def get_js_decoder(data: bytes,
     elif isinstance(escape, (bytes, str)):
         escape = ord(escape)
     last_part = f'''`
-{output_var}=new Uint8Array(s.length)
+{output_var}=new Uint8Array({payload_var}.length)
 j=e=0
-for(c of s)i=c.charCodeAt()%65533,i>>8&&(i=128+'€ ‚ƒ„…†‡ˆ‰Š‹Œ Ž  ‘’“”•–—˜™š›œ žŸ'.indexOf(c)),i=={escape}&&!e?e=1:(e&&(e=0,i--),{output_var}[j++]=i{-offset if offset else ''})
+for(c of {payload_var})i=c.charCodeAt()%65533,i>>8&&(i=128+'€ ‚ƒ„…†‡ˆ‰Š‹Œ Ž  ‘’“”•–—˜™š›œ žŸ'.indexOf(c)),i=={escape}&&!e?e=1:(e&&(e=0,i--),{output_var}[j++]=i{-offset if offset else ''})
 {output_var}={output_var}.slice(0,j)
 '''
-    return b's=`' + encoded + last_part.encode('cp1252')
+    return f'{payload_var}=`'.encode() + encoded + last_part.encode('cp1252')

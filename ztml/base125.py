@@ -131,6 +131,7 @@ def decode(data: bytes, offset: int = 0) -> bytes:
 
 def get_js_decoder(data: bytes,
                    offset: Optional[int] = 0,
+                   payload_var: str = default_vars.payload,
                    output_var: str = default_vars.bytearray,
                    validate: bool = True
                    ) -> bytes:
@@ -140,13 +141,13 @@ def get_js_decoder(data: bytes,
         encoded = encode(data, offset, validate)
     illegal_str = ','.join(str(i) for i in illegal)
     last_part = f'''`
-{output_var}=new Uint8Array(s.length*2)
+{output_var}=new Uint8Array({payload_var}.length*2)
 j=k=n=0
 p=(b,l=7)=>{{n|=b<<(l<8)>>k>>(l>8);k+=l;k>7&&({output_var}[j++]=n{-offset or ''},k-=8,n=b<<8-k)}}
-for(c of s)(i=c.charCodeAt()%65533)>127?(e=i>>9,e&&p([{illegal_str}][e]),p(i<<2*!e&511,9)):p(i)
+for(c of {payload_var})(i=c.charCodeAt()%65533)>127?(e=i>>9,e&&p([{illegal_str}][e]),p(i<<2*!e&511,9)):p(i)
 {output_var}={output_var}.slice(0,j)
 '''
-    return b's=`' + encoded + last_part.encode()
+    return f'{payload_var}=`'.encode() + encoded + last_part.encode()
 
 
 def test() -> None:
