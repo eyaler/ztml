@@ -5,15 +5,15 @@ from time import time
 start_time = time()
 
 if not __package__:
-    import bwt_mtf, validation, ztml
+    import bwt_mtf, validation, webify, ztml
 else:
-    from . import bwt_mtf, validation, ztml
+    from . import bwt_mtf, validation, webify, ztml
 
 
 min_char_code = 0
 max_char_code = 10000
 browsers = list(validation.drivers)[:1]
-input_encodings = ['utf8', 'cp1255']
+input_encodings = ['utf8', 'cp1252', 'cp1255']
 bin2txt_encodings = ztml.bin2txt_encodings
 mtf_variants = [None, 0, 52, 80]  # bwt_mtf.mtf_variants
 temp_folder = 'tmp'
@@ -26,18 +26,18 @@ os.makedirs(temp_folder, exist_ok=True)
 i = 0
 for browser in browsers:
     with validation.get_browser(browser) as b:
-        for enc in input_encodings:
-            enc = enc.lower().replace('-', '')
+        for encoding in input_encodings:
+            encoding = encoding.lower().replace('-', '')
             for bin2txt in bin2txt_encodings:
                 for mtf in mtf_variants:
                     i += 1
-                    print(f'{i}/{len(browsers) * len(input_encodings) * len(ztml.bin2txt_encodings) * len(mtf_variants)} browser={browser} input_enc={enc} bin2txt={bin2txt} mtf={mtf}')
-                    input_filename = os.path.join(temp_folder, f'ztml_test_file_{enc}_{bin2txt}_{mtf}.txt')
-                    output_filename = os.path.join(temp_folder, f'ztml_test_file_{enc}_{bin2txt}_{mtf}.html')
-                    output_stream = os.path.join(temp_folder, f'ztml_test_stream_{enc}_{bin2txt}_{mtf}.html')
+                    print(f'{i}/{len(browsers) * len(input_encodings) * len(ztml.bin2txt_encodings) * len(mtf_variants)} browser={browser} input_enc={encoding} bin2txt={bin2txt} mtf={mtf}')
+                    input_filename = os.path.join(temp_folder, f'ztml_test_file_{encoding}_{bin2txt}_{mtf}.txt')
+                    output_filename = os.path.join(temp_folder, f'ztml_test_file_{encoding}_{bin2txt}_{mtf}.html')
+                    output_stream = os.path.join(temp_folder, f'ztml_test_stream_{encoding}_{bin2txt}_{mtf}.html')
                     with open(input_filename, 'wb') as f:
-                        f.write((text if enc.startswith('utf') else 'אבגדהוזחטיךכלםמןנסעףפץצקרשת').encode(enc))
-                    if enc == 'utf8':
+                        f.write(webify.safe_encode(text, encoding))
+                    if encoding == 'utf8':
                         out1, result1 = ztml.ztml(text, mtf=mtf, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
                         out2, result2 = ztml.ztml(text, output_filename, mtf=mtf, bin2txt=bin2txt, validate=True, compare_caps=False, browser=b, verbose=True)
                         with open(output_filename, 'rb') as f:

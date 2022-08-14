@@ -95,6 +95,9 @@ def render_html(file: AnyStr,
             return browser.find_element(By.TAG_NAME, element).get_attribute('innerText')
         except TimeoutException:
             return None
+        except Exception:
+            print(f'\nError: {browser.name} failed on {full_path(filename)}', file=sys.stderr)
+            raise
 
 
 def find_first_diff(render: str, text: str, verbose: bool = True) -> int:

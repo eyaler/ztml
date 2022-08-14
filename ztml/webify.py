@@ -1,17 +1,23 @@
 """ Minification by way of aliasing AKA uglification
 
 Warnings:
-1. The two-parameter aliases do not support func`str` syntax (even if you add them explicitly, but it will probably not break your code)
-2. Aliases do not support some complex method compositions (which can break your code). E.g.:
-    a.appendChild(b=document.createElement`c`).textContent='hi'  # works => A(a,b=E`c`).C='hi'
-    a.appendChild(b=document.createElement`c`).setAttribute('style', d)  # will break your code
-3. Non-static method aliases support only specific argument forms as appearing in default_aliases (and others will break your code)
+1. The two-parameter aliases would miss substitutions involving tag function syntax, i.e.
+   func`str`, even if you specify such forms explicitly. However, see following examples.
+2. While alias substitution does support some level of composition, e.g.:
+      a.appendChild(b=document.createElement`p`).textContent='hi'          # => A(a,b=E`p`).C='hi'
+   More complex compositions would miss later substitutions, e.g.:
+      a.appendChild(b=document.createElement`p`).appendChild(c)            # => A(a,b=E`p`).appendChild(c)
+      a.appendChild(b=document.createElement`p`).setAttribute('style',c)  # => A(a,b=E`p`).setAttribute(P,c)
+3. Non-static method aliases support only specific parameter signatures as appear in
+   default_aliases. Attempting to specify different signatures will break your code.
+4. You may need to set replace_quoted=False if you do not want e.g. all 'length', "Length"
+   to be replaced by: L
 """
 
 
 import re
 import sys
-from typing import AnyStr, Optional
+from typing import AnyStr
 
 if not __package__:
     import default_vars
@@ -25,20 +31,20 @@ A = (e, c) => e.appendChild(c)
 B = document.body
 C = 'textContent'
 D = 'dataset'
-E = e => document.createElement(e)
-F = String.fromCodePoint
+E = (e='div') => document.createElement(e)
+F = String
 G = 'width'
 H = 'height'
 I = setInterval
-J = 'background'
-K = 'color'
+J = clearInterval
+K = e => e.cancel()
 L = 'length'
-M = (e, d) => e.setAttribute('style', d)
+M = Math
 N = speechSynthesis
 O = setTimeout
-P = 'parentElement'
+P = 'style'
 R = 'target'
-S = 'style'
+S = (e, d) => e.setAttribute('style', d)
 '''
 
 
@@ -46,25 +52,23 @@ def get_literals_regex(payload_var: str = default_vars.payload) -> str:
     return rf'(\b{payload_var}=`(?:\\.|[^`\\])*`)'
 
 
-def get_encoding_errors(encoding: str):
-    if encoding is None:
-        encoding = 'utf8'
-    errors = 'strict' if encoding.lower().replace('-', '') == 'utf8' else 'backslashreplace'
-    return encoding, errors
+def safe_encode(s: str, encoding: str) -> bytes:
+    return re.sub(rb'\\U000?([\dA-Fa-f]{5,6})', rb'\\u{\1}',
+                  s.encode(encoding, 'strict' if encoding.lower().replace('-', '') == 'utf8' else 'backslashreplace'))
 
 
 def get_len(script: str, encoding: str) -> int:
-    return len(script.encode(*get_encoding_errors(encoding)) if isinstance(script, str) else script)
+    return len(safe_encode(script, encoding) if isinstance(script, str) else script)
 
 
 def uglify(script: AnyStr,
            aliases: str = default_aliases,
            min_cnt: int = 2,
+           replace_quoted: bool = True,
            add_used_aliases: bool = True,
-           encoding: Optional[str] = None,
+           encoding: str = 'utf8',
            payload_var: str = default_vars.payload
            ) -> AnyStr:
-    encoding, errors = get_encoding_errors(encoding)
     orig_len = get_len(script, encoding)
     shorts = set()
     for alias in reversed(aliases.strip().splitlines()):
@@ -75,27 +79,33 @@ def uglify(script: AnyStr,
         assert short not in shorts, short
         shorts.add(short)
         prefix = ''
-        if ',' in long:
-            prefix = '([\\w.]+?)\\.'
-        long = re.sub('[^,]+,[^=]+=>[^.]+\\.|[^=]+=>|\\([^,)]+\\)|,.*', '', long)
+        comma = ''
+        if re.search('(\\b\\w+\\b)[^>]*=>[^.]*\\b\\1\\.', long):
+            prefix = '(\\w[\\w.]*)\\.'
+            if re.search('[^,]+,[^>]+=>', long):
+                comma = ','
+        long = re.sub('[^>]*(?P<prefix>\\b\\w+\\b)[^>]*=>[^.]*\\b(?P=prefix)\\.|[^>]+=>|\\([^,)]*\\)|,.*', '', long)
         if prefix:
             short += '(\\1'
             if '(' not in long:
                 long += '('
-                short += ','
+                short += comma
             long = prefix + re.sub('[\'"]', '[\'"]', re.escape(long))
         elif long[0] == long[-1] in '\'"':
-            long = '\\.' + long[1:-1]
-            short = '[' + short + ']'
+            short = lambda x, short=short, long=long: f"{'[' * (len(x[0]) < len(long))}{short}{']' * (len(x[0]) < len(long))}"
+            long = f'\\.{long[1:-1]}' + re.sub('[\'"]', '[\'"]', f'|{long}') * replace_quoted
         if re.match('\\w', long[0]):
-            long = '\\b' + long
+            long = f'\\b{long}'
         if re.match('\\w', long[-1]):
             long += '\\b'
         literals_regex = get_literals_regex(payload_var)
         if isinstance(script, bytes):
-            long = long.encode(encoding, errors)
-            short = short.encode(encoding, errors)
-            literals_regex = literals_regex.encode(encoding, errors)
+            long = safe_encode(long, encoding)
+            if isinstance(short, str):
+                short = safe_encode(short, encoding)
+            else:
+                short = lambda x, short=short: safe_encode(short(x), encoding)
+            literals_regex = literals_regex.encode()
         sub = script[:0]
         cnt = 0
         parts = re.split(literals_regex, script)
@@ -111,7 +121,7 @@ def uglify(script: AnyStr,
             if add_used_aliases:
                 alias += '\n'
                 if isinstance(script, bytes):
-                    alias = alias.encode(encoding, errors)
+                    alias = safe_encode(alias, encoding)
                 if alias not in script:
                     script = alias + script.lstrip()
     new_len = get_len(script, encoding)
@@ -123,21 +133,20 @@ def uglify(script: AnyStr,
 def html_wrap(script: AnyStr,
               aliases: str = default_aliases,
               min_cnt: int = 2,
-              lang: Optional[str] = None,
-              encoding: Optional[str] = None,
-              add_mobile: bool = False
+              replace_quoted: bool = True,
+              lang: str = 'en',
+              encoding: str = 'utf8',
+              mobile: bool = False,
+              payload_var: str = default_vars.payload
               ) -> AnyStr:
-    if lang is None:
-        lang = 'en'
-    encoding, errors = get_encoding_errors(encoding)
-    mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' if add_mobile else ''
+    mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
     html_header = f'<!DOCTYPE html><html lang={lang}><head><meta charset={encoding}>{mobile_meta}</head><body><script>'
     html_footer = '</script></body></html>'
     newline = '\n'
     if isinstance(script, bytes):
-        html_header = html_header.encode(encoding, errors)
-        html_footer = html_footer.encode(encoding, errors)
-        newline = newline.encode(encoding, errors)
+        html_header = html_header.encode()
+        html_footer = html_footer.encode()
+        newline = newline.encode()
     if aliases:
-        script = uglify(script, aliases, min_cnt, encoding=encoding)
+        script = uglify(script, aliases, min_cnt, replace_quoted, encoding=encoding, payload_var=payload_var)
     return newline.join([html_header, script.strip(), html_footer])

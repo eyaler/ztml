@@ -192,7 +192,7 @@ for(k of {data_var}){mtf_op}
             js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
     if add_bwt_func:
         js_decoder += f'{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j in s)[d[j],k]=s[k]}}\n'
-    expand = f'=[...{data_var}]' if is_str else ''
+    expand = f'=[...{data_var}]' * is_str
     js_decoder += f'{bwt_func_var}({data_var}{expand},{index})\n'
     dyn_orders = None
     if reorder:

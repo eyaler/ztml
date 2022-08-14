@@ -9,10 +9,11 @@ else:
     from . import default_vars
 
 
-newline = '\n\v\f\r\x85\u2028\u2029'
-single_quote = '\u2018-\u201b'
-double_quote = '\u201c-\u201f'
-apos = "'\\u2019\\uff07"
+newline = '\\n\\v\\f\\r\\x85\\u2028\\u2029'
+single_quote = '[\u2018-\u201b\u05f3\uff07]'
+double_quote = '[\u201c-\u201f\u05f4\uff02]'
+apos = "['’]"  # \\uff07
+eos = '[!.?]'  # \\uff01\\uff0e\\uff1f\\ufe52\\ufe56\\ufe57
 nonword = '\\p{L}\\p{M}\\p{N}'
 caps_modes = 'auto', 'lower', 'raw', 'upper'
 default_caps_mode = 'auto'
@@ -32,8 +33,8 @@ def normalize(text: str,
         text = regex.sub('\r\n?', '\n', text)
     if fix_punct:
         text = regex.sub('\\p{Pd}', '-', text)
-        text = regex.sub(f'[{single_quote}]', "'", text)
-        text = regex.sub(f'[{double_quote}]', '"', text)
+        text = regex.sub(single_quote, "'", text)
+        text = regex.sub(double_quote, '"', text)
         text = regex.sub('\u2026', '...', text)
     return text.lstrip('\ufeff')  # Remove BOM
 
@@ -47,7 +48,7 @@ def encode_caps(text: str, caps: str = default_caps_mode, caps_warn: bool = Fals
     return text
 
 
-caps_regex = f'(\\n\\n|\\r\\r|\\r\\n\\r\\n|[.?!])\\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
+caps_regex = f'(((?=(\\r\\n|[{newline}]))\\3){{2,}}|^|{eos})\\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
 
 
 def auto_upper(text: str) -> str:
@@ -68,7 +69,7 @@ def remove_the(text: str) -> str:
 
 def get_qu_regex(case_letter: str) -> str:
     u = 'U' if case_letter == 'u' else 'u'
-    return f'(?=[{apos}]?[^{u}\\P{{L{case_letter}}}])'
+    return f'(?={apos}?[^{u}\\P{{L{case_letter}}}])'
 
 
 def encode_quq(text: str, caps_for_warn: Optional[str] = None) -> str:
