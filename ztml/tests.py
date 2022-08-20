@@ -15,7 +15,7 @@ max_char_code = 10000
 browsers = list(validation.drivers)[:1]
 input_encodings = ['utf8', 'cp1252', 'cp1255']
 bin2txt_encodings = ztml.bin2txt_encodings
-mtf_variants = [None, 0, 52, 80]  # bwt_mtf.mtf_variants
+mtf_variants = [None, 0, 1, 2, 50, 52, 80]  # bwt_mtf.mtf_variants
 temp_folder = 'tmp'
 cleanup = True
 

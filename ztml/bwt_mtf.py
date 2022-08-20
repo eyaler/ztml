@@ -174,12 +174,12 @@ def get_js_decoder(data: Union[str, Iterable[int]],
             mtf_op = f'd.splice(k>1,0,{data_var}[j++]=d.splice(k,1)[0])'
         elif mtf == 2:
             js_decoder += 'n=1\n'
-            mtf_op = f'd.splice(k>1||k==1&&!n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
+            mtf_op = f'd.splice(k>!!n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         elif mtf == 50:
             mtf_op = f'd.splice(k/2|0,0,{data_var}[j++]=d.splice(k,1)[0])'
         elif mtf == 52:
             js_decoder += 'n=1\n'
-            mtf_op = f'd.splice(k>1?k/2|0:k==1&&!n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
+            mtf_op = f'd.splice(k>1?k/2|0:k>n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         else:
             mtf_op = f'd.splice(k*{mtf / 100}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])'
         if is_str:
@@ -191,7 +191,7 @@ for(k of {data_var}){mtf_op}
         if is_str:
             js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
     if add_bwt_func:
-        js_decoder += f'{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j in s)[d[j],k]=s[k]}}\n'
+        js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j in s)[d[j],k]=s[k]??''}}\n"  # ??'' needed for Safari
     expand = f'=[...{data_var}]' * is_str
     js_decoder += f'{bwt_func_var}({data_var}{expand},{index})\n'
     dyn_orders = None

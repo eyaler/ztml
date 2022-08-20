@@ -4,9 +4,9 @@ Warnings:
 1. The two-parameter aliases would miss substitutions involving tag function syntax, i.e.
    func`str`, even if you specify such forms explicitly. However, see following examples.
 2. While alias substitution does support some level of composition, e.g.:
-      a.appendChild(b=document.createElement`p`).textContent='hi'          # => A(a,b=E`p`).C='hi'
+      a.appendChild(b=document.createElement`p`).innerHTML='hi'           # => A(a,b=E`p`).C='hi'
    More complex compositions would miss later substitutions, e.g.:
-      a.appendChild(b=document.createElement`p`).appendChild(c)            # => A(a,b=E`p`).appendChild(c)
+      a.appendChild(b=document.createElement`p`).appendChild(c)           # => A(a,b=E`p`).appendChild(c)
       a.appendChild(b=document.createElement`p`).setAttribute('style',c)  # => A(a,b=E`p`).setAttribute(P,c)
 3. Non-static method aliases support only specific parameter signatures as appear in
    default_aliases. Attempting to specify different signatures will break your code.
@@ -29,7 +29,7 @@ default_aliases = '''
 Q = document
 A = (e, c) => e.appendChild(c)
 B = document.body
-C = 'textContent'
+C = 'innerHTML'
 D = 'dataset'
 E = (e='div') => document.createElement(e)
 F = String
