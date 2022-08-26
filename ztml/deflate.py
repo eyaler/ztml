@@ -9,7 +9,10 @@ We use Google's optimized Zopfli compression which is compatible with DEFLATE de
 A minimalistic JS decoder code is generated.
 
 References:
-https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/compression-using-canvas-and-png.html
+https://web.archive.org/web/20090826082743/http://blog.nihilogic.dk:80/2008/05/compression-using-canvas-and-png.html
+https://web.archive.org/web/20130310075429/http://daeken.com/superpacking-js-demos
+https://gist.github.com/gasman/2560551
+https://github.com/xem/miniBook
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy
 https://github.com/jhildenbiddle/canvas-size#test-results

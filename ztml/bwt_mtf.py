@@ -22,7 +22,7 @@ else:
     from . import default_vars
 
 
-mtf_variants = None, 0, 1, 2, 50, 52, 60, 70, 80
+mtf_variants = None, 0, 1, 2, 50, 52, 60, 70, 80, 90
 default_mtf_variant = 0
 order1 = 'AOUIEVWXYZaouievwxyz'
 order2 = 'VWXYZAOUIEvwxyzaouie'
@@ -191,7 +191,7 @@ for(k of {data_var}){mtf_op}
         if is_str:
             js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
     if add_bwt_func:
-        js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]);for(j in s)[d[j],k]=s[k]??''}}\n"  # ??'' needed for Safari
+        js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);for(j in s)[d[j],k]=s[k]}}\n"  # ?1:0 needed for Safari (see https://stackoverflow.com/questions/73451718/sorting-nested-arrays-in-safari)
     expand = f'=[...{data_var}]' * is_str
     js_decoder += f'{bwt_func_var}({data_var}{expand},{index})\n'
     dyn_orders = None

@@ -37,6 +37,8 @@
 
 [ ] Save (e.g. Huffman) metadata in image / in png metadata
 
+[ ] [Use WOFF2 as a Brotli container](https://github.com/lifthrasiir/roadroller/issues/9#issuecomment-905580540)
+
 [ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
 
 [ ] Compress the JS itself and use eval
