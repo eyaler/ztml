@@ -28,7 +28,7 @@ See [example.py](example.py) for a complete example reproducing the above benchm
 ### Caveats:
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
 2. This solution favors compression rate over compression and decompression times. Use `mtf=None` for faster decompression of large files.
-3. For [compressing word lists](http://golf.horse), solutions as [Roadroller](https://lifthrasiir.github.io/roadroller) do a much better job.
+3. For [compressing word lists](http://golf.horse) (sorted lexicographically), solutions as [Roadroller](https://lifthrasiir.github.io/roadroller) do a much better job.
 
 ### ZTML pipeline breakdown:
 1. [Text normalization](ztml/text_prep.py) (irreversible; reduce whitespace, substitute unicode punctuation)
