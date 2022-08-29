@@ -43,6 +43,7 @@ default_padding_bit = 0
 def to_png(bits: Iterable[int],
            padding_sep_code: str = '',
            padding_bit: int = default_padding_bit,
+           compression: int = 9,
            filter_strategies: str = '',  # Any subset of 01234mepb, '' means auto
            iterations: int = 15,
            iterations_large: int = 5,
@@ -67,7 +68,7 @@ def to_png(bits: Iterable[int],
         assert width <= max_dim, width
     bits = [bits[i : i + width] for i in range(0, length, width)]
     png_data = BytesIO()
-    png.Writer(width, height, greyscale=True, bitdepth=1, compression=9).write(png_data, bits)
+    png.Writer(width, height, greyscale=True, bitdepth=1, compression=compression).write(png_data, bits)
     png_data.seek(0)
     png_data = png_data.read()
     zop_data = zopfli.ZopfliPNG(filter_strategies=filter_strategies, iterations=iterations, iterations_large=iterations_large).optimize(png_data)  # Time-consuming op.
