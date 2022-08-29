@@ -8,3 +8,4 @@ selenium
 typing_extensions
 webdriver_manager
 zopflipy
+gutenberg

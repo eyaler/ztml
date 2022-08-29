@@ -11,7 +11,9 @@ A minimalistic JS decoder code is generated.
 References:
 https://web.archive.org/web/20090826082743/http://blog.nihilogic.dk:80/2008/05/compression-using-canvas-and-png.html
 https://web.archive.org/web/20130310075429/http://daeken.com/superpacking-js-demos
+https://gist.github.com/tlack/3039247
 https://gist.github.com/gasman/2560551
+https://www.pouet.net/prod.php?which=59298
 https://github.com/xem/miniBook
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy

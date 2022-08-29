@@ -140,7 +140,7 @@ def encode_and_get_js_decoder(text: str,
                               caps_fallback: bool = False,
                               text_var: str = default_vars.text
                               ) -> Tuple[str, str]:
-    if caps_fallback and caps == 'auto' and not count_bad_auto_caps(text, verbose=caps_warn):
+    if caps_fallback and caps == 'auto' and count_bad_auto_caps(text, verbose=caps_warn):
         caps = 'raw'
         if caps_warn:
             print(f"Falling back to caps='{caps}'", file=sys.stderr)

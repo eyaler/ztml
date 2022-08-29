@@ -206,4 +206,4 @@ def validate_files(filenames: Mapping[str, str],
                 if verbose:
                     print(file=sys.stderr)
         if verbose and validate:
-            print('Note: above rendering times from Selenium are much longer than actual browser rendering', file=sys.stderr)
+            print('Note: above rendering times from Selenium are much longer than actual browser rendering.', file=sys.stderr)

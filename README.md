@@ -16,9 +16,9 @@ The pipeline includes efficient alternatives to base64 which are also useful for
 | Project Gutenberg plain text utf8                                 | txt           | 3.2 MB                                                            | 63.7 kB                                                          |
 | 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                      | 7z            | 746 kB (23%)                                                      | 20.8 kB (32%)                                                    |
 | 7-Zip 22.01 9 Ultra PPMd (self extracting)                        | exe           | 958 kB (29%)                                                      | 232 kB (364%)                                                    |
-| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2 | js            | 981 kB (31%)                                                      | 27.1 kB (42%)                                                    |
+| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2 | js            | 1.0 MB (30%)                                                      | 26.5 kB (42%)                                                    |
 | ZTML Base125 (keep whitespace and punctuation)                    | html (utf8)   | 910 kB (28%) using `mtf=80`                                       | 26.2 kB (41%) using `mtf=0`                                      |
-| ZTML crEnc (keep whitespace and punctuation)                      | html (cp1252) | 813 kB (25%) using `mtf=80`                                       | 23.5 kB (37%) using `mtf=0`                                      |
+| ZTML crEnc (keep whitespace and punctuation)                      | html (cp1252) | 813 kB (25%) using `mtf=80`                                       | 23.4 kB (37%) using `mtf=0`                                      |
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
@@ -45,7 +45,7 @@ See [example.py](example.py) for a complete example reproducing the above benchm
      2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
 8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
 
-*Automatic capitalization recovery is currently only partial. Use `caps=raw` to preserve original capitalization.
+*Automatic capitalization recovery is currently only partial. Use `caps=raw` or `caps_fallback=True` to preserve original capitalization.
 
 ### Projects using this:
 [fragium](https://fragium.com)

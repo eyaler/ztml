@@ -140,13 +140,13 @@ def html_wrap(script: AnyStr,
               payload_var: str = default_vars.payload
               ) -> AnyStr:
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
-    html_header = f'<!DOCTYPE html><html lang={lang}><head><meta charset={encoding}>{mobile_meta}</head><body><script>'
-    html_footer = '</script></body></html>'
-    newline = '\n'
+    html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}<body><script>'
+    html_footer = '</script>'
+    sep = ''
     if isinstance(script, bytes):
         html_header = html_header.encode()
         html_footer = html_footer.encode()
-        newline = newline.encode()
+        sep = sep.encode()
     if aliases:
         script = uglify(script, aliases, min_cnt, replace_quoted, encoding=encoding, payload_var=payload_var)
-    return newline.join([html_header, script.strip(), html_footer])
+    return sep.join([html_header, script.strip(), html_footer])

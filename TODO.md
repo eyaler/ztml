@@ -37,6 +37,8 @@
 
 [ ] Investigate effect of PNG aspect ratio on compression
 
+[ ] Benchmark https://github.com/fhanau/Efficient-Compression-Tool
+
 [ ] Save (e.g. Huffman) metadata in image / in png metadata
 
 [ ] [Use WOFF2 as a Brotli container](https://github.com/lifthrasiir/roadroller/issues/9#issuecomment-905580540)
