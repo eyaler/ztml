@@ -3,6 +3,8 @@
 ### Extreme inline text compression for HTML / JS
 ### By [Eyal Gruss](https://eyalgruss.com)
 
+#### Partially made at [Stochastic Labs](http://stochasticlabs.org)
+
 On-chain media storage can require efficient compression for text embedded inline in HTML / JS.
 ZTML is a custom pipeline that generates stand-alone HTML or JS files which embed competitively compressed self-extracting text, with file sizes of 25% - 40% the original.
 These file sizes include the decoder code which is 1.5 - 2 kB (including auxiliary indices and tables).
