@@ -1,10 +1,9 @@
-from collections import Mapping
 from contextlib import ExitStack, redirect_stdout
 import os
 import sys
 from tempfile import NamedTemporaryFile
 from time import sleep, time
-from typing import AnyStr, Iterable, Optional, Union
+from typing import AnyStr, Iterable, Mapping, Optional, Union
 
 import regex
 from selenium.common.exceptions import TimeoutException, WebDriverException

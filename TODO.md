@@ -23,11 +23,13 @@
 
 [ ] Improve JS MTF decoding times for large files
 
-[ ] Benchmark alternatives to MTF
+[ ] Automatic optimizing over MTF variants
+
+[ ] Benchmark alternatives to MTF 
 
 [ ] Run length encoding after MTF
 
-[ ] Respect-caps mode using a next-letter-invert-caps-symbol (either on top of the auto-caps when that is viable or forced, or stand-alone)
+[ ] Augment auto-caps with a next-letter-invert-caps-symbol / block level caps markup
 
 [ ] Dictionary compression for long texts
 
@@ -41,6 +43,8 @@
 
 [ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
 
-[ ] Compress the JS itself and use eval
+[ ] Compress the JS itself and use eval, considering also js packing e.g. [JSCrush](https://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller) 
 
 [ ] Strip whitespace from scripts lines not part of multi-line content strings
+
+[ ] Benchmark [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coder

@@ -4,6 +4,7 @@
 import argparse
 from base64 import b64encode
 import chardet
+import os
 import sys
 from time import time
 from typing import Optional, overload, Tuple
@@ -79,6 +80,8 @@ def ztml(text: str,
     if bin2txt != 'base64':
         image = deflate.get_js_image_decoder(len(bwt_bits), render)
         script += webify.safe_encode(image, encoding)
+    if os.path.splitext(filename)[-1] == '.js':
+        js = True
     if js and uglify:
         out = webify.uglify(script, replace_quoted=replace_quoted, encoding=encoding)
     elif not js:
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps_mode)
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants, default=bwt_mtf.default_mtf_variant)
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
-    parser.add_argument('--js', action='store_true')
+    parser.add_argument('--js', action='store_true', help='can also be inferred from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
     parser.add_argument('--skip_replace_quoted', action='store_true')
     parser.add_argument('--lang', default='en')
