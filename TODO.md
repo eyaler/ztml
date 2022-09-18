@@ -3,9 +3,7 @@
 
 ### Usability
 
-[ ] Better support and benchmarks for non-English texts
-
-[ ] Example for image compression use case
+[ ] **Example for Base125 / crEnc image compression use case**
 
 [ ] Expose more parameters and allow skipping steps in CLI / ztml(), via arguments or config file
 
@@ -19,7 +17,23 @@
 
 ### Compression
 
-[ ] Ablation benchmarks
+[ ] **Ablation benchmarks**
+
+[ ] **Auto-caps should use modifiers for next letter/word/sentence/paragraph or block-level, over simple mode instead of falling back to raw**
+
+[ ] Dictionary compression for long texts
+
+[ ] [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
+
+[ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
+
+[ ] Compress the JS itself and use eval, considering also js packing e.g. [JSCrush](https://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller) 
+
+[ ] Benchmark [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coder
+
+[ ] Strip whitespace from script lines not part of multi-line content strings
+
+#### MTF
 
 [ ] Improve JS MTF decoding times for large files
 
@@ -29,24 +43,12 @@
 
 [ ] Run length encoding after MTF
 
-[ ] Auto-caps with modifiers for next letter/word/sentence/paragraph or block-level
+#### Deflate
 
-[ ] Dictionary compression for long texts
-
-[ ] [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
-
-[ ] Investigate effect of PNG aspect ratio on compression
+[ ] **Investigate effect of PNG aspect ratio on compression / optimize over it**
 
 [ ] Benchmark https://github.com/fhanau/Efficient-Compression-Tool
 
-[ ] Save (e.g. Huffman) metadata in image / in png metadata
+[ ] Compress metadata into PNG 
 
 [ ] [Use WOFF2 as a Brotli container](https://github.com/lifthrasiir/roadroller/issues/9#issuecomment-905580540)
-
-[ ] [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
-
-[ ] Compress the JS itself and use eval, considering also js packing e.g. [JSCrush](https://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller) 
-
-[ ] Strip whitespace from scripts lines not part of multi-line content strings
-
-[ ] Benchmark [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coder
