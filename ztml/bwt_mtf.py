@@ -23,7 +23,7 @@ else:
 
 
 mtf_variants = None, 0, 1, 2, 50, 52, 60, 70, 80, 90
-default_mtf_variant = 0
+default_mtf = 0
 order1 = 'AOUIEVWXYZaouievwxyz'
 order2 = 'VWXYZAOUIEvwxyzaouie'
 
@@ -33,6 +33,7 @@ reverse_reorder_table = str.maketrans(order2, order1)
 
 
 def mtf_rank(mtf: int, rank: int, prev: int) -> int:
+    assert mtf in mtf_variants, mtf
     if mtf == 0:
         new_rank = 0
     elif mtf == 1:
@@ -44,12 +45,12 @@ def mtf_rank(mtf: int, rank: int, prev: int) -> int:
     elif mtf == 52:
         new_rank = rank // 2 if rank > 1 else rank == 1 and not prev
     else:
-        new_rank = int(round(rank * mtf / 100))
+        new_rank = int(rank*(mtf/100) + 0.5)  # round in the same way as JS (do not round half to even)
     return new_rank
 
 
 def mtf_encode(data: Iterable[int],
-               mtf: Optional[int] == default_mtf_variant,
+               mtf: Optional[int] == default_mtf,
                validate=True
                ) -> List[int]:
     ranks = list(range(max(data, default=-1) + 1))
@@ -69,7 +70,7 @@ def mtf_encode(data: Iterable[int],
     return out
 
 
-def mtf_decode(data: Iterable[int], mtf: Optional[int] == default_mtf_variant) -> List[int]:
+def mtf_decode(data: Iterable[int], mtf: Optional[int] == default_mtf) -> List[int]:
     out = list(data)
     ranks = list(range(max(out, default=-1) + 1))
     prev = 1
@@ -92,10 +93,9 @@ def encode(data: Iterable[int], reorder=..., mtf=..., validate=...) -> Tuple[Lis
 
 def encode(data,
            reorder: bool = True,
-           mtf: Optional[int] = default_mtf_variant,
+           mtf: Optional[int] = default_mtf,
            validate: bool = True
            ):
-    assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
     out = list(data)
     if reorder:
@@ -129,8 +129,7 @@ def decode(data: Iterable[int], index, reorder=..., mtf=...) -> List[int]:
     ...
 
 
-def decode(data, index: int, reorder: bool = True, mtf: Optional[int] = default_mtf_variant):
-    assert mtf in mtf_variants, mtf
+def decode(data, index: int, reorder: bool = True, mtf: Optional[int] = default_mtf):
     is_str = isinstance(data, str)
     out = list(data)
     if mtf is not None:
@@ -157,7 +156,7 @@ def decode(data, index: int, reorder: bool = True, mtf: Optional[int] = default_
 def get_js_decoder(data: Union[str, Iterable[int]],
                    index: int,
                    reorder: bool = True,
-                   mtf: Optional[int] = default_mtf_variant,
+                   mtf: Optional[int] = default_mtf,
                    add_bwt_func: bool = True,
                    bwt_func_var: str = default_vars.bwt_func,
                    data_var: Optional[str] = None
@@ -181,7 +180,7 @@ def get_js_decoder(data: Union[str, Iterable[int]],
             js_decoder += 'n=1\n'
             mtf_op = f'd.splice(k>1?k/2|0:k>n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         else:
-            mtf_op = f'd.splice(k*{mtf / 100}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])'
+            mtf_op = f"d.splice(k*{str(mtf / 100).lstrip('0')}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])"
         if is_str:
             js_decoder += f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n'
         js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>a>b?a:b+1,0)).keys()]
@@ -228,13 +227,12 @@ def encode_and_get_js_decoder(data: Iterable[int], reorder=..., mtf=..., add_bwt
 
 def encode_and_get_js_decoder(data,
                               reorder: bool = True,
-                              mtf: Optional[int] = default_mtf_variant,
+                              mtf: Optional[int] = default_mtf,
                               add_bwt_func: bool = True,
                               bwt_func_var: str = default_vars.bwt_func,
                               data_var: Optional[str] = None,
                               validate: bool = True
                               ):
-    assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
     if data_var is None:
         data_var = default_vars.text if is_str else default_vars.bitarray
@@ -259,16 +257,16 @@ def test() -> None:
         for y in symbols:
             for z in symbols:
                 for mtf in mtf_variants:
-                    for reorder in range(2):
-                        encode(f'{x}{y}{z}', reorder=bool(reorder), mtf=mtf, validate=True)
+                    for reorder in [False, True]:
+                        encode(f'{x}{y}{z}', reorder=reorder, mtf=mtf, validate=True)
 
     symbols = '', '0', '1', '97', '255'
     for x in symbols:
         for y in symbols:
             for z in symbols:
                 for mtf in mtf_variants:
-                    for reorder in range(2):
-                        encode([int(c) for c in f'{x}{y}{z}'], reorder=bool(reorder), mtf=mtf, validate=True)
+                    for reorder in [False, True]:
+                        encode([int(c) for c in f'{x}{y}{z}'], reorder=reorder, mtf=mtf, validate=True)
 
 
 if __name__ == '__main__':

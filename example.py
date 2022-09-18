@@ -14,11 +14,11 @@ output_folder = 'output'
 for book, mtf in zip(books, mtf_variants):
     book_start_time = time()
     filenames = dict(text=f'{book}.txt',
-                     base64_js=f'{book}_64.js',
+                     # base64_js=f'{book}_64.js',
                      base64_html=f'{book}_64.html',
-                     base125_js=f'{book}_125.js',
+                     # base125_js=f'{book}_125.js',
                      base125_html=f'{book}_125.html',
-                     crenc_js=f'{book}_cr.js',
+                     # crenc_js=f'{book}_cr.js',
                      crenc_html=f'{book}_cr.html')
     os.makedirs(output_folder, exist_ok=True)
     filenames = {k: os.path.join(output_folder, v) for k, v in filenames.items()}
@@ -32,16 +32,18 @@ for book, mtf in zip(books, mtf_variants):
     with open(filenames['text'], 'rb') as f:
         text = f.read().decode()
 
+    cnt = 0
     for label, filename in filenames.items():
         ext = os.path.splitext(filename)[-1][1:]
         if ext not in ['js', 'html']:
             continue
         file = ztml.ztml(text, filename, mtf=mtf, bin2txt=label.split('_', 1)[0])
+        cnt += 1
 
-    print(f'All encodings of {book} took {(time()-book_start_time) / 60 :.1f} min.')
+    print(f'{cnt} encodings of {book} took {(time()-book_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate text is recovered
-    validation.validate_files(filenames, compare_caps=False)
+    validation.validate_files(filenames)
     print()
 
 print(f'Total took {(time()-start_time) / 60 :.1f} min.')

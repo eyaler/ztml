@@ -29,7 +29,7 @@
 
 [ ] Run length encoding after MTF
 
-[ ] Augment auto-caps with a next-letter-invert-caps-symbol / block level caps markup
+[ ] Auto-caps with modifiers for next letter/word/sentence/paragraph or block-level
 
 [ ] Dictionary compression for long texts
 

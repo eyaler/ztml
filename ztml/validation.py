@@ -63,6 +63,8 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
         try:
             browser = drivers[browser][0](service=drivers[browser][1].service.Service(service, log_path=os.devnull), options=options)
         except WebDriverException as e:
+            if 'executable needs to be in' in e.msg:
+                raise
             print(e, file=sys.stderr)
             sleep(30)
     if stack:
@@ -115,7 +117,7 @@ def find_first_diff(render: str, text: str, verbose: bool = True) -> int:
 
 def validate_html(file: AnyStr,
                   text: str,
-                  compare_caps: bool = True,
+                  caps: str = text_prep.default_caps,
                   ignore_regex: str = '',
                   unicode_A: int = 0,
                   browser: BrowserType = default_browser,
@@ -126,9 +128,12 @@ def validate_html(file: AnyStr,
     render = render_html(file, browser, timeout, element)
     if render is None:
         return None
-    if not compare_caps:
-        render = render.lower()
+    if caps == 'lower':
         text = text.lower()
+    elif caps == 'upper':
+        text = text.upper()
+    elif caps == 'simple':
+        text = text_prep.decode_caps_simple(text.lower())
     render = regex.sub(ignore_regex, '', render)
     if unicode_A:
         render = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), render)
@@ -142,9 +147,9 @@ def validate_html(file: AnyStr,
 def validate_files(filenames: Mapping[str, str],
                    text: Optional[str] = None,
                    reduce_whitespace: bool = False,
-                   fix_newline: bool = True,
+                   unix_newline: bool = True,
                    fix_punct: bool = False,
-                   compare_caps: bool = True,
+                   caps: str = text_prep.default_caps,
                    ignore_regex: str = '',
                    unicode_A: int = 0,
                    element: str = default_element,
@@ -170,7 +175,7 @@ def validate_files(filenames: Mapping[str, str],
             if text is None:
                 assert ext == 'txt', filename
                 with open(filename, 'rb') as f:
-                    text = text_prep.normalize(f.read().decode(), reduce_whitespace, fix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
+                    text = text_prep.normalize(f.read().decode(), reduce_whitespace, unix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
             if text_size is None:
                 text_size = size if ext == 'txt' else len(text.encode())
             if label == 'base64_html':
@@ -197,7 +202,7 @@ def validate_files(filenames: Mapping[str, str],
             if validate and ext == 'html':
                 for i, browser in enumerate(browsers):
                     start_time = time()
-                    valid = validate_html(filename, text, compare_caps, ignore_regex, unicode_A, browser, timeout, element, verbose)
+                    valid = validate_html(filename, text, caps, ignore_regex, unicode_A, browser, timeout, element, verbose)
                     assert valid is not False, filename
                     if verbose:
                         if not i:

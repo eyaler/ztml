@@ -25,29 +25,28 @@ default_bin2txt = 'crenc'
 
 
 @overload
-def ztml(text, filename=..., reduce_whitespace=..., fix_newline=..., fix_punct=...,
-         caps=..., caps_fallback=..., mtf=..., bin2txt=..., js=..., uglify=...,
-         replace_quoted=..., lang=..., mobile=..., validate: Literal[True] = ...,
-         compare_caps=..., browser=..., verbose=...) -> bytes:
+def ztml(text, filename=..., reduce_whitespace=..., unix_newline=..., fix_punct=...,
+         caps=..., mtf=..., bin2txt=..., js=..., uglify=..., replace_quoted=...,
+         lang=..., mobile=..., validate: Literal[True] = ..., browser=..., verbose=...
+         ) -> bytes:
     ...
 
 
 @overload
-def ztml(text, filename=..., reduce_whitespace=..., fix_newline=..., fix_punct=...,
-         caps=..., caps_fallback=..., mtf=..., bin2txt=..., js=..., uglify=...,
-         replace_quoted=..., lang=..., mobile=..., validate: Literal[False] = ...,
-         compare_caps=..., browser=..., verbose=...) -> Tuple[bytes, int]:
+def ztml(text, filename=..., reduce_whitespace=..., unix_newline=..., fix_punct=...,
+         caps=..., mtf=..., bin2txt=..., js=..., uglify=..., replace_quoted=...,
+         lang=..., mobile=..., validate: Literal[False] = ..., browser=..., verbose=...
+         ) -> Tuple[bytes, int]:
     ...
 
 
 def ztml(text: str,
          filename: str = '',
          reduce_whitespace: bool = False,
-         fix_newline: bool = True,
+         unix_newline: bool = True,
          fix_punct: bool = False,
-         caps: str = text_prep.default_caps_mode,
-         caps_fallback: bool = False,
-         mtf: Optional[int] = bwt_mtf.default_mtf_variant,
+         caps: str = text_prep.default_caps,
+         mtf: Optional[int] = bwt_mtf.default_mtf,
          bin2txt: str = default_bin2txt,
          js: bool = False,
          uglify: bool = True,
@@ -55,14 +54,13 @@ def ztml(text: str,
          lang: str = 'en',
          mobile: bool = False,
          validate: bool = False,
-         compare_caps: bool = True,
          browser: validation.BrowserType = validation.default_browser,
          verbose: bool = False
          ):
     start_time = time()
     encoding = 'cp1252' if bin2txt == 'crenc' else 'utf8'
-    text = text_prep.normalize(text, reduce_whitespace, fix_newline, fix_punct)  # Reduce whitespace
-    condensed, string_decoder = text_prep.encode_and_get_js_decoder(text, caps, caps_fallback=caps_fallback)  # Lower case and shorten common strings
+    text = text_prep.normalize(text, reduce_whitespace, unix_newline, fix_punct)  # Reduce whitespace
+    condensed, string_decoder = text_prep.encode_and_get_js_decoder(text, caps)  # Lower case and shorten common strings
     bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False)  # Burrows–Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
     bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text)  # Huffman encode
     bwt_bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(bits)  # Burrows–Wheeler transform on bits
@@ -96,7 +94,7 @@ def ztml(text: str,
         print(f'Encoding took {time() - start_time :,.1f} sec.', file=sys.stderr)
     if validate:
         valid = validation.validate_html(webify.html_wrap(out, aliases='', encoding=encoding) if js else filename or out,
-                                         text, compare_caps, browser=browser, verbose=True)
+                                         text, caps, browser=browser, verbose=True)
         out = out, not valid
     return out
 
@@ -107,12 +105,11 @@ if __name__ == '__main__':
     parser.add_argument('output_filename', nargs='?', default='')
     parser.add_argument('--input_encoding')
     parser.add_argument('--reduce_whitespace', action='store_true')
-    parser.add_argument('--skip_fix_newline', action='store_true')
+    parser.add_argument('--skip_unix_newline', action='store_true')
     parser.add_argument('--fix_punct', action='store_true')
-    parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps_mode)
-    parser.add_argument('--caps_fallback', action='store_true')
+    parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps)
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants,
-                        default=bwt_mtf.default_mtf_variant)
+                        default=bwt_mtf.default_mtf)
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--js', action='store_true', help='can also be inferred from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
@@ -120,7 +117,6 @@ if __name__ == '__main__':
     parser.add_argument('--lang', default='en')
     parser.add_argument('--mobile', action='store_true')
     parser.add_argument('--validate', action='store_true')
-    parser.add_argument('--skip_compare_caps', action='store_true')
     parser.add_argument('--browser', type=str.lower, choices=list(validation.drivers), default=validation.default_browser)
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
@@ -138,10 +134,10 @@ if __name__ == '__main__':
                 else:
                     raise
     out = ztml(text, args.output_filename, args.reduce_whitespace,
-               not args.skip_fix_newline, args.fix_punct, args.caps, args.caps_fallback,
+               not args.skip_unix_newline, args.fix_punct, args.caps,
                args.mtf, args.bin2txt, args.js, not args.skip_uglify,
-               not args.skip_replace_quoted, args.lang, args.mobile, args.validate,
-               not args.skip_compare_caps, args.browser, args.verbose)
+               not args.skip_replace_quoted, args.lang, args.mobile,
+               args.validate, args.browser, args.verbose)
     result = False
     if args.validate:
         out, result = out

@@ -43,24 +43,22 @@ default_padding_bit = 0
 
 
 def to_png(bits: Iterable[int],
-           padding_sep_code: str = '',
            padding_bit: int = default_padding_bit,
            compression: int = 9,
            filter_strategies: str = '',  # Any subset of 01234mepb, '' means auto
            iterations: int = 15,
            iterations_large: int = 5,
+           omit_crc_iend: bool = True,
            filename: str = '',
            verbose: bool = False) -> bytes:
     bits = list(bits)
     assert len(bits)
     width = height = pad_len = 0
     length = None
-    padding = list(padding_sep_code)
     while width * height != length:
         if length is not None:
-            bits += padding
-            pad_len += len(padding)
-            padding = [padding_bit]
+            bits.append(padding_bit)
+            pad_len += 1
         length = len(bits)
         assert length <= max_len, length
         height = int(math.sqrt(length))
@@ -73,13 +71,17 @@ def to_png(bits: Iterable[int],
     png.Writer(width, height, greyscale=True, bitdepth=1, compression=compression).write(png_data, bits)
     png_data.seek(0)
     png_data = png_data.read()
-    zop_data = zopfli.ZopfliPNG(filter_strategies=filter_strategies, iterations=iterations, iterations_large=iterations_large).optimize(png_data)  # Time-consuming op.
+    out = png_data
+    if iterations > 0 and iterations_large > 0:
+        out = zopfli.ZopfliPNG(filter_strategies=filter_strategies, iterations=iterations, iterations_large=iterations_large).optimize(png_data)  # Time-consuming op.
+    if omit_crc_iend:
+        out = out[:-20]  # zlib Adler-32 (4 bytes) + IDAT CRC-32 (4 bytes) + IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes)
     if verbose:
-        print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} zop={len(zop_data)}', file=sys.stderr)
+        print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} final={len(out)}', file=sys.stderr)
     if filename:
         with open(filename, 'wb') as f:
-            f.write(zop_data)
-    return zop_data
+            f.write(out)
+    return out
 
 
 encode = to_png
