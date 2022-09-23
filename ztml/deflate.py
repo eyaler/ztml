@@ -100,7 +100,7 @@ def get_js_create_image(image_var: str = default_vars.image,
 
 
 def get_js_image_data(length: int,
-                      render_script: str = '',
+                      decoder_script: str = '',
                       image_var: str = default_vars.image,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
@@ -110,13 +110,13 @@ x=c.getContext`2d`
 c=[c.width,c.height]=[{image_var}.width,{image_var}.height]
 x.drawImage({image_var},0,0)
 {bitarray_var}=[...x.getImageData(0,0,...c).data].flatMap((i,j)=>j%4||j>{length*4 - 1}?[]:[i>>7])
-{render_script.strip()}}})'''  # Using >>7 to deal with safari rendering inaccuracy
+{decoder_script.strip()}}})'''  # Using >>7 to deal with Safari rendering inaccuracy
 
 
 def get_js_image_decoder(length: int,
-                         render_script: str = '',
+                         decoder_script: str = '',
                          image_var: str = default_vars.image,
                          bytearray_var: str = default_vars.bytearray,
                          bitarray_var: str = default_vars.bitarray
                          ) -> str:
-    return get_js_create_image(image_var, bytearray_var) + get_js_image_data(length, render_script, image_var, bitarray_var)
+    return get_js_create_image(image_var, bytearray_var) + get_js_image_data(length, decoder_script, image_var, bitarray_var)

@@ -1,4 +1,5 @@
 from contextlib import ExitStack, redirect_stdout
+import html
 import os
 import sys
 from tempfile import NamedTemporaryFile
@@ -51,6 +52,9 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
     try:
         with redirect_stdout(None):
             service = drivers[browser][2]().install()
+        folder = os.path.dirname(webdriver_paths_filename)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
         with open(webdriver_paths_filename, 'a', encoding='utf8') as f:
             f.write(f'{browser},{service}\n')
     except Exception:
@@ -75,7 +79,8 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
 def render_html(file: AnyStr,
                 browser: BrowserType = default_browser,
                 timeout: int = default_timeout,
-                element: str = default_element
+                element: str = default_element,
+                raw: bool = False
                 ) -> Optional[str]:
     with ExitStack() as stack:
         browser = get_browser(browser, stack)
@@ -92,8 +97,14 @@ def render_html(file: AnyStr,
             except PermissionError:
                 pass
         try:
+            if raw:
+                sleep(1)
             WebDriverWait(browser, timeout).until(lambda x: x.find_element(By.TAG_NAME, element).text)
-            return browser.find_element(By.TAG_NAME, element).get_attribute('innerText')
+            property = 'innerHTML' if raw else 'innerText'
+            out = browser.find_element(By.TAG_NAME, element).get_attribute(property)
+            if raw:
+                out = html.unescape(out)
+            return out
         except TimeoutException:
             return None
         except Exception:
@@ -123,9 +134,10 @@ def validate_html(file: AnyStr,
                   browser: BrowserType = default_browser,
                   timeout: int = default_timeout,
                   element: str = default_element,
+                  raw: bool = False,
                   verbose: bool = True
                   ) -> Optional[bool]:
-    render = render_html(file, browser, timeout, element)
+    render = render_html(file, browser, timeout, element, raw)
     if render is None:
         return None
     if caps == 'lower':
@@ -153,6 +165,7 @@ def validate_files(filenames: Mapping[str, str],
                    ignore_regex: str = '',
                    unicode_A: int = 0,
                    element: str = default_element,
+                   raw: bool = False,
                    browsers: Optional[Union[BrowserType, Iterable[BrowserType]]] = None,
                    timeout: int = default_timeout,
                    payload_var: str = default_vars.payload,
@@ -202,7 +215,7 @@ def validate_files(filenames: Mapping[str, str],
             if validate and ext == 'html':
                 for i, browser in enumerate(browsers):
                     start_time = time()
-                    valid = validate_html(filename, text, caps, ignore_regex, unicode_A, browser, timeout, element, verbose)
+                    valid = validate_html(filename, text, caps, ignore_regex, unicode_A, browser, timeout, element, raw, verbose)
                     assert valid is not False, filename
                     if verbose:
                         if not i:

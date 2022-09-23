@@ -42,12 +42,12 @@ def find_best_escape(data: bytes) -> int:
 
 
 @overload
-def encode(data: bytes, escape: Literal[None] = ..., offset=...) -> Tuple[bytes, int]:
+def encode(data: bytes, escape: Union[int, AnyStr] = ..., offset=...) -> bytes:
     ...
 
 
 @overload
-def encode(data: bytes, escape: Union[int, AnyStr] = ..., offset=...) -> bytes:
+def encode(data: bytes, escape: Literal[None] = ..., offset=...) -> Tuple[bytes, int]:
     ...
 
 
@@ -75,12 +75,12 @@ def encode(data: bytes, escape=None, offset: int = 0):
 
 
 @overload
-def optimize_encode(data, escape: Literal[None] = ...) -> Tuple[Tuple[bytes, int], int, int]:
+def optimize_encode(data, escape: Union[int, AnyStr] = ...) -> Tuple[bytes, int, int]:
     ...
 
 
 @overload
-def optimize_encode(data, escape: Union[int, AnyStr] = ...) -> Tuple[bytes, int, int]:
+def optimize_encode(data, escape: Literal[None] = ...) -> Tuple[Tuple[bytes, int], int, int]:
     ...
 
 

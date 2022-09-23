@@ -30,7 +30,7 @@ for book, mtf in zip(books, mtf_variants):
             f.write(load_etext(book).encode())
 
     with open(filenames['text'], 'rb') as f:
-        text = f.read().decode()
+        text = f.read()
 
     cnt = 0
     for label, filename in filenames.items():

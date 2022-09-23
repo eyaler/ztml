@@ -5,6 +5,8 @@
 
 [ ] **Example for Base125 / crEnc image compression use case**
 
+[ ] Make into a PIP library and start doing versioning
+
 [ ] Expose more parameters and allow skipping steps in CLI / ztml(), via arguments or config file
 
 [ ] Provide pure JS libraries where relevant

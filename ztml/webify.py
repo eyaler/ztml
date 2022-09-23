@@ -4,14 +4,15 @@ Warnings:
 1. The two-parameter aliases would miss substitutions involving tag function syntax, i.e.
    func`str`, even if you specify such forms explicitly. However, see following examples.
 2. While alias substitution does support some level of composition, e.g.:
-      a.appendChild(b=document.createElement`p`).innerHTML='hi'           # => A(a,b=E`p`).C='hi'
+      a.appendChild(b=document.createElement`p`).innerHTML='hi'           # => C(a,b=E`p`).C='hi'
    More complex compositions would miss later substitutions, e.g.:
-      a.appendChild(b=document.createElement`p`).appendChild(c)           # => A(a,b=E`p`).appendChild(c)
-      a.appendChild(b=document.createElement`p`).setAttribute('style',c)  # => A(a,b=E`p`).setAttribute(P,c)
+      a.appendChild(b=document.createElement`p`).appendChild(c)           # => C(a,b=E`p`).appendChild(c)
+      a.appendChild(b=document.createElement`p`).setAttribute('style',c)  # => C(a,b=E`p`).setAttribute('style',c)
 3. Non-static method aliases support only specific parameter signatures as appear in
    default_aliases. Attempting to specify different signatures will break your code.
 4. You may need to set replace_quoted=False if you do not want e.g. all 'length', "Length"
    to be replaced by: L
+5. Aliases to be used in other aliases e.g. document, should be specified before the latter.
 """
 
 
@@ -25,26 +26,24 @@ else:
     from . import default_vars
 
 
+default_lang = 'en'
+
 default_aliases = '''
-Q = document
-A = (e, c) => e.appendChild(c)
+D = document
+A = (e, d) => e.setAttribute('style', d)
 B = document.body
-C = 'innerHTML'
-D = 'dataset'
+C = (e, c) => e.appendChild(c)
 E = (e='div') => document.createElement(e)
 F = String
-G = 'width'
-H = 'height'
+G = 'target'
+H = 'innerHTML'
 I = setInterval
 J = clearInterval
-K = e => e.cancel()
+K = e => e.codePointAt()
 L = 'length'
 M = Math
 N = speechSynthesis
 O = setTimeout
-P = 'style'
-R = 'target'
-S = (e, d) => e.setAttribute('style', d)
 '''
 
 
@@ -63,8 +62,9 @@ def get_len(script: str, encoding: str) -> int:
 
 def uglify(script: AnyStr,
            aliases: str = default_aliases,
-           min_cnt: int = 2,
            replace_quoted: bool = True,
+           min_cnt: int = 2,
+           prevent_grow: bool = True,
            add_used_aliases: bool = True,
            encoding: str = 'utf8',
            payload_var: str = default_vars.payload
@@ -81,7 +81,7 @@ def uglify(script: AnyStr,
         prefix = ''
         comma = ''
         if re.search('(\\b\\w+\\b)[^>]*=>[^.]*\\b\\1\\.', long):
-            prefix = '(\\w[\\w.]*)\\.'
+            prefix = '(\\w[\\w.[\\]]*)\\.'
             if re.search('[^,]+,[^>]+=>', long):
                 comma = ','
         long = re.sub('[^>]*(?P<prefix>\\b\\w+\\b)[^>]*=>[^.]*\\b(?P=prefix)\\.|[^>]+=>|\\([^,)]*\\)|,.*', '', long)
@@ -117,24 +117,26 @@ def uglify(script: AnyStr,
                 cnt += c
             sub += part
         if cnt >= min_cnt:
-            script = sub
             if add_used_aliases:
                 alias += '\n'
-                if isinstance(script, bytes):
+                if isinstance(sub, bytes):
                     alias = safe_encode(alias, encoding)
-                if alias not in script:
-                    script = alias + script.lstrip()
+                if alias not in sub:
+                    sub = alias + sub.lstrip()
+            if not prevent_grow or get_len(sub, encoding) < get_len(script, encoding):
+                script = sub
     new_len = get_len(script, encoding)
     if new_len > orig_len:
-        print(f'Warning size has grown: {new_len} B > {orig_len} B', file=sys.stderr)
+        print(f'Warning: uglified size increased: {new_len} B > {orig_len} B', file=sys.stderr)
     return script
 
 
 def html_wrap(script: AnyStr,
               aliases: str = default_aliases,
-              min_cnt: int = 2,
               replace_quoted: bool = True,
-              lang: str = 'en',
+              min_cnt: int = 2,
+              prevent_grow: bool = True,
+              lang: str = default_lang,
               encoding: str = 'utf8',
               mobile: bool = False,
               payload_var: str = default_vars.payload
@@ -148,5 +150,5 @@ def html_wrap(script: AnyStr,
         html_footer = html_footer.encode()
         sep = sep.encode()
     if aliases:
-        script = uglify(script, aliases, min_cnt, replace_quoted, encoding=encoding, payload_var=payload_var)
+        script = uglify(script, aliases, replace_quoted, min_cnt, prevent_grow, encoding=encoding, payload_var=payload_var)
     return sep.join([html_header, script.strip(), html_footer])

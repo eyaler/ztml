@@ -30,6 +30,8 @@ order2 = 'VWXYZAOUIEvwxyzaouie'
 
 reorder_table = str.maketrans(order1, order2)
 reverse_reorder_table = str.maketrans(order2, order1)
+surrogate_lo = 55296
+surrogate_hi = 57343
 
 
 def mtf_rank(mtf: int, rank: int, prev: int) -> int:
@@ -53,15 +55,18 @@ def mtf_encode(data: Iterable[int],
                mtf: Optional[int] == default_mtf,
                validate=True
                ) -> List[int]:
+    data = list(data)
     ranks = list(range(max(data, default=-1) + 1))
     out = []
     prev = 1
     for i in data:
         rank = ranks.index(i)  # Time-consuming op.
-        out.append(rank)
         ranks.pop(rank)
         ranks.insert(mtf_rank(mtf, rank, prev), i)
         prev = rank
+        if rank >= surrogate_lo:
+            rank += surrogate_hi - surrogate_lo + 1
+        out.append(rank)
     if validate:
         decoded = mtf_decode(out, mtf)
         if not hasattr(data, '__getitem__'):
@@ -75,6 +80,8 @@ def mtf_decode(data: Iterable[int], mtf: Optional[int] == default_mtf) -> List[i
     ranks = list(range(max(out, default=-1) + 1))
     prev = 1
     for i, rank in enumerate(out):
+        if rank > surrogate_lo:
+            rank -= surrogate_hi - surrogate_lo + 1
         out[i] = ranks.pop(rank)
         ranks.insert(mtf_rank(mtf, rank, prev), out[i])
         prev = rank
@@ -97,6 +104,8 @@ def encode(data,
            validate: bool = True
            ):
     is_str = isinstance(data, str)
+    if not is_str:
+        data = list(data)
     out = list(data)
     if reorder:
         if not is_str:
@@ -163,9 +172,11 @@ def get_js_decoder(data: Union[str, Iterable[int]],
                    ) -> str:
     assert mtf in mtf_variants, mtf
     is_str = isinstance(data, str)
+    if not is_str:
+        data = list(data)
     if data_var is None:
         data_var = default_vars.text if is_str else default_vars.bitarray
-    js_decoder = ''
+    js_decoder = f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n' * is_str
     if mtf is not None:
         if mtf == 0:
             mtf_op = f'd.unshift({data_var}[j++]=d.splice(k,1)[0])'
@@ -181,18 +192,15 @@ def get_js_decoder(data: Union[str, Iterable[int]],
             mtf_op = f'd.splice(k>1?k/2|0:k>n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         else:
             mtf_op = f"d.splice(k*{str(mtf / 100).lstrip('0')}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])"
-        if is_str:
-            js_decoder += f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n'
+        if is_str and any(ord(c) > surrogate_lo for c in data):
+            mtf_op = f'k-={surrogate_hi - surrogate_lo + 1}*(k>{surrogate_lo}),{mtf_op}'
         js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>a>b?a:b+1,0)).keys()]
 j=0
 for(k of {data_var}){mtf_op}
 '''
-        if is_str:
-            js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
     if add_bwt_func:
-        js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);for(j in s)[d[j],k]=s[k]}}\n"  # ?1:0 needed for Safari (see https://stackoverflow.com/questions/73451718/sorting-nested-arrays-in-safari)
-    expand = f'=[...{data_var}]' * is_str
-    js_decoder += f'{bwt_func_var}({data_var}{expand},{index})\n'
+        js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]-b[0]);for(j in s)[d[j],k]=s[k]}}\n"  # Sort on code points to respect order of char above \uffff
+    js_decoder += f'{bwt_func_var}({data_var},{index})\n'
     dyn_orders = None
     if reorder:
         symbols = set(data)
@@ -203,13 +211,12 @@ for(k of {data_var}){mtf_op}
             dyn_order1, dyn_order2 = dyn_orders
             dyn_order1 = ''.join(dyn_order1)
             dyn_order2 = ''.join(dyn_order2)
-            if not is_str:
-                js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i))\n'
-            js_decoder += f'''d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
+            js_decoder += f'''{data_var}={data_var}.map(i=>String.fromCodePoint(i))
+d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
 {data_var}={data_var}.map(c=>{'d[c]||c).join``' if is_str else '(d[c]||c).codePointAt())'}
 '''
     if is_str and not dyn_orders:
-        js_decoder += f'{data_var}={data_var}.join``\n'
+        js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i)).join``\n'
     return js_decoder
 
 
@@ -234,6 +241,8 @@ def encode_and_get_js_decoder(data,
                               validate: bool = True
                               ):
     is_str = isinstance(data, str)
+    if not is_str:
+        data = list(data)
     if data_var is None:
         data_var = default_vars.text if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
@@ -252,7 +261,7 @@ def test() -> None:
     mtf2 = mtf_encode(mtf_test[:], mtf=2, validate=True)
     assert mtf2 == [3, 3, 1, 0, 2, 0, 0, 1, 0, 0], mtf2
 
-    symbols = '', '\0', '\1', 'a', 'b', 'א', 'ב'
+    symbols = '', '\0', '\1', 'a', 'b', 'א', 'ב', '\ue000', '\uffff', '\U00010000'
     for x in symbols:
         for y in symbols:
             for z in symbols:
