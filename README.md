@@ -11,14 +11,15 @@ These file sizes include the decoder code which is 1.5 - 2 kB (including auxilia
 The approach makes sense and is optimized for small texts, but performs quite well also on large texts.
 The pipeline includes efficient alternatives to base64 which are also useful for inline images.
 
-|                                                                   | File format   | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) |
-|-------------------------------------------------------------------|---------------|-------------------------------------------------------------------|------------------------------------------------------------------|
-| Project Gutenberg plain text utf8                                 | txt           | 3.2 MB                                                            | 63.7 kB                                                          |
-| 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                      | 7z            | 746 kB (23%)                                                      | 20.8 kB (32%)                                                    |
-| 7-Zip 22.01 9 Ultra PPMd (self extracting)                        | exe           | 958 kB (29%)                                                      | 232 kB (364%)                                                    |
-| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2 | js            | 1.0 MB (30%)                                                      | 26.5 kB (42%)                                                    |
-| **ZTML Base125**                                                  | html (utf8)   | 916 kB (28%) `mtf=80`                                             | 26.5 kB (42%) `mtf=0`                                            |
-| **ZTML crEnc**                                                    | html (cp1252) | 818 kB (25%) `mtf=80`                                             | 23.7 kB (37%) `mtf=0`                                            |
+|                                                                                            | File format   | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) |
+|--------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------|------------------------------------------------------------------|
+| Project Gutenberg plain text utf8                                                          | txt           | 3.2 MB                                                          | 63.7 kB                                                          |
+| [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12LRT (excluding decoder) | paq           | 575 kB (18%)                                                    | 13.3 kB (21%)                                                    |
+| 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                                               | 7z            | 746 kB (23%)                                                    | 20.8 kB (32%)                                                    |
+| 7-Zip 22.01 9 Ultra PPMd (self extracting)                                                 | exe           | 958 kB (29%)                                                    | 232 kB (364%)                                                    |
+| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                          | js            | 1.0 MB (30%)                                                    | 26.5 kB (42%)                                                    |
+| **ZTML Base125**                                                                           | html (utf8)   | 916 kB (28%) `mtf=80`                                           | 26.5 kB (42%) `mtf=0`                                            |
+| **ZTML crEnc**                                                                             | html (cp1252) | 818 kB (25%) `mtf=80`                                           | 23.7 kB (37%) `mtf=0`                                            |
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
