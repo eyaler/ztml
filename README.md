@@ -48,4 +48,4 @@ See [example.py](example.py) for a complete example reproducing the above benchm
 
 ### Projects using this:
 - [fragium](https://fragium.com)
-- [miniBook](https://github.com/eyaler/miniBook) submission by Eyal Gruss 
+- [miniBook](https://xem.github.io/miniBook) submission by Eyal Gruss

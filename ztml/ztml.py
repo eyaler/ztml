@@ -66,9 +66,9 @@ def ztml(text: AnyStr,
         text = text.decode()
     text = text_prep.normalize(text, reduce_whitespace, unix_newline, fix_punct)  # Reduce whitespace
     condensed, string_decoder = text_prep.encode_and_get_js_decoder(text, caps)  # Lower case and shorten common strings
-    bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False)  # Burrows–Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
+    bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False)  # Burrows-Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
     bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text)  # Huffman encode
-    bwt_bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(bits)  # Burrows–Wheeler transform on bits
+    bwt_bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(bits)  # Burrows-Wheeler transform on bits
     zop_data = deflate.to_png(bwt_bits)  # PNG encode. Time-consuming op.
     if raw:
         render = f'document.write({default_vars.text})'

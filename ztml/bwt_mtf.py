@@ -1,4 +1,4 @@
-"""Burrows–Wheeler and Move-to-front transforms
+"""Burrows-Wheeler and Move-to-front transforms
 
 Implementation follows pydivsufsort tests, to unnecessitate adding an EOF token.
 
