@@ -3,7 +3,7 @@
 
 ### Usability
 
-[ ] **Example for Base125 / crEnc image compression use case**
+[ ] **Example for Base125 / crEnc inline image encoding use case**
 
 [ ] Make into a PIP library and start doing versioning
 
@@ -49,7 +49,9 @@
 
 [ ] **Investigate effect of PNG aspect ratio on compression / optimize over it**
 
-[ ] Benchmark https://github.com/fhanau/Efficient-Compression-Tool
+[ ] Integrate https://github.com/fhanau/Efficient-Compression-Tool (1.4% improvement on 2600.txt)
+
+[ ] Investigate Safari canvas size limits
 
 [ ] Compress metadata into PNG 
 
