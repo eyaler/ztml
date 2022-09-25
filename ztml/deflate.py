@@ -48,7 +48,7 @@ def to_png(bits: Iterable[int],
            filter_strategies: str = '',  # Any subset of 01234mepb, '' means auto
            iterations: int = 15,
            iterations_large: int = 5,
-           omit_crc_iend: bool = True,
+           omit_iend: bool = True,
            filename: str = '',
            verbose: bool = False) -> bytes:
     bits = list(bits)
@@ -74,8 +74,8 @@ def to_png(bits: Iterable[int],
     out = png_data
     if iterations > 0 and iterations_large > 0:
         out = zopfli.ZopfliPNG(filter_strategies=filter_strategies, iterations=iterations, iterations_large=iterations_large).optimize(png_data)  # Time-consuming op.
-    if omit_crc_iend:
-        out = out[:-20]  # zlib Adler-32 (4 bytes) + IDAT CRC-32 (4 bytes) + IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes)
+    if omit_iend:
+        out = out[:-12]  # IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes). Note: do not omit the IDAT zlib Adler-32 or the IDAT CRC-32 as this will break Safari
     if verbose:
         print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} final={len(out)}', file=sys.stderr)
     if filename:

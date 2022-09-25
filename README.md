@@ -19,7 +19,7 @@ The pipeline includes efficient alternatives to base64 which are also useful for
 | 7-Zip 22.01 9 Ultra PPMd (self extracting)                                                 | exe           | 958 kB (29%)                                                    | 232 kB (364%)                                                    |
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                          | js            | 1.0 MB (30%)                                                    | 26.5 kB (42%)                                                    |
 | **ZTML Base125**                                                                           | html (utf8)   | 916 kB (28%) `mtf=80`                                           | 26.5 kB (42%) `mtf=0`                                            |
-| **ZTML crEnc**                                                                             | html (cp1252) | 818 kB (25%) `mtf=80`                                           | 23.7 kB (37%) `mtf=0`                                            |
+| **ZTML crEnc**                                                                             | html (cp1252) | 818 kB (25%) `mtf=80`                                           | 23.8 kB (37%) `mtf=0`                                            |
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
@@ -47,4 +47,5 @@ See [example.py](example.py) for a complete example reproducing the above benchm
 8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
 
 ### Projects using this:
-[fragium](https://fragium.com)
+- [fragium](https://fragium.com)
+- [miniBook](https://github.com/eyaler/miniBook) submission by Eyal Gruss 
