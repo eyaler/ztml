@@ -9,7 +9,6 @@ else:
     from . import text_prep, bwt_mtf, validation, webify, ztml
 
 
-max_unicode = 1114111
 min_char_code1 = 0
 max_char_code1 = 14000
 min_char_code2 = 55000
@@ -23,9 +22,9 @@ temp_folder = 'tmp'
 cleanup = True
 
 
-all_chars = ''.join(chr(i) for i in range(min_char_code1, min(max_char_code1 or max_unicode, max_unicode) + 1))
+all_chars = ''.join(chr(i) for i in range(min_char_code1, min(max_char_code1 or bwt_mtf.max_unicode, bwt_mtf.max_unicode) + 1))
 if min_char_code2 is not None and max_char_code2 is not None:
-    all_chars += ''.join(chr(i) for i in range(min_char_code2, min(max_char_code2 or max_unicode, max_unicode) + 1) if chr(i) not in all_chars)
+    all_chars += ''.join(chr(i) for i in range(min_char_code2, min(max_char_code2 or bwt_mtf.max_unicode, bwt_mtf.max_unicode) + 1) if chr(i) not in all_chars)
 os.makedirs(temp_folder, exist_ok=True)
 i = 0
 for browser in browsers:
@@ -36,7 +35,7 @@ for browser in browsers:
                 for caps in caps_modes:
                     for mtf in mtf_variants:
                         for raw in [False, True]:
-                            test_time = time()
+                            test_start_time = time()
                             i += 1
                             print(f'{i}/{len(browsers) * len(input_encodings) * len(ztml.bin2txt_encodings) * len(caps_modes) * len(mtf_variants) * 2} browser={browser} input_enc={encoding} bin2txt={bin2txt} caps={caps} mtf={mtf} raw={raw}')
                             suffix = f'{browser}_{encoding}_{bin2txt}_{caps}_{mtf}'
@@ -51,7 +50,7 @@ for browser in browsers:
                             if raw:
                                 text = ''.join(c for c in text if c not in ['\0', '\r'])
                             if mtf is not None:
-                                text = ''.join(c for c in text if ord(c) < max_unicode - (bwt_mtf.surrogate_hi-bwt_mtf.surrogate_lo))
+                                text = ''.join(c for c in text if ord(c) <= bwt_mtf.max_ord_for_mtf)
                             with open(input_filename, 'wb') as f:
                                 f.write(webify.safe_encode(text, encoding))
                             if encoding == 'utf8':
@@ -76,7 +75,7 @@ for browser in browsers:
                                         os.remove(filename)
                                     except PermissionError:
                                         pass
-                            print(f'Test took {time() - test_time :.0f} sec.\n')
+                            print(f'Test took {time() - test_start_time :.0f} sec.\n')
 if cleanup:
     try:
         os.rmdir(temp_folder)

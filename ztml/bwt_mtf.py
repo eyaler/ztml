@@ -32,6 +32,8 @@ reorder_table = str.maketrans(order1, order2)
 reverse_reorder_table = str.maketrans(order2, order1)
 surrogate_lo = 55296
 surrogate_hi = 57343
+max_unicode = 1114111
+max_ord_for_mtf = max_unicode - (surrogate_hi-surrogate_lo) - 1
 
 
 def mtf_rank(mtf: int, rank: int, prev: int) -> int:
@@ -52,11 +54,13 @@ def mtf_rank(mtf: int, rank: int, prev: int) -> int:
 
 
 def mtf_encode(data: Iterable[int],
-               mtf: Optional[int] == default_mtf,
+               mtf: int == default_mtf,
                validate=True
                ) -> List[int]:
     data = list(data)
-    ranks = list(range(max(data, default=-1) + 1))
+    max_data = max(data, default=-1)
+    assert max_data <= max_ord_for_mtf, (max_data, max_ord_for_mtf)
+    ranks = list(range(max_data + 1))
     out = []
     prev = 1
     for i in data:
@@ -75,7 +79,7 @@ def mtf_encode(data: Iterable[int],
     return out
 
 
-def mtf_decode(data: Iterable[int], mtf: Optional[int] == default_mtf) -> List[int]:
+def mtf_decode(data: Iterable[int], mtf: int == default_mtf) -> List[int]:
     out = list(data)
     ranks = list(range(max(out, default=-1) + 1))
     prev = 1
