@@ -34,7 +34,7 @@ drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
                firefox=[Firefox, firefox, GeckoDriverManager]
                )
 BrowserType = Union[str, WebDriver]
-critical_error_strings = 'executable needs to be in', 'unable to find binary in', 'unexpectedly exited'
+critical_error_strings = 'executable needs to be', 'unable to find binary', 'unexpectedly'
 
 
 def full_path(filename: str) -> str:
