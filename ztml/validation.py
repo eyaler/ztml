@@ -207,9 +207,11 @@ def validate_files(filenames: Mapping[str, str],
                 stats = ' '.join(stats)
                 if stats:
                     stats = f' ({stats})'
-                if (mb := size / 1024**2) >= 0.1:
+                mb = size / 1024 ** 2
+                if mb >= 0.1:
                     stats = f' = {round(mb, 1):,} MB' + stats
-                if (kb := size / 1024) >= 0.1:
+                kb = size / 1024
+                if kb >= 0.1:
                     stats = f' = {round(kb, 1):,} kB' + stats
                 print(f"{full_path(filename)} {size:,} B{stats}", end='' if validate and ext == 'html' else None, file=sys.stderr)
             if validate and ext == 'html':
