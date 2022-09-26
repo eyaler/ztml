@@ -22,12 +22,12 @@ The pipeline includes efficient alternatives to Base64 which are also useful for
 | **ZTML crEnc**                                                                            | html (cp1252) | 818 kB (25%) `mtf=80`                                             | 23.8 kB (37%) `mtf=0`                                            |
 
 ### Installation
-
 ```
 git clone https://github.com/eyaler/ztml
 cd ztml
 pip install -r requirements.txt
 ```
+For running validations, you also need to have Chrome, Edge and Firefox installed.
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).

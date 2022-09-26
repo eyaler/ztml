@@ -5,6 +5,8 @@
 
 [ ] **Example for Base125 / crEnc inline image encoding use case**
 
+[ ] **Google Colab example** 
+
 [ ] Make into a PIP library and start doing versioning
 
 [ ] Expose more parameters and allow skipping steps in CLI / ztml(), via arguments or config file

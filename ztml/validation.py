@@ -34,6 +34,7 @@ drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
                firefox=[Firefox, firefox, GeckoDriverManager]
                )
 BrowserType = Union[str, WebDriver]
+critical_error_strings = 'executable needs to be in', 'unable to find binary in', 'unexpectedly exited'
 
 
 def full_path(filename: str) -> str:
@@ -45,10 +46,9 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
         return browser
     options = drivers[browser][1].options.Options()
     options.headless = True
-    try:
+    options.add_argument('--no-sandbox')
+    if hasattr(options, 'add_experimental_option'):
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    except AttributeError:
-        pass
     try:
         with redirect_stdout(None):
             service = drivers[browser][2]().install()
@@ -67,7 +67,7 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
         try:
             browser = drivers[browser][0](service=drivers[browser][1].service.Service(service, log_path=os.devnull), options=options)
         except WebDriverException as e:
-            if 'executable needs to be in' in e.msg:
+            if any(s in e.msg for s in critical_error_strings):
                 raise
             print(e, file=sys.stderr)
             sleep(30)
