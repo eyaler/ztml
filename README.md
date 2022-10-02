@@ -34,7 +34,7 @@ A standard simplified pipeline can be run by calling `ztml()` or running `python
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252. [Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 
 
-See [example.py](example.py) for a complete example reproducing the above benchmark.
+See [example.py](example.py) for a complete example reproducing the above benchmark, and [example_image.py](example_image.py) for an inline image encoding example. Results of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 
 ### Caveats:
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
@@ -53,6 +53,8 @@ See [example.py](example.py) for a complete example reproducing the above benchm
      1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant with 1.6% overhead, to be used with single-byte charset)
      2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
 8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
+
+Note: image encoding only uses steps 7 and 8.
 
 ### Projects using this:
 - [fragium](https://fragium.com)

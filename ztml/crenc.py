@@ -1,4 +1,4 @@
-"""crEnc encoding based on yEnc and optimized for inline HTML / JS text compression
+"""crEnc encoding based on yEnc and optimized for inline HTML / JS text compression and image encoding
 
 In the premise of yEnc (why encode?), we only encode symbols where absolutely required,
 which in this use case is just the carriage-return (CR).

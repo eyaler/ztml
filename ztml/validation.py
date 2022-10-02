@@ -1,3 +1,4 @@
+from base64 import b64decode
 from contextlib import ExitStack, redirect_stdout
 import html
 import os
@@ -24,6 +25,7 @@ else:
 
 default_browser = 'chrome'
 default_timeout = 60
+default_by = By.TAG_NAME
 default_element = 'body'
 webdriver_paths_filename = 'webdriver_paths.txt'
 
@@ -34,7 +36,7 @@ drivers = dict(chrome=[Chrome, chrome, ChromeDriverManager],
                firefox=[Firefox, firefox, GeckoDriverManager]
                )
 BrowserType = Union[str, WebDriver]
-critical_error_strings = 'executable needs to be', 'unable to find binary', 'unexpectedly'
+critical_error_strings = ['executable needs to be', 'unable to find binary', 'unexpectedly']
 
 
 def full_path(filename: str) -> str:
@@ -79,9 +81,16 @@ def get_browser(browser: BrowserType, stack: Optional[ExitStack] = None) -> WebD
 def render_html(file: AnyStr,
                 browser: BrowserType = default_browser,
                 timeout: int = default_timeout,
+                by: str = default_by,
                 element: str = default_element,
-                raw: bool = False
-                ) -> Optional[str]:
+                raw: bool = False,
+                image: bool = False,
+                bytearray_var: str = default_vars.bytearray,
+                ) -> Optional[AnyStr]:
+    if not by:
+        by = default_by
+    if not element:
+        element = default_element
     with ExitStack() as stack:
         browser = get_browser(browser, stack)
         if isinstance(file, str):
@@ -97,11 +106,25 @@ def render_html(file: AnyStr,
             except PermissionError:
                 pass
         try:
+            wait = WebDriverWait(browser, timeout)
+            if image:
+                if by == By.TAG_NAME and element == 'body':
+                    data_url = wait.until(lambda x: regex.sub('^none$', '', x.find_element(by, element).value_of_css_property('background-image')))
+                else:
+                    data_url = wait.until(lambda x: x.find_element(by, element).get_property('src'))
+                if ';base64,' in data_url:
+                    return b64decode(data_url.split(';base64,', 1)[1].split('"', 1)[0], validate=True)
+                image_data = browser.execute_script(f'return {bytearray_var}')
+                if isinstance(image_data, dict):  # For Firefox, see: https://github.com/SeleniumHQ/selenium/issues/11070
+                    image_data = [v for k, v in sorted(image_data.items(), key=lambda x: int(x[0]))]
+                return bytes(image_data)
             if raw:
+                by = By.TAG_NAME
+                element = 'body'
                 sleep(1)
-            WebDriverWait(browser, timeout).until(lambda x: x.find_element(By.TAG_NAME, element).text)
-            property = 'innerHTML' if raw else 'innerText'
-            out = browser.find_element(By.TAG_NAME, element).get_attribute(property)
+            wait.until(lambda x: x.find_element(by, element).text)
+            text_property = 'innerHTML' if raw else 'innerText'
+            out = browser.find_element(by, element).get_property(text_property)
             if raw:
                 out = html.unescape(out)
             return out
@@ -112,60 +135,67 @@ def render_html(file: AnyStr,
             raise
 
 
-def find_first_diff(render: str, text: str, verbose: bool = True) -> int:
+def find_first_diff(render: AnyStr, data: AnyStr, verbose: bool = True) -> int:
     i = -1
-    for i, (r, t) in enumerate(zip(render, text)):
+    for i, (r, t) in enumerate(zip(render, data)):
         if r != t:
             break
     else:
         i += 1
     if verbose:
         print(f'\nFirst difference found at {i} / {len(render)}', file=sys.stderr)
-        print('Original:', repr(text[max(i - 30, 0) : i]), '->', repr(text[i : i + 50]), file=sys.stderr)
+        print('Original:', repr(data[max(i - 30, 0) : i]), '->', repr(data[i : i + 50]), file=sys.stderr)
         print('Rendered:', repr(render[max(i - 30, 0) : i]), '->', repr(render[i : i + 50]), '\n', file=sys.stderr)
     return i
 
 
 def validate_html(file: AnyStr,
-                  text: str,
+                  data: AnyStr,
                   caps: str = text_prep.default_caps,
                   ignore_regex: str = '',
                   unicode_A: int = 0,
                   browser: BrowserType = default_browser,
                   timeout: int = default_timeout,
+                  by: str = default_by,
                   element: str = default_element,
                   raw: bool = False,
+                  image: bool = False,
+                  bytearray_var: str = default_vars.bytearray,
                   verbose: bool = True
                   ) -> Optional[bool]:
-    render = render_html(file, browser, timeout, element, raw)
+    render = render_html(file, browser, timeout, by, element, raw, image, bytearray_var)
     if render is None:
         return None
-    if caps == 'lower':
-        text = text.lower()
-    elif caps == 'upper':
-        text = text.upper()
-    elif caps == 'simple':
-        text = text_prep.decode_caps_simple(text.lower())
-    render = regex.sub(ignore_regex, '', render)
-    if unicode_A:
-        render = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), render)
-    if render == text:
+    if not image:
+        if caps == 'lower':
+            data = data.lower()
+        elif caps == 'upper':
+            data = data.upper()
+        elif caps == 'simple':
+            data = text_prep.decode_caps_simple(data.lower())
+        render = regex.sub(ignore_regex, '', render)
+        if unicode_A:
+            render = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), render)
+    if render == data:
         return True
     if verbose:
-        find_first_diff(render, text)
+        find_first_diff(render, data)
     return False
 
 
 def validate_files(filenames: Mapping[str, str],
-                   text: Optional[str] = None,
+                   data: Optional[AnyStr] = None,
                    reduce_whitespace: bool = False,
                    unix_newline: bool = True,
                    fix_punct: bool = False,
                    caps: str = text_prep.default_caps,
                    ignore_regex: str = '',
                    unicode_A: int = 0,
+                   by: str = default_by,
                    element: str = default_element,
                    raw: bool = False,
+                   image: bool = False,
+                   bytearray_var: str = default_vars.bytearray,
                    browsers: Optional[Union[BrowserType, Iterable[BrowserType]]] = None,
                    timeout: int = default_timeout,
                    payload_var: str = default_vars.payload,
@@ -178,31 +208,34 @@ def validate_files(filenames: Mapping[str, str],
         browsers = [browsers]
     with ExitStack() as stack:
         browsers = [get_browser(browser, stack) for browser in browsers]
-        text_size = None
+        raw_size = None
         base64_size = None
         for label, filename in filenames.items():
             ext = os.path.splitext(filename)[-1][1:]
-            if ext not in ['txt', 'html']:
+            if raw_size is not None and ext != 'html' or not os.path.exists(filename):
                 continue
             size = os.path.getsize(filename)
-            if text is None:
-                assert ext == 'txt', filename
+            if data is None:
+                assert ext != 'html', filename
                 with open(filename, 'rb') as f:
-                    text = text_prep.normalize(f.read().decode(), reduce_whitespace, unix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
-            if text_size is None:
-                text_size = size if ext == 'txt' else len(text.encode())
+                    data = f.read()
+                    if not image:
+                        data = text_prep.normalize(data.decode(), reduce_whitespace, unix_newline, fix_punct)  # Assumes first text file is utf8. Otherwise, you can pass the text argument
+            if raw_size is None:
+                raw_size = size if ext != 'html' else len(data.encode())
             if label == 'base64_html':
                 base64_size = size * 3 / 4
             if verbose:
                 stats = []
-                if text_size:
-                    stats.append(f'ratio={round(size / text_size * 100, 1)}%')
+                if raw_size:
+                    stats.append(f'ratio={round(size / raw_size * 100, 1)}%')
                 if base64_size:
                     stats.append(f'overhead={round((size/base64_size-1) * 100, 1)}%')
                 if ext == 'html' and label != 'base64_html':
                     with open(filename, 'rb') as f:
                         script = f.read()
-                        script = script.replace(max(regex.finditer(webify.get_literals_regex(payload_var).encode(), script), key=lambda m: len(m[0]), default=b'')[0].split(b'`', 1)[1].rsplit(b'`', 1)[0], b'')
+                        script = script.replace(max(regex.finditer(webify.get_literals_regex(payload_var).encode(), script),
+                                                    key=lambda m: len(m[0]), default=b'')[0].split(b'`', 1)[1].rsplit(b'`', 1)[0], b'')
                     stats.append(f'code: {len(script):,} B = {round(len(script) / 1024, 1):,} kB')
                 stats = ' '.join(stats)
                 if stats:
@@ -217,7 +250,9 @@ def validate_files(filenames: Mapping[str, str],
             if validate and ext == 'html':
                 for i, browser in enumerate(browsers):
                     start_time = time()
-                    valid = validate_html(filename, text, caps, ignore_regex, unicode_A, browser, timeout, element, raw, verbose)
+                    valid = validate_html(filename, data, caps, ignore_regex, unicode_A,
+                                          browser, timeout, by, element, raw, image,
+                                          bytearray_var, verbose)
                     assert valid is not False, filename
                     if verbose:
                         if not i:

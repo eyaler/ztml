@@ -22,7 +22,7 @@ else:
     from . import default_vars
 
 
-mtf_variants = None, 0, 1, 2, 50, 52, 60, 70, 80, 90
+mtf_variants = [None, 0, 1, 2, 50, 52, 60, 70, 80, 90]
 default_mtf = 0
 order1 = 'AOUIEVWXYZaouievwxyz'
 order2 = 'VWXYZAOUIEvwxyzaouie'
@@ -179,7 +179,7 @@ def get_js_decoder(data: Union[str, Iterable[int]],
     if not is_str:
         data = list(data)
     if data_var is None:
-        data_var = default_vars.text if is_str else default_vars.bitarray
+        data_var = default_vars.content if is_str else default_vars.bitarray
     js_decoder = f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n' * is_str
     if mtf is not None:
         if mtf == 0:
@@ -248,7 +248,7 @@ def encode_and_get_js_decoder(data,
     if not is_str:
         data = list(data)
     if data_var is None:
-        data_var = default_vars.text if is_str else default_vars.bitarray
+        data_var = default_vars.content if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
         reorder = False
         mtf = None
@@ -265,7 +265,7 @@ def test() -> None:
     mtf2 = mtf_encode(mtf_test[:], mtf=2, validate=True)
     assert mtf2 == [3, 3, 1, 0, 2, 0, 0, 1, 0, 0], mtf2
 
-    symbols = '', '\0', '\1', 'a', 'b', 'א', 'ב', '\ue000', '\uffff', '\U00010000'
+    symbols = ['', '\0', '\1', 'a', 'b', 'א', 'ב', '\ue000', '\uffff', '\U00010000']
     for x in symbols:
         for y in symbols:
             for z in symbols:
@@ -273,7 +273,7 @@ def test() -> None:
                     for reorder in [False, True]:
                         encode(f'{x}{y}{z}', reorder=reorder, mtf=mtf, validate=True)
 
-    symbols = '', '0', '1', '97', '255'
+    symbols = ['', '0', '1', '97', '255']
     for x in symbols:
         for y in symbols:
             for z in symbols:

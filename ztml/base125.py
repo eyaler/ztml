@@ -1,4 +1,4 @@
-"""Base125 encoding based on Base122 and optimized for inline HTML / JS text compression
+"""Base125 encoding based on Base122 and optimized for inline HTML / JS text compression and image encoding
 
 If we must use utf8 encoding for HTML or JS, crEnc will not work.
 Instead, we can use this unnecessarily optimized version of the variable length Base122.
@@ -29,7 +29,7 @@ else:
     from . import default_vars
 
 
-illegal = '', 13, 92, 96
+illegal = ['', 13, 92, 96]
 
 
 def encode(data: bytes, offset: int = 0, validate: bool = True) -> bytes:

@@ -65,7 +65,7 @@ def encode(text: str,
 
 def get_js_decoder(charset: str,
                    canonical_table: str,
-                   text_var: str = default_vars.text,
+                   text_var: str = default_vars.content,
                    bitarray_var: str = default_vars.bitarray,
                    ) -> str:
     charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
@@ -76,7 +76,7 @@ for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',
 
 
 def encode_and_get_js_decoder(text: str,
-                              text_var: str = default_vars.text,
+                              text_var: str = default_vars.content,
                               bitarray_var: str = default_vars.bitarray,
                               validate: bool = True,
                               verbose: bool = False

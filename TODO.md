@@ -3,8 +3,6 @@
 
 ### Usability
 
-[ ] **Example for Base125 / crEnc inline image encoding use case**
-
 [ ] **Linux installation instructions / Google Colab example** 
 
 [ ] Make into a PIP library and start doing versioning

@@ -15,7 +15,7 @@ double_quote = '[\u201c-\u201f\u05f4\uff02]'
 apos = "['’]"  # \\uff07
 eos = '[!.?]'  # \\uff01\\uff0e\\uff1f\\ufe52\\ufe56\\ufe57
 nonword = '\\p{L}\\p{M}\\p{N}'
-caps_modes = 'auto', 'lower', 'raw', 'simple', 'upper'
+caps_modes = ['auto', 'lower', 'raw', 'simple', 'upper']
 default_caps = 'auto'
 
 
@@ -148,7 +148,7 @@ def get_js_decoder(text: Optional[str] = None,
                    caps: str = default_caps,
                    the: bool = True,
                    quq: bool = True,
-                   text_var: str = default_vars.text
+                   text_var: str = default_vars.content
                    ) -> str:
     assert caps in caps_modes, f"caps='{caps}' not in {caps_modes}"
     if text is not None:
@@ -174,7 +174,7 @@ def encode_and_get_js_decoder(text: str,
                               the_fallback: bool = True,
                               quq_fallback: bool = True,
                               verbose: bool = False,
-                              text_var: str = default_vars.text
+                              text_var: str = default_vars.content
                               ) -> Tuple[str, str]:
     text, caps, the, quq = encode_with_fallbacks(text, caps, the, quq, caps_fallback, the_fallback, quq_fallback, verbose)
     return text, get_js_decoder(caps=caps, the=the, quq=quq, text_var=text_var)

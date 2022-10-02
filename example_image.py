@@ -1,22 +1,27 @@
 import os
 from time import time
+from urllib.request import urlopen
 
 start_time = time()
 
 from ztml import validation, ztml
 
 
-books = [30123, 2600]
-mtf_variants = [0, 80]
+image_urls = ['http://wiesmann.codiferes.net/share/bitmaps/test_pattern.bmp',
+              'http://wiesmann.codiferes.net/share/bitmaps/test_pattern.gif',
+              'http://wiesmann.codiferes.net/share/bitmaps/test_pattern.jpg',
+              'http://wiesmann.codiferes.net/share/bitmaps/test_pattern.png',
+              'http://wiesmann.codiferes.net/share/bitmaps/test_pattern.webp'
+              ]
 output_folder = 'output'
 skip_exists = True
 element_id = ''
 
 
-assert len(books) == len(mtf_variants)
-for item, mtf in zip(books, mtf_variants):
+for url in image_urls:
     item_start_time = time()
-    filenames = dict(raw=f'{item}.txt',
+    item = url.rsplit('/', 1)[-1]
+    filenames = dict(raw=item,
                      # base64_js=f'{item}_64.js',
                      base64_html=f'{item}_64.html',
                      # base125_js=f'{item}_125.js',
@@ -28,9 +33,8 @@ for item, mtf in zip(books, mtf_variants):
 
     # If missing, download an example file from the web
     if not skip_exists or not os.path.exists(filenames['raw']):
-        from gutenberg.acquire.text import load_etext
-        with open(filenames['raw'], 'wb') as f:
-            f.write(load_etext(item).encode())
+        with urlopen(url) as fin, open(filenames['raw'], 'wb') as fout:
+            fout.write(fin.read())
 
     with open(filenames['raw'], 'rb') as f:
         data = f.read()
@@ -40,13 +44,13 @@ for item, mtf in zip(books, mtf_variants):
         ext = os.path.splitext(filename)[-1][1:]
         if ext not in ['js', 'html']:
             continue
-        file = ztml.ztml(data, filename, mtf=mtf, bin2txt=label.split('_', 1)[0], element_id=element_id)
+        file = ztml.ztml(data, filename, bin2txt=label.split('_', 1)[0], element_id=element_id, image=True)
         cnt += 1
 
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate data is recovered
-    validation.validate_files(filenames, by='id' if element_id else '', element=element_id)
+    validation.validate_files(filenames, by='id' if element_id else '', element=element_id, image=True)
     print()
 
-print(f'Total of {len(books)} books took {(time()-start_time) / 60 :.1f} min.')
+print(f'Total of {len(image_urls)} images took {(time()-start_time) / 60 :.1f} min.')
