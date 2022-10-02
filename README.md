@@ -32,9 +32,13 @@ For running validations, you also need to have Chrome, Edge and Firefox installe
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
 
-[crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252. [Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 
+[crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252.
+[Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 
 
-See [example.py](example.py) for a complete example reproducing the above benchmark, and [example_image.py](example_image.py) for an inline image encoding example. Results of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
+See [example.py](example.py) for a complete example reproducing the ZTML results in the above benchmark,
+and [example_image.py](example_image.py) for an inline image encoding example.
+Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
+On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6.
 
 ### Caveats:
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).

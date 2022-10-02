@@ -78,7 +78,7 @@ for browser in browsers:
                                 out1 = f1.read()
                             with open(output_stream, 'rb') as f2:
                                 out2 = f2.read()
-                            if out2.endswith(b'\x1b[0m'):
+                            if out2.endswith(b'\x1b[0m'):  # E.g. due to PyCharm terminal
                                 out2 = out2[:-4]
                             assert not result1 and not result2 and out1 == out2, (result1, result2, out1 == out2, validation.full_path(output_filename), len(out1), validation.full_path(output_stream), len(out2))
                             if cleanup:
