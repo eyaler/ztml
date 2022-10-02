@@ -38,7 +38,7 @@ A standard simplified pipeline can be run by calling `ztml()` or running `python
 See [example.py](example.py) for a complete example reproducing the ZTML results in the above benchmark,
 and [example_image.py](example_image.py) for an inline image encoding example.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
-On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6.
+On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16 Safari.
 
 ### Caveats:
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
@@ -57,8 +57,9 @@ On top of the built-in validations for Chrome, Edge and Firefox, these were also
      1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant with 1.6% overhead, to be used with single-byte charset)
      2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
 8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
+9. [Validation](ztml/validation.py) of content reproduction on Chrome, Edge and Firefox
 
-Note: image encoding only uses steps 7 and 8.
+Note: image encoding only uses steps 7 and later.
 
 ### Projects using this:
 - [fragium](https://fragium.com)
