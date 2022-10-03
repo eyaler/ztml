@@ -42,12 +42,12 @@ and [example_image.py](example_image.py) for an inline image encoding example.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16.0 Safari.
 
-### Caveats:
+### Caveats
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
 2. This solution favors compression rate over compression and decompression times. Use `mtf=None` for faster decompression of large files.
 3. For [compressing word lists](http://golf.horse) (sorted lexicographically), solutions as [Roadroller](https://lifthrasiir.github.io/roadroller) do a much better job.
 
-### ZTML pipeline breakdown:
+### ZTML pipeline breakdown
 1. [Text normalization](ztml/text_prep.py) (irreversible; reduce whitespace, substitute unicode punctuation)
 2. [Text condensation](ztml/text_prep.py) (reversible; lowercase with automatic capitalization, substitute common strings as: the, qu)
 3. [Burrows–Wheeler + Move-to-front transforms](ztml/bwt_mtf.py) on text with some optional variants, including some new ones (beneficial for large texts)
@@ -63,7 +63,7 @@ On top of the built-in validations for Chrome, Edge and Firefox, these were also
 
 Note: image encoding only uses steps 7 and later.
 
-### Projects using this:
+### Projects using this
 - [fragium](https://fragium.com)
 - [miniBook](https://xem.github.io/miniBook) submission by Eyal Gruss
 - [webzos](https://wbtz.github.io)
