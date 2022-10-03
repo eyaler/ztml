@@ -217,6 +217,8 @@ def validate_files(filenames: Mapping[str, str],
             size = os.path.getsize(filename)
             if data is None:
                 assert ext != 'html', filename
+                if ext.lower() in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
+                    image = True
                 with open(filename, 'rb') as f:
                     data = f.read()
                     if not image:

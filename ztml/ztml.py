@@ -153,20 +153,22 @@ if __name__ == '__main__':
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants,
                         default=bwt_mtf.default_mtf)
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
-    parser.add_argument('--element_id')
+    parser.add_argument('--element_id', nargs='?', const='', default='')
     parser.add_argument('--raw', action='store_true', help='use document.write() to overwrite the document with the raw text')
-    parser.add_argument('--image', action='store_true')
-    parser.add_argument('--js', action='store_true', help='can also be inferred from output_filename extension')
+    parser.add_argument('--image', action='store_true', help='may also be inferred from input_filename extension')
+    parser.add_argument('--js', action='store_true', help='may also be inferred from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
     parser.add_argument('--skip_replace_quoted', action='store_true')
     parser.add_argument('--lang', default=webify.default_lang)
     parser.add_argument('--mobile', action='store_true')
     parser.add_argument('--validate', action='store_true')
-    parser.add_argument('--ignore_regex', default='')
+    parser.add_argument('--ignore_regex', nargs='?', const='', default='')
     parser.add_argument('--browser', type=str.lower, choices=list(validation.drivers), default=validation.default_browser)
     parser.add_argument('--timeout', type=int, default=validation.default_timeout, help='seconds')
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
+    if os.path.splitext(args.input_filename)[-1][1:].lower() in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
+        args.image = True
     with open(args.input_filename, 'rb') as f:
         data = f.read()
         if not args.image:

@@ -1,7 +1,9 @@
+![](C:\Users\eyalg   \Downloads\hascolab.png)
+
 # ZTML
 
 ### Extreme inline text compression for HTML / JS
-### By [Eyal Gruss](https://eyalgruss.com)
+### By [Eyal Gruss](https://eyalgruss.com) ([@eyaler](https://twitter.com/eyaler))
 
 #### Partially made at [Stochastic Labs](http://stochasticlabs.org)
 
@@ -24,13 +26,13 @@ The pipeline includes efficient alternatives to Base64 which are also useful for
 ### Installation
 ```
 git clone https://github.com/eyaler/ztml
-cd ztml
-pip install -r requirements.txt
+pip install -r ztml/requirements.txt
 ```
 For running validations, you also need to have Chrome, Edge and Firefox installed.
 
 ### Usage
 A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
+Of course, there is also an accessible [Google Colab](https://colab.research.google.com/github/eyaler/ztml/blob/main/ztml.ipynb) with a simple GUI. Shortcut: [bit.ly/ztml](https://bit.ly/ztml).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252.
 [Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 

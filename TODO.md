@@ -3,7 +3,7 @@
 
 ### Usability
 
-[ ] **Linux installation instructions / Google Colab example** 
+[ ] Linux installation instructions / Full webdriver installation for Google Colab 
 
 [ ] Make into a PIP library and start doing versioning
 
@@ -11,7 +11,7 @@
 
 [ ] Provide pure JS libraries where relevant
 
-[ ] Online GUI
+[ ] Online web GUI
 
 [ ] Validation testing for Safari
 
