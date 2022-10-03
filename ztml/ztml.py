@@ -145,7 +145,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input_filename')
     parser.add_argument('output_filename', nargs='?', default='')
-    parser.add_argument('--input_encoding')
+    parser.add_argument('--input_encoding', nargs='?', const='', default='')
     parser.add_argument('--reduce_whitespace', action='store_true')
     parser.add_argument('--skip_unix_newline', action='store_true')
     parser.add_argument('--fix_punct', action='store_true')
