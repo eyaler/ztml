@@ -1,7 +1,8 @@
 # Todo
 
-
 ### Usability
+
+[ ] Support for encoding multiple images
 
 [ ] Linux installation instructions / Full webdriver installation for Google Colab 
 

@@ -93,12 +93,12 @@ def mtf_decode(data: Iterable[int], mtf: int == default_mtf) -> List[int]:
 
 
 @overload
-def encode(data: str, reorder=..., mtf=..., validate=...) -> Tuple[str, int]:
+def encode(data: str, reorder, mtf, validate) -> Tuple[str, int]:
     ...
 
 
 @overload
-def encode(data: Iterable[int], reorder=..., mtf=..., validate=...) -> Tuple[List[int], int]:
+def encode(data: Iterable[int], reorder, mtf, validate) -> Tuple[List[int], int]:
     ...
 
 
@@ -133,12 +133,12 @@ def encode(data,
 
 
 @overload
-def decode(data: str, index, reorder=..., mtf=...) -> str:
+def decode(data: str, index, reorder, mtf) -> str:
     ...
 
 
 @overload
-def decode(data: Iterable[int], index, reorder=..., mtf=...) -> List[int]:
+def decode(data: Iterable[int], index, reorder, mtf) -> List[int]:
     ...
 
 
@@ -225,14 +225,14 @@ d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
 
 
 @overload
-def encode_and_get_js_decoder(data: str, reorder=..., mtf=..., add_bwt_func=...,
-                              bwt_func_var=..., data_var=..., validate=...) -> Tuple[str, str]:
+def encode_and_get_js_decoder(data: str, reorder, mtf, add_bwt_func, bwt_func_var,
+                              data_var, validate) -> Tuple[str, str]:
     ...
 
 
 @overload
-def encode_and_get_js_decoder(data: Iterable[int], reorder=..., mtf=..., add_bwt_func=...,
-                              bwt_func_var=..., data_var=..., validate=...) -> Tuple[List[int], str]:
+def encode_and_get_js_decoder(data: Iterable[int], reorder, mtf, add_bwt_func,
+                              bwt_func_var, data_var, validate) -> Tuple[List[int], str]:
     ...
 
 

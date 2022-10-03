@@ -25,20 +25,17 @@ default_bin2txt = 'crenc'
 
 
 @overload
-def ztml(data, filename=..., reduce_whitespace=..., unix_newline=..., fix_punct=...,
-         caps=..., mtf=..., bin2txt=..., element_id=..., raw=..., image=..., js=...,
-         uglify=..., replace_quoted=..., lang=..., mobile=...,
-         validate: Literal[True] = ..., ignore_regex=..., browser=..., timeout=...,
-         verbose=...) -> bytes:
+def ztml(data, filename, reduce_whitespace, unix_newline, fix_punct, caps, mtf, bin2txt,
+         element_id, raw, image, js, uglify, replace_quoted, lang, mobile,
+         validate: Literal[False], ignore_regex, browser, timeout, verbose) -> bytes:
     ...
 
 
 @overload
-def ztml(data, filename=..., reduce_whitespace=..., unix_newline=..., fix_punct=...,
-         caps=..., mtf=..., bin2txt=..., element_id=..., raw=..., image=..., js=...,
-         uglify=..., replace_quoted=..., lang=..., mobile=...,
-         validate: Literal[False] = ..., ignore_regex=..., browser=..., timeout=...,
-         verbose=...) -> Tuple[bytes, int]:
+def ztml(data, filename, reduce_whitespace, unix_newline, fix_punct, caps, mtf, bin2txt,
+         element_id, raw, image, js, uglify, replace_quoted, lang, mobile,
+         validate: Literal[True], ignore_regex, browser, timeout, verbose
+         ) -> Tuple[bytes, int]:
     ...
 
 
@@ -185,8 +182,8 @@ if __name__ == '__main__':
                not args.skip_unix_newline, args.fix_punct, args.caps, args.mtf,
                args.bin2txt, args.element_id, args.raw, args.image, args.js,
                not args.skip_uglify, not args.skip_replace_quoted, args.lang,
-               args.mobile, args.validate, args.ignore_regex, args.browser, args.timeout,
-               args.verbose)
+               args.mobile, args.validate, args.ignore_regex, args.browser,
+               args.timeout, args.verbose)
     result = False
     if args.validate:
         out, result = out
