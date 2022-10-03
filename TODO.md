@@ -1,10 +1,10 @@
 # Todo
 
-### Usability
+### Usability:
 
 [ ] Support for encoding multiple images
 
-[ ] Linux installation instructions / Full webdriver installation for Google Colab 
+[ ] Linux installation instructions / Enable validation in Google Colab 
 
 [ ] Make into a PIP library and start doing versioning
 
@@ -18,7 +18,7 @@
 
 [ ] Fix slow rendering with Selenium in validation
 
-### Compression
+### Compression:
 
 [ ] **Ablation benchmarks**
 
@@ -36,7 +36,7 @@
 
 [ ] Strip whitespace from script lines not part of multi-line content strings
 
-#### MTF
+#### MTF:
 
 [ ] Improve JS MTF decoding times for large files
 
@@ -46,11 +46,11 @@
 
 [ ] Run length encoding after MTF
 
-#### Deflate
+#### Deflate:
 
 [ ] **Investigate effect of PNG aspect ratio on compression / optimize over it**
 
-[ ] Integrate https://github.com/fhanau/Efficient-Compression-Tool (1.4% improvement on 2600.txt)
+[ ] **Integrate https://github.com/fhanau/Efficient-Compression-Tool (1.4% improvement on 2600.txt)**
 
 [ ] Investigate Safari canvas size limits
 
