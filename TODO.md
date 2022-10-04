@@ -30,5 +30,6 @@
 - **Investigate effect of PNG aspect ratio on compression / optimize over it**
 - **Integrate https://github.com/fhanau/Efficient-Compression-Tool** (1.4% improvement on 2600.txt)
 - Investigate Safari canvas size limits
+- Allow using higher bit-depth to overcome canvas size limits (for larger content and maybe more compressible aspect ratios)
 - Compress metadata into PNG 
 - [Use WOFF2 as a Brotli container](https://github.com/lifthrasiir/roadroller/issues/9#issuecomment-905580540)
