@@ -1,7 +1,8 @@
 # Todo
 
 ### Usability
-- Support for encoding multiple images
+- Support encoding video/audio
+- Support encoding multiple media elements
 - Linux installation instructions / Enable validation in Google Colab
 - Make into a PIP library and start doing versioning
 - JS library?
