@@ -66,4 +66,4 @@ Note: image encoding only uses steps 7 and later.
 ### Projects using this
 - [fragium](https://fragium.com)
 - [miniBook](https://xem.github.io/miniBook) submission by Eyal Gruss
-- [webzos](https://wbtz.github.io)
+- [WEBZOS](https://wbtz.github.io)

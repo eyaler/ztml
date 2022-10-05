@@ -26,14 +26,14 @@ default_bin2txt = 'crenc'
 
 @overload
 def ztml(data, filename, reduce_whitespace, unix_newline, fix_punct, caps, mtf, bin2txt,
-         element_id, raw, image, js, uglify, replace_quoted, lang, mobile,
+         element_id, raw, image, js, uglify, replace_quoted, lang, mobile, title,
          validate: Literal[False], ignore_regex, browser, timeout, verbose) -> bytes:
     ...
 
 
 @overload
 def ztml(data, filename, reduce_whitespace, unix_newline, fix_punct, caps, mtf, bin2txt,
-         element_id, raw, image, js, uglify, replace_quoted, lang, mobile,
+         element_id, raw, image, js, uglify, replace_quoted, lang, mobile, title,
          validate: Literal[True], ignore_regex, browser, timeout, verbose
          ) -> Tuple[bytes, int]:
     ...
@@ -55,6 +55,7 @@ def ztml(data: AnyStr,
          replace_quoted: bool = True,
          lang: str = webify.default_lang,
          mobile: bool = False,
+         title: str = '',
          validate: bool = False,
          ignore_regex: str = '',
          browser: validation.BrowserType = validation.default_browser,
@@ -118,7 +119,7 @@ def ztml(data: AnyStr,
     elif not js:
         out = webify.html_wrap(out, aliases=webify.default_aliases if uglify else '',
                                replace_quoted=replace_quoted, lang=lang,
-                               encoding=encoding, mobile=mobile)
+                               encoding=encoding, mobile=mobile, title=title)
     if filename:
         with open(filename, 'wb') as f:
             f.write(out)
@@ -158,6 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--skip_replace_quoted', action='store_true')
     parser.add_argument('--lang', default=webify.default_lang)
     parser.add_argument('--mobile', action='store_true')
+    parser.add_argument('--title', nargs='?', const='', default='')
     parser.add_argument('--validate', action='store_true')
     parser.add_argument('--ignore_regex', nargs='?', const='', default='')
     parser.add_argument('--browser', type=str.lower, choices=list(validation.drivers), default=validation.default_browser)
@@ -182,8 +184,8 @@ if __name__ == '__main__':
                not args.skip_unix_newline, args.fix_punct, args.caps, args.mtf,
                args.bin2txt, args.element_id, args.raw, args.image, args.js,
                not args.skip_uglify, not args.skip_replace_quoted, args.lang,
-               args.mobile, args.validate, args.ignore_regex, args.browser,
-               args.timeout, args.verbose)
+               args.mobile, args.title, args.validate, args.ignore_regex,
+               args.browser, args.timeout, args.verbose)
     result = False
     if args.validate:
         out, result = out

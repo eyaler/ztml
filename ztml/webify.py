@@ -139,10 +139,12 @@ def html_wrap(script: AnyStr,
               lang: str = default_lang,
               encoding: str = 'utf8',
               mobile: bool = False,
+              title: str = '',
               payload_var: str = default_vars.payload
               ) -> AnyStr:
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
-    html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}<body><script>'
+    title_element = f'<title>{title}</title>' * bool(title)
+    html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}{title_element}<body><script>'
     html_footer = '</script>'
     sep = ''
     if isinstance(script, bytes):
