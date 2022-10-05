@@ -15,6 +15,7 @@ A minimalistic JS decoder code is generated.
 The overhead is ~ 8/log2(125)-1 ~ 15% (compared to 33.3% for Base64).
 
 References:
+https://en.wikipedia.org/wiki/Binary-to-text_encoding
 https://blog.kevinalbs.com/base122
 https://github.com/kevinAlbs/Base122
 https://github.com/eshaz/simple-yenc#what-is-dynencode
