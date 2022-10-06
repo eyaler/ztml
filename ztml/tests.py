@@ -55,8 +55,6 @@ for browser in browsers:
                             text = all_chars
                             if encoding == 'utf8':
                                 text = ''.join(c for c in text if ord(c) < bwt_mtf.surrogate_lo or ord(c) > bwt_mtf.surrogate_hi)
-                            if raw:
-                                text = ''.join(c for c in text if c not in ['\0', '\r'])
                             if mtf is not None:
                                 text = ''.join(c for c in text if ord(c) <= bwt_mtf.max_ord_for_mtf)
                             with open(input_filename, 'wb') as f:

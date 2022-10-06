@@ -122,7 +122,7 @@ def encode_with_fallbacks(text: str,
         if the_fallback:
             if theless == text:
                 the = False
-            if the and '  ' in text:
+            if the and regex.search('(^| ) ', text, regex.MULTILINE):
                 the = False
                 if verbose:
                     print(f'Falling back to the={the}', file=sys.stderr)

@@ -1,6 +1,9 @@
 """Burrows-Wheeler and Move-to-front transforms
 
-Implementation follows pydivsufsort tests, to unnecessitate adding an EOF token.
+Applies alphabet reordering by default to concentrate the vowels together.
+BWT Implementation follows pydivsufsort tests, to unnecessitate adding an EOF token.
+MTF includes new variants (50-90), where larger texts benefit from higher mtf settings.
+Additional BWT on bits (after entropy coding) was found beneficial for large texts.
 
 References:
 https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf
@@ -22,10 +25,10 @@ else:
     from . import default_vars
 
 
-mtf_variants = [None, 0, 1, 2, 50, 52, 60, 70, 80, 90]
-default_mtf = 0
 order1 = 'AOUIEVWXYZaouievwxyz'
 order2 = 'VWXYZAOUIEvwxyzaouie'
+mtf_variants = [None, 0, 1, 2, 50, 52, 60, 70, 80, 90]
+default_mtf = 0
 
 
 reorder_table = str.maketrans(order1, order2)

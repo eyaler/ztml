@@ -65,8 +65,8 @@ def encode(text: str,
 
 def get_js_decoder(charset: str,
                    canonical_table: str,
-                   text_var: str = default_vars.content,
                    bitarray_var: str = default_vars.bitarray,
+                   text_var: str = default_vars.content,
                    ) -> str:
     charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
     return f'''s=[...'{charset}']
@@ -76,10 +76,10 @@ for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',
 
 
 def encode_and_get_js_decoder(text: str,
-                              text_var: str = default_vars.content,
                               bitarray_var: str = default_vars.bitarray,
+                              text_var: str = default_vars.content,
                               validate: bool = True,
                               verbose: bool = False
                               ) -> Tuple[List[int], str]:
     bits, charset, canonical_table, _ = encode(text, validate, verbose)
-    return bits, get_js_decoder(charset, canonical_table, text_var, bitarray_var)
+    return bits, get_js_decoder(charset, canonical_table, bitarray_var, text_var)

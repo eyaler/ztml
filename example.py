@@ -9,11 +9,12 @@ from ztml import validation, ztml
 books = [30123, 2600]
 mtf_variants = [0, 80]
 output_folder = 'output'
-skip_exists = True
+skip_download_exists = True
 element_id = ''
 
 
 assert len(books) == len(mtf_variants)
+error = False
 for item, mtf in zip(books, mtf_variants):
     item_start_time = time()
     filenames = dict(raw=f'{item}.txt',
@@ -27,7 +28,7 @@ for item, mtf in zip(books, mtf_variants):
     filenames = {k: os.path.join(output_folder, v) for k, v in filenames.items()}
 
     # If missing, download an example file from the web
-    if not skip_exists or not os.path.exists(filenames['raw']):
+    if not skip_download_exists or not os.path.exists(filenames['raw']):
         from gutenberg.acquire.text import load_etext
         with open(filenames['raw'], 'wb') as f:
             f.write(load_etext(item).encode())
@@ -37,16 +38,18 @@ for item, mtf in zip(books, mtf_variants):
 
     cnt = 0
     for label, filename in filenames.items():
-        ext = os.path.splitext(filename)[-1][1:]
-        if ext not in ['js', 'html']:
+        if label == 'raw':
             continue
-        file = ztml.ztml(data, filename, mtf=mtf, bin2txt=label.split('_', 1)[0], element_id=element_id)
+        file = ztml.ztml(data, filename, mtf=mtf, bin2txt=label.rsplit('_', 1)[0], element_id=element_id)
         cnt += 1
 
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate data is recovered
-    validation.validate_files(filenames, by='id' if element_id else '', element=element_id)
+    error |= validation.validate_files(filenames, by='id' if element_id else '', element=element_id)
     print()
 
-print(f'Total of {len(books)} books took {(time()-start_time) / 60 :.1f} min.')
+if error:
+    print('Error: some renderings timed out')
+else:
+    print(f'Total of {len(books)} books took {(time()-start_time) / 60 :.1f} min.')

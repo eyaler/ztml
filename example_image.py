@@ -14,10 +14,11 @@ image_urls = ['http://wiesmann.codiferes.net/share/bitmaps/test_pattern.bmp',
               'http://wiesmann.codiferes.net/share/bitmaps/test_pattern.webp'
               ]
 output_folder = 'output'
-skip_exists = True
+skip_download_exists = True
 element_id = ''
 
 
+error = False
 for url in image_urls:
     item_start_time = time()
     item = url.rsplit('/', 1)[-1]
@@ -32,7 +33,7 @@ for url in image_urls:
     filenames = {k: os.path.join(output_folder, v) for k, v in filenames.items()}
 
     # If missing, download an example file from the web
-    if not skip_exists or not os.path.exists(filenames['raw']):
+    if not skip_download_exists or not os.path.exists(filenames['raw']):
         with urlopen(url) as fin, open(filenames['raw'], 'wb') as fout:
             fout.write(fin.read())
 
@@ -41,16 +42,18 @@ for url in image_urls:
 
     cnt = 0
     for label, filename in filenames.items():
-        ext = os.path.splitext(filename)[-1][1:]
-        if ext not in ['js', 'html']:
+        if label == 'raw':
             continue
-        file = ztml.ztml(data, filename, bin2txt=label.split('_', 1)[0], element_id=element_id, image=True)
+        file = ztml.ztml(data, filename, bin2txt=label.rsplit('_', 1)[0], element_id=element_id, image=True)
         cnt += 1
 
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate data is recovered
-    validation.validate_files(filenames, by='id' if element_id else '', element=element_id, image=True)
+    error |= validation.validate_files(filenames, by='id' if element_id else '', element=element_id, image=True)
     print()
 
-print(f'Total of {len(image_urls)} images took {(time()-start_time) / 60 :.1f} min.')
+if error:
+    print('Error: some renderings timed out')
+else:
+    print(f'Total of {len(image_urls)} images took {(time()-start_time) / 60 :.1f} min.')

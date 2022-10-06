@@ -131,9 +131,9 @@ def ztml(data: AnyStr,
         if element_id:
             by = 'id'
             element = element_id
-        valid = validation.validate_html(file, data, caps, ignore_regex=ignore_regex,
-                                         browser=browser, timeout=timeout, by=by,
-                                         element=element, raw=raw, image=image,
+        valid = validation.validate_html(file, data, caps, by=by, element=element,
+                                         raw=raw, image=image, browser=browser,
+                                         timeout=timeout, ignore_regex=ignore_regex,
                                          verbose=True)
         out = out, not valid
     return out
@@ -152,9 +152,9 @@ if __name__ == '__main__':
                         default=bwt_mtf.default_mtf)
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--element_id', nargs='?', const='', default='')
-    parser.add_argument('--raw', action='store_true', help='use document.write() to overwrite the document with the raw text')
-    parser.add_argument('--image', action='store_true', help='may also be inferred from input_filename extension')
-    parser.add_argument('--js', action='store_true', help='may also be inferred from output_filename extension')
+    parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be inferred from input_filename .html')
+    parser.add_argument('--image', action='store_true', help='May also be inferred from input_filename extension')
+    parser.add_argument('--js', action='store_true', help='May also be inferred from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
     parser.add_argument('--skip_replace_quoted', action='store_true')
     parser.add_argument('--lang', default=webify.default_lang)
@@ -166,7 +166,10 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', type=int, default=validation.default_timeout, help='seconds')
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
-    if os.path.splitext(args.input_filename)[-1][1:].lower() in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
+    ext = os.path.splitext(args.input_filename)[-1][1:].lower()
+    if ext == 'html':
+        args.raw = True
+    if ext in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
         args.image = True
     with open(args.input_filename, 'rb') as f:
         data = f.read()

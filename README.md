@@ -18,7 +18,7 @@ The pipeline includes efficient binary-to-text alternatives to Base64 which are 
 | Project Gutenberg plain text utf8                                                         | txt           | 63.7 kB                                                          | 3.2 MB                                                            |
 | [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12RT (excluding decoder) | paq           | 13.3 kB (21%)                                                    | 575 kB (18%)                                                      |
 | 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                                              | 7z            | 20.8 kB (32%)                                                    | 746 kB (23%)                                                      |
-| 7-Zip 22.01 9 Ultra PPMd (self extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
+| 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
 | **ZTML Base125**                                                                          | html (utf8)   | 26.5 kB (42%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
 | **ZTML crEnc**                                                                            | html (cp1252) | 23.8 kB (37%) `mtf=0`                                            | 818 kB (25%) `mtf=80`                                             |
@@ -42,6 +42,8 @@ and [example_image.py](example_image.py) for an inline image encoding example.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16.0 Safari.
 
+A quick and dirty way to compress an existing single-page websites with embedded inline media is to use `raw=True`.
+
 ### Caveats
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
 2. This solution favors compression rate over compression and decompression times. Use `mtf=None` for faster decompression of large files.
@@ -50,7 +52,7 @@ On top of the built-in validations for Chrome, Edge and Firefox, these were also
 ### ZTML pipeline breakdown
 1. [Text normalization](ztml/text_prep.py) (irreversible; reduce whitespace, substitute unicode punctuation)
 2. [Text condensation](ztml/text_prep.py) (reversible; lowercase with automatic capitalization, substitute common strings as: the, qu)
-3. [Burrows–Wheeler + Move-to-front transforms](ztml/bwt_mtf.py) on text with some optional variants, including some new ones (beneficial for large texts)
+3. [Burrows–Wheeler + Move-to-front transforms](ztml/bwt_mtf.py) on text with some optional variants, including some new ones (beneficial for large texts with higher mtf settings)
 4. [Huffman encoding](ztml/huffman.py) (with a [codebook-free decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes), beneficial even as followed by DEFLATE)
 5. [Burrows–Wheeler transform](ztml/bwt_mtf.py) on bits (beneficial for large texts)
 6. [PNG / DEFLATE compression](ztml/deflate.py) (allowing [native decompression](https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/compression-using-canvas-and-png.html
