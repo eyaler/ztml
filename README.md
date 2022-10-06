@@ -42,7 +42,7 @@ and [example_image.py](example_image.py) for an inline image encoding example.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16.0 Safari.
 
-A quick and dirty way to compress an existing single-page websites with embedded inline media is to use `raw=True`.
+A quick and dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True`.
 
 ### Caveats
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).
