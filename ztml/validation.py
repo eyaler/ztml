@@ -84,8 +84,7 @@ def render_html(file: AnyStr,
                 image: bool = False,
                 browser: BrowserType = default_browser,
                 timeout: int = default_timeout,
-                bytearray_var: str = default_vars.bytearray,
-                text_var: str = default_vars.text
+                content_var: str = ''
                 ) -> Optional[AnyStr]:
     if not by:
         by = default_by
@@ -114,7 +113,7 @@ def render_html(file: AnyStr,
                     data_url = wait.until(lambda x: x.find_element(by, element).get_property('src'))
                 if ';base64,' in data_url:
                     return b64decode(data_url.split(';base64,', 1)[1].split('"', 1)[0], validate=True)
-                image_data = browser.execute_script(f'return {bytearray_var}')
+                image_data = browser.execute_script(f'return {content_var or default_vars.bytearray}')
                 if isinstance(image_data, dict):  # For Firefox, see: https://github.com/SeleniumHQ/selenium/issues/11070
                     image_data = [v for k, v in sorted(image_data.items(), key=lambda x: int(x[0]))]
                 return bytes(image_data)
@@ -122,7 +121,7 @@ def render_html(file: AnyStr,
                 sleep(0.1)
             wait.until(lambda x: x.find_element(by, element).text)
             if raw:
-                return browser.execute_script(f'return {text_var}')
+                return browser.execute_script(f'return {content_var or default_vars.text}')
             return browser.find_element(by, element).get_property('innerText')
         except TimeoutException:
             return None
@@ -156,11 +155,10 @@ def validate_html(file: AnyStr,
                   timeout: int = default_timeout,
                   unicode_A: int = 0,
                   ignore_regex: str = '',
-                  bytearray_var: str = default_vars.bytearray,
-                  text_var: str = default_vars.text,
+                  content_var: str = '',
                   verbose: bool = True
                   ) -> Optional[bool]:
-    rendered = render_html(file, by, element, raw, image, browser, timeout, bytearray_var, text_var)
+    rendered = render_html(file, by, element, raw, image, browser, timeout, content_var)
     if rendered is None:
         return None
     if not image:
@@ -196,8 +194,7 @@ def validate_files(filenames: Mapping[str, str],
                    unicode_A: int = 0,
                    ignore_regex: str = '',
                    payload_var: str = default_vars.payload,
-                   bytearray_var: str = default_vars.bytearray,
-                   text_var: str = default_vars.text,
+                   content_var: str = '',
                    validate: bool = True,
                    verbose: bool = True
                    ) -> bool:
@@ -254,7 +251,7 @@ def validate_files(filenames: Mapping[str, str],
                     start_time = time()
                     valid = validate_html(filename, data, caps, by, element, raw, image,
                                           browser, timeout, unicode_A, ignore_regex,
-                                          bytearray_var, text_var, verbose)
+                                          content_var, verbose)
                     assert valid is not False, filename
                     if not valid:
                         error = True

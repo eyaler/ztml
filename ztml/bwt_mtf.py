@@ -40,7 +40,7 @@ max_ord_for_mtf = max_unicode - (surrogate_hi-surrogate_lo) - 1
 
 
 def mtf_rank(mtf: int, rank: int, prev: int) -> int:
-    assert mtf in mtf_variants, mtf
+    assert mtf in mtf_variants, f'Error: mtf={mtf} not in {mtf_variants}'
     if mtf == 0:
         new_rank = 0
     elif mtf == 1:
@@ -175,13 +175,13 @@ def get_js_decoder(data: Union[str, Iterable[int]],
                    mtf: Optional[int] = default_mtf,
                    add_bwt_func: bool = True,
                    bwt_func_var: str = default_vars.bwt_func,
-                   data_var: Optional[str] = None
+                   data_var: str = ''
                    ) -> str:
-    assert mtf in mtf_variants, mtf
+    assert mtf in mtf_variants, f'Error: mtf={mtf} not in {mtf_variants}'
     is_str = isinstance(data, str)
     if not is_str:
         data = list(data)
-    if data_var is None:
+    if not data_var:
         data_var = default_vars.text if is_str else default_vars.bitarray
     js_decoder = f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n' * is_str
     if mtf is not None:
@@ -244,13 +244,13 @@ def encode_and_get_js_decoder(data,
                               mtf: Optional[int] = default_mtf,
                               add_bwt_func: bool = True,
                               bwt_func_var: str = default_vars.bwt_func,
-                              data_var: Optional[str] = None,
+                              data_var: str = '',
                               validate: bool = True
                               ):
     is_str = isinstance(data, str)
     if not is_str:
         data = list(data)
-    if data_var is None:
+    if not data_var:
         data_var = default_vars.text if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
         reorder = False

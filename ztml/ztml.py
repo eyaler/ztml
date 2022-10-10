@@ -63,6 +63,7 @@ def ztml(data: AnyStr,
          verbose: bool = False
          ):
     start_time = time()
+    assert not element_id and not image or not raw
     if image:
         assert isinstance(data, bytes)
         image_data = data

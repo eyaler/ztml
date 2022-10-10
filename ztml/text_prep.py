@@ -47,7 +47,7 @@ def decode_caps_simple(text: str) -> str:
 
 
 def encode_caps(text: str, caps: str = default_caps) -> str:
-    assert caps in caps_modes, f"caps='{caps}' not in {caps_modes}"
+    assert caps in caps_modes, f"Error: caps='{caps}' not in {caps_modes}"
     return text if caps == 'raw' else text.upper() if caps == 'upper' else text.lower()
 
 
@@ -150,7 +150,7 @@ def get_js_decoder(text: Optional[str] = None,
                    quq: bool = True,
                    text_var: str = default_vars.text
                    ) -> str:
-    assert caps in caps_modes, f"caps='{caps}' not in {caps_modes}"
+    assert caps in caps_modes, f"Error: caps='{caps}' not in {caps_modes}"
     if text is not None:
         text, caps, the, quq = encode_with_fallbacks(text, caps, the, quq)
     js_decoder = ''

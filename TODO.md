@@ -3,7 +3,8 @@
 ### Usability
 - Support encoding video/audio/fonts/PDF/...
 - Support encoding multiple media elements
-- Linux installation instructions / Enable validation in Google Colab
+- Provide an easy way to view and edit output HTML in Colab
+- Linux installation instructions / Enable validation in Colab
 - Make into a PIP library and start doing versioning
 - JS library?
 - Expose more parameters and allow skipping steps in ztml() / CLI / Colab, possibly via config file
