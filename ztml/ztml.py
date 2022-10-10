@@ -83,12 +83,12 @@ def ztml(data: AnyStr,
         huffman_bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text)  # Huffman encode
         bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(huffman_bits)  # Burrows-Wheeler transform on bits
         if raw:
-            render = f'document.write({default_vars.content})'
+            renderer = f'document.write({default_vars.text})'
         elif element_id:
-            render = f"document.body.appendChild(document.createElement`pre`).id='{element_id}';document.getElementById`{element_id}`.textContent={default_vars.content}"
+            renderer = f"document.body.appendChild(document.createElement`pre`).id='{element_id}';document.getElementById`{element_id}`.textContent={default_vars.text}"
         else:
-            render = f"document.body.style.whiteSpace='pre';document.body.textContent={default_vars.content}"
-        decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{render}'
+            renderer = f"document.body.style.whiteSpace='pre';document.body.textContent={default_vars.text}"
+        decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{renderer}'
         image_data = deflate.to_png(bits)  # PNG encode. Time-consuming op.
         bit_len = len(bits)
 

@@ -1,6 +1,6 @@
 bwt_func = '$'
 bitarray = 'b'
 bytearray = 'o'
-content = 't'
+text = 't'
 image = 'i'
 payload = 's'

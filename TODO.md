@@ -1,7 +1,7 @@
 # Todo
 
 ### Usability
-- Support encoding video/audio/fonts/...
+- Support encoding video/audio/fonts/PDF/...
 - Support encoding multiple media elements
 - Linux installation instructions / Enable validation in Google Colab
 - Make into a PIP library and start doing versioning

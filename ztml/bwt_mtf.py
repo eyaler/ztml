@@ -182,7 +182,7 @@ def get_js_decoder(data: Union[str, Iterable[int]],
     if not is_str:
         data = list(data)
     if data_var is None:
-        data_var = default_vars.content if is_str else default_vars.bitarray
+        data_var = default_vars.text if is_str else default_vars.bitarray
     js_decoder = f'{data_var}=[...{data_var}].map(c=>c.codePointAt())\n' * is_str
     if mtf is not None:
         if mtf == 0:
@@ -251,7 +251,7 @@ def encode_and_get_js_decoder(data,
     if not is_str:
         data = list(data)
     if data_var is None:
-        data_var = default_vars.content if is_str else default_vars.bitarray
+        data_var = default_vars.text if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
         reorder = False
         mtf = None

@@ -85,7 +85,7 @@ def render_html(file: AnyStr,
                 browser: BrowserType = default_browser,
                 timeout: int = default_timeout,
                 bytearray_var: str = default_vars.bytearray,
-                content_var: str = default_vars.content
+                text_var: str = default_vars.text
                 ) -> Optional[AnyStr]:
     if not by:
         by = default_by
@@ -122,7 +122,7 @@ def render_html(file: AnyStr,
                 sleep(0.1)
             wait.until(lambda x: x.find_element(by, element).text)
             if raw:
-                return browser.execute_script(f'return {content_var}')
+                return browser.execute_script(f'return {text_var}')
             return browser.find_element(by, element).get_property('innerText')
         except TimeoutException:
             return None
@@ -131,17 +131,17 @@ def render_html(file: AnyStr,
             raise
 
 
-def find_first_diff(render: AnyStr, data: AnyStr, verbose: bool = True) -> int:
+def find_first_diff(rendered: AnyStr, data: AnyStr, verbose: bool = True) -> int:
     i = -1
-    for i, (r, t) in enumerate(zip(render, data)):
+    for i, (r, t) in enumerate(zip(rendered, data)):
         if r != t:
             break
     else:
         i += 1
     if verbose:
-        print(f'\nFirst difference found at {i} / {len(render)}', file=sys.stderr)
+        print(f'\nFirst difference found at {i} / {len(rendered)}', file=sys.stderr)
         print('Original:', repr(data[max(i - 30, 0) : i]), '->', repr(data[i : i + 50]), file=sys.stderr)
-        print('Rendered:', repr(render[max(i - 30, 0) : i]), '->', repr(render[i : i + 50]), '\n', file=sys.stderr)
+        print('Rendered:', repr(rendered[max(i - 30, 0) : i]), '->', repr(rendered[i : i + 50]), '\n', file=sys.stderr)
     return i
 
 
@@ -154,14 +154,14 @@ def validate_html(file: AnyStr,
                   image: bool = False,
                   browser: BrowserType = default_browser,
                   timeout: int = default_timeout,
-                  ignore_regex: str = '',
                   unicode_A: int = 0,
+                  ignore_regex: str = '',
                   bytearray_var: str = default_vars.bytearray,
-                  content_var: str = default_vars.content,
+                  text_var: str = default_vars.text,
                   verbose: bool = True
                   ) -> Optional[bool]:
-    render = render_html(file, by, element, raw, image, browser, timeout, bytearray_var, content_var)
-    if render is None:
+    rendered = render_html(file, by, element, raw, image, browser, timeout, bytearray_var, text_var)
+    if rendered is None:
         return None
     if not image:
         if caps == 'lower':
@@ -170,14 +170,14 @@ def validate_html(file: AnyStr,
             data = data.upper()
         elif caps == 'simple':
             data = text_prep.decode_caps_simple(data.lower())
-    if not image and not raw:
-        render = regex.sub(ignore_regex, '', render)
+    if not raw and not image:
         if unicode_A:
-            render = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), render)
-    if render == data:
+            rendered = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), rendered)
+        rendered = regex.sub(ignore_regex, '', rendered)
+    if rendered == data:
         return True
     if verbose:
-        find_first_diff(render, data)
+        find_first_diff(rendered, data)
     return False
 
 
@@ -193,11 +193,11 @@ def validate_files(filenames: Mapping[str, str],
                    image: bool = False,
                    browsers: Optional[Union[BrowserType, Iterable[BrowserType]]] = None,
                    timeout: int = default_timeout,
-                   ignore_regex: str = '',
                    unicode_A: int = 0,
+                   ignore_regex: str = '',
                    payload_var: str = default_vars.payload,
                    bytearray_var: str = default_vars.bytearray,
-                   content_var: str = default_vars.content,
+                   text_var: str = default_vars.text,
                    validate: bool = True,
                    verbose: bool = True
                    ) -> bool:
@@ -253,8 +253,8 @@ def validate_files(filenames: Mapping[str, str],
                 for i, browser in enumerate(browsers):
                     start_time = time()
                     valid = validate_html(filename, data, caps, by, element, raw, image,
-                                          browser, timeout, ignore_regex, unicode_A,
-                                          bytearray_var, content_var, verbose)
+                                          browser, timeout, unicode_A, ignore_regex,
+                                          bytearray_var, text_var, verbose)
                     assert valid is not False, filename
                     if not valid:
                         error = True

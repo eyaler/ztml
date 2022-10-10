@@ -34,12 +34,12 @@ for browser in browsers:
             for bin2txt in bin2txt_encodings:
                 for caps in caps_modes:
                     for mtf in mtf_variants:
-                        for render in range(3):
+                        for render_mode in range(3):
                             element_id = ''
                             raw = False
-                            if render == 1:
+                            if render_mode == 1:
                                 element_id = 'myid'
-                            elif render == 2:
+                            elif render_mode == 2:
                                 raw = True
                             test_start_time = time()
                             i += 1
