@@ -27,6 +27,7 @@ from typing import Optional, Tuple
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
@@ -34,35 +35,35 @@ illegal = ['', 13, 92, 96]
 
 
 def encode(data: bytes, offset: int = 0, validate: bool = True) -> bytes:
-    curIndex = 0
-    curBit = 0  # Points to current bit needed
+    cur_index = 0
+    cur_bit = 0  # Points to current bit needed
     out = bytearray()
 
-    # Get 7 or 9 bits of input data. Returns false if there is no input left
+    # Get 7 or 9 bits of input data. Returns None if there is no input left
     def get_bits(length : int) -> Optional[int]:
-        nonlocal curIndex, curBit
-        if curIndex >= len(data):
+        nonlocal cur_index, cur_bit
+        if cur_index >= len(data):
             return None
 
         # Shift, mask, unshift to get first part. Align it to a 7 or 9 bit chunk
-        firstPart = (255>>curBit & data[curIndex]+offset & 255) << curBit
+        first_part = (255>>cur_bit & data[cur_index]+offset & 255) << cur_bit
         diff = 8 - length
         if diff > 0:
-            firstPart >>= diff
+            first_part >>= diff
         else:
-            firstPart <<= -diff
+            first_part <<= -diff
         # Check if we need to go to the next byte for more bits
-        curBit += length
-        if curBit < 8:
-            return firstPart  # Do not need next byte
-        curBit -= 8
-        curIndex += 1
-        # Now we want bits [0..curBit] of the next byte if it exists
-        if curIndex >= len(data):
-            return firstPart
+        cur_bit += length
+        if cur_bit < 8:
+            return first_part  # Do not need next byte
+        cur_bit -= 8
+        cur_index += 1
+        # Now we want bits [0..cur_bit] of the next byte if it exists
+        if cur_index >= len(data):
+            return first_part
         # Align it
-        secondPart = (0xFF00>>curBit & data[curIndex]+offset & 255) >> 8-curBit
-        return firstPart | secondPart
+        second_part = (0xff00>>cur_bit & data[cur_index]+offset & 255) >> 8-cur_bit
+        return first_part | second_part
 
     while True:
         # Grab 7 bits
@@ -70,16 +71,16 @@ def encode(data: bytes, offset: int = 0, validate: bool = True) -> bytes:
         if bits is None:
             break
         try:
-            illegalIndex = illegal.index(bits)
+            illegal_index = illegal.index(bits)
             # Since this will be a two-byte character, get the next chunk of 9 bits
-            nextBits = get_bits(9)
-            if nextBits is None:
+            next_bits = get_bits(9)
+            if next_bits is None:
                 b1 = 4
-                nextBits = bits
+                next_bits = bits
             else:
-                b1 = illegalIndex << 3
+                b1 = illegal_index << 3
             # Push first 3 bits onto first byte, remaining 6 onto second
-            out.extend([192 | b1 | nextBits>>6, 128 | nextBits&63])
+            out.extend([192 | b1 | next_bits>>6, 128 | next_bits&63])
         except ValueError:
             out.append(bits)
 
@@ -132,7 +133,6 @@ def decode(data: bytes, offset: int = 0) -> bytes:
 
 def get_js_decoder(data: bytes,
                    offset: Optional[int] = 0,
-                   payload_var: str = default_vars.payload,
                    output_var: str = default_vars.bytearray,
                    validate: bool = True
                    ) -> bytes:
@@ -141,14 +141,11 @@ def get_js_decoder(data: bytes,
     else:
         encoded = encode(data, offset, validate)
     illegal_str = ','.join(str(i) for i in illegal)
-    last_part = f'''`
-{output_var}=new Uint8Array({payload_var}.length*2)
-j=k=n=0
-p=(b,l=7)=>{{n|=b<<(l<8)>>k>>(l>8);k+=l;k>7&&({output_var}[j++]=n{-offset or ''},k-=8,n=b<<8-k)}}
-for(c of {payload_var})(i=c.charCodeAt()%65533)>127?(e=i>>9,e&&p([{illegal_str}][e]),p(i<<2*!e&511,9)):p(i)
-{output_var}={output_var}.slice(0,j)
-'''
-    return f'{payload_var}=`'.encode() + encoded + last_part.encode()
+    first_part = f'''k=n=0
+p=(b,l=7)=>(n|=b<<(l<8)>>k>>(l>8),k+=l,k>7?(r=n{-offset or ''},k-=8,n=b<<8-k,r):[])
+{output_var}=new Uint8Array([...`'''
+    last_part = f'`].flatMap(c=>(i=c.charCodeAt()%65533,i>127?(e=i>>9,[e?p([{illegal_str}][e]):[],p(i<<2*!e&511,9)].flat()):p(i))))\n'
+    return first_part.encode() + encoded + last_part.encode()
 
 
 def test() -> None:

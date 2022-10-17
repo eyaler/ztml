@@ -22,6 +22,7 @@ from pydivsufsort import divsufsort
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
@@ -52,7 +53,7 @@ def mtf_rank(mtf: int, rank: int, prev: int) -> int:
     elif mtf == 52:
         new_rank = rank // 2 if rank > 1 else rank == 1 and not prev
     else:
-        new_rank = int(rank*(mtf/100) + 0.5)  # round in the same way as JS (do not round half to even)
+        new_rank = int(rank*(mtf/100) + 0.5)  # Round in the same way as JS (do not round half to even)
     return new_rank
 
 
@@ -96,20 +97,16 @@ def mtf_decode(data: Iterable[int], mtf: int == default_mtf) -> List[int]:
 
 
 @overload
-def encode(data: str, reorder, mtf, validate) -> Tuple[str, int]:
-    ...
+def encode(data: str, reorder: bool = ..., mtf: Optional[int] = ...,
+           validate: bool = ...) -> Tuple[str, int]: ...
 
 
 @overload
-def encode(data: Iterable[int], reorder, mtf, validate) -> Tuple[List[int], int]:
-    ...
+def encode(data: Iterable[int], reorder: bool = ..., mtf: Optional[int] = ...,
+           validate: bool = ...) -> Tuple[List[int], int]: ...
 
 
-def encode(data,
-           reorder: bool = True,
-           mtf: Optional[int] = default_mtf,
-           validate: bool = True
-           ):
+def encode(data, reorder=True, mtf=default_mtf, validate=True):
     is_str = isinstance(data, str)
     if not is_str:
         data = list(data)
@@ -136,16 +133,16 @@ def encode(data,
 
 
 @overload
-def decode(data: str, index, reorder, mtf) -> str:
-    ...
+def decode(data: str, index: int, reorder: bool = ...,
+           mtf: Optional[int] = ...) -> str: ...
 
 
 @overload
-def decode(data: Iterable[int], index, reorder, mtf) -> List[int]:
-    ...
+def decode(data: Iterable[int], index: int, reorder: bool = ...,
+           mtf: Optional[int] = ...) -> List[int]: ...
 
 
-def decode(data, index: int, reorder: bool = True, mtf: Optional[int] = default_mtf):
+def decode(data, index, reorder=True, mtf=default_mtf):
     is_str = isinstance(data, str)
     out = list(data)
     if mtf is not None:
@@ -218,34 +215,43 @@ for(k of {data_var}){mtf_op}
             dyn_order1, dyn_order2 = dyn_orders
             dyn_order1 = ''.join(dyn_order1)
             dyn_order2 = ''.join(dyn_order2)
-            js_decoder += f'''{data_var}={data_var}.map(i=>String.fromCodePoint(i))
-d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
-{data_var}={data_var}.map(c=>{'d[c]||c).join``' if is_str else '(d[c]||c).codePointAt())'}
+            js_decoder += f'''d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
+{data_var}={data_var}.map(i=>{'d[c=String.fromCodePoint(i)]||c).join``' if is_str else '(d[c=String.fromCodePoint(i)]||c).codePointAt())'}
 '''
     if is_str and not dyn_orders:
-        js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i)).join``\n'
+        js_decoder += f'{data_var}=String.fromCodePoint(...{data_var})\n'
     return js_decoder
 
 
 @overload
-def encode_and_get_js_decoder(data: str, reorder, mtf, add_bwt_func, bwt_func_var,
-                              data_var, validate) -> Tuple[str, str]:
-    ...
+def encode_and_get_js_decoder(data: str,
+                              reorder: bool = ...,
+                              mtf: Optional[int] = ...,
+                              add_bwt_func: bool = ...,
+                              bwt_func_var: str = ...,
+                              data_var: str = ...,
+                              validate: bool = ...
+                              ) -> Tuple[str, str]: ...
 
 
 @overload
-def encode_and_get_js_decoder(data: Iterable[int], reorder, mtf, add_bwt_func,
-                              bwt_func_var, data_var, validate) -> Tuple[List[int], str]:
-    ...
+def encode_and_get_js_decoder(data: Iterable[int],
+                              reorder: bool = ...,
+                              mtf: Optional[int] = ...,
+                              add_bwt_func: bool = ...,
+                              bwt_func_var: str = ...,
+                              data_var: str = ...,
+                              validate: bool = ...
+                              ) -> Tuple[List[int], str]: ...
 
 
 def encode_and_get_js_decoder(data,
-                              reorder: bool = True,
-                              mtf: Optional[int] = default_mtf,
-                              add_bwt_func: bool = True,
-                              bwt_func_var: str = default_vars.bwt_func,
-                              data_var: str = '',
-                              validate: bool = True
+                              reorder=True,
+                              mtf=default_mtf,
+                              add_bwt_func=True,
+                              bwt_func_var=default_vars.bwt_func,
+                              data_var='',
+                              validate=True
                               ):
     is_str = isinstance(data, str)
     if not is_str:

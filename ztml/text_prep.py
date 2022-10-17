@@ -6,6 +6,7 @@ import regex
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
@@ -62,12 +63,14 @@ def get_qu_regex(next_letter_case: str, u_caps: Optional[bool] = None) -> str:
 
 
 def encode_quq(text: str) -> str:
-    return regex.sub(f"QU{get_qu_regex('')}", 'Q', regex.sub(f"([Qq])u{get_qu_regex('l')}", '\\1', text))
+    return regex.sub(f"QU{get_qu_regex('')}", 'Q',
+                     regex.sub(f"([Qq])u{get_qu_regex('l')}", '\\1', text))
 
 
 def decode_quq(text: str, caps: str) -> str:
     if caps == 'raw':
-        text = regex.sub(f"Q{get_qu_regex('u')}", 'QU', regex.sub(f"[Qq]{get_qu_regex('l')}", '\\g<0>u', text))
+        text = regex.sub(f"Q{get_qu_regex('u')}", 'QU',
+                         regex.sub(f"[Qq]{get_qu_regex('l')}", '\\g<0>u', text))
     elif caps == 'upper':
         text = regex.sub(f"Q{get_qu_regex('', u_caps=True)}", 'QU', text)
     else:

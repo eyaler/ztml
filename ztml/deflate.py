@@ -34,11 +34,13 @@ import sys
 from typing import List, Iterable
 
 import png
+# noinspection PyPackageRequirements
 import zopfli
 
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
@@ -73,12 +75,16 @@ def to_png(bits: Iterable[int],
         assert width <= max_dim, width
     bits = [bits[i : i + width] for i in range(0, length, width)]
     png_data = BytesIO()
-    png.Writer(width, height, greyscale=True, bitdepth=1, compression=compression).write(png_data, bits)
+    png.Writer(width, height, greyscale=True, bitdepth=1, compression=compression
+               ).write(png_data, bits)
     png_data.seek(0)
     png_data = png_data.read()
     out = png_data
     if iterations > 0 and iterations_large > 0:
-        out = zopfli.ZopfliPNG(filter_strategies=filter_strategies, iterations=iterations, iterations_large=iterations_large).optimize(png_data)  # Time-consuming op.
+        out = zopfli.ZopfliPNG(filter_strategies=filter_strategies,
+                               iterations=iterations,
+                               iterations_large=iterations_large
+                               ).optimize(png_data)  # Time-consuming op.
     if omit_iend:
         out = out[:-12]  # IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes). Note: do not omit the IDAT zlib Adler-32 or the IDAT CRC-32 as this will break Safari
     if verbose:
@@ -124,4 +130,5 @@ def get_js_image_decoder(length: int,
                          bytearray_var: str = default_vars.bytearray,
                          bitarray_var: str = default_vars.bitarray
                          ) -> str:
-    return get_js_create_image(image_var, bytearray_var) + get_js_image_data(length, decoder_script, image_var, bitarray_var)
+    return get_js_create_image(image_var, bytearray_var) + get_js_image_data(
+        length, decoder_script, image_var, bitarray_var)

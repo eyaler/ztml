@@ -22,10 +22,11 @@ from bitarray.util import ba2int, canonical_decode, canonical_huffman
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
-DEBUG_SKIP_HUFFMAN = False  # Note: this is just for benchmarking and is not implemented in JS decoder
+DEBUG_SKIP_HUFFMAN = False  # This is just for benchmarking and is not implemented in JS decoder
 
 
 def encode(text: str,
@@ -45,14 +46,16 @@ def encode(text: str,
             counts = []
             symbols = []
         charset = ''.join(symbols[::-1])
-        canonical_table = {len(code): [2**len(code) - ba2int(code), len(codebook) - i - 1] for i, (symbol, code) in enumerate(codebook.items())}
+        canonical_table = {len(code): [2**len(code) - ba2int(code), len(codebook) - i - 1]
+                           for i, (symbol, code) in enumerate(codebook.items())}
         canonical_table = str(canonical_table).replace(' ', '').replace("'", '')
 
     bits = bitarray()
     if codebook:
         bits.encode(codebook, text)
     if verbose:
-        print(sorted([(k, v.to01()) for k, v in codebook.items()], key=lambda x: -counter[x[0]]), file=sys.stderr)
+        print(sorted([(k, v.to01()) for k, v in codebook.items()],
+                     key=lambda x: -counter[x[0]]), file=sys.stderr)
         if charset:
             print(len(charset), charset, file=sys.stderr)
             print(canonical_table, file=sys.stderr)
@@ -68,8 +71,8 @@ def get_js_decoder(charset: str,
                    bitarray_var: str = default_vars.bitarray,
                    text_var: str = default_vars.text,
                    ) -> str:
-    charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\n', '\\n').replace('\r', '\\r').replace("'", "\\'")
-    return f'''s=[...'{charset}']
+    charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\r', '\\r').replace('`', '\\`').replace('${', '\\${')  # Note that charset may include more characters requiring safe encoding as regard to encoding domains as well as HTML character overrides
+    return f'''s=[...`{charset}`]
 d={canonical_table}
 for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-('0b'+c))>=0);j++)c+={bitarray_var}[j]&1
 '''

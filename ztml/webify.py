@@ -23,6 +23,7 @@ from typing import AnyStr
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
@@ -46,18 +47,20 @@ N = speechSynthesis
 O = setTimeout
 '''
 
-
-def get_literals_regex(payload_var: str = default_vars.payload) -> str:
-    return rf'(\b{payload_var}=`(?:\\.|[^`\\])*`)'
+literals_regex = rf'((?:\[\.\.\.)`(?:\\.|[^`\\])*`])'
 
 
-def safe_encode(s: str, encoding: str) -> bytes:
-    return re.sub(rb'\\U000?([\dA-Fa-f]{5,6})', rb'\\u{\1}',
-                  s.encode(encoding, 'strict' if encoding.lower().replace('-', '') == 'utf8' else 'backslashreplace'))
+def safe_encode(s: str, encoding: str, get_back_unused: bool = False) -> bytes:
+    encoding = encoding.lower()
+    out = s.encode(encoding, 'strict' if encoding.replace('-', '') == 'utf8' else 'backslashreplace')
+    out = re.sub(rb'\\U000?([\da-f]{5,6})', rb'\\u{\1}', out)
+    if get_back_unused and encoding == 'cp1252':
+        out = out.replace(b'\\x81', b'\x81').replace(b'\\x8d', b'\x8d').replace(b'\\x8f', b'\x8f').replace(b'\\x90', b'\x90').replace(b'\\x9d', b'\x9d')  # These actually do not require escaping in HTML
+    return out
 
 
-def get_len(script: str, encoding: str) -> int:
-    return len(safe_encode(script, encoding) if isinstance(script, str) else script)
+def get_len(s: AnyStr, encoding: str) -> int:
+    return len(safe_encode(s, encoding) if isinstance(s, str) else s)
 
 
 def uglify(script: AnyStr,
@@ -67,7 +70,6 @@ def uglify(script: AnyStr,
            prevent_grow: bool = True,
            add_used_aliases: bool = True,
            encoding: str = 'utf8',
-           payload_var: str = default_vars.payload
            ) -> AnyStr:
     orig_len = get_len(script, encoding)
     shorts = set()
@@ -98,21 +100,17 @@ def uglify(script: AnyStr,
             long = f'\\b{long}'
         if re.match('\\w', long[-1]):
             long += '\\b'
-        literals_regex = get_literals_regex(payload_var)
         if isinstance(script, bytes):
             long = safe_encode(long, encoding)
             if isinstance(short, str):
                 short = safe_encode(short, encoding)
             else:
                 short = lambda x, short=short: safe_encode(short(x), encoding)
-            literals_regex = literals_regex.encode()
         sub = script[:0]
         cnt = 0
-        parts = re.split(literals_regex, script)
-        literals_parts = [part for i, part in enumerate(parts) if i % 2]
-        payload_index = max(range(len(literals_parts)), key=lambda i: get_len(literals_parts[i], encoding), default=None)
+        parts = re.split(safe_encode(literals_regex, encoding) if isinstance(script, bytes) else literals_regex, script)
         for i, part in enumerate(parts):
-            if (i-1) / 2 != payload_index or not payload_var:
+            if i % 2 == 0:
                 part, c = re.subn(long, short, part)
                 cnt += c
             sub += part
@@ -140,17 +138,21 @@ def html_wrap(script: AnyStr,
               encoding: str = 'utf8',
               mobile: bool = False,
               title: str = '',
-              payload_var: str = default_vars.payload
               ) -> AnyStr:
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
     title_element = f'<title>{title}</title>' * bool(title)
+    encoding = encoding.lower()
+    if encoding == 'utf-8':
+        encoding = 'utf8'
+    if encoding in ['cp1252', 'latin1']:
+        encoding = 'l1'  # HTML5 treats these the same
     html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}{title_element}<body><script>'
     html_footer = '</script>'
     sep = ''
     if isinstance(script, bytes):
-        html_header = html_header.encode()
-        html_footer = html_footer.encode()
-        sep = sep.encode()
+        html_header = safe_encode(html_header, encoding)
+        html_footer = safe_encode(html_footer, encoding)
+        sep = safe_encode(sep, encoding)
     if aliases:
-        script = uglify(script, aliases, replace_quoted, min_cnt, prevent_grow, encoding=encoding, payload_var=payload_var)
+        script = uglify(script, aliases, replace_quoted, min_cnt, prevent_grow, encoding=encoding)
     return sep.join([html_header, script.strip(), html_footer])

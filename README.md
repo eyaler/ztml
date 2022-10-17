@@ -21,7 +21,7 @@ The pipeline includes efficient binary-to-text alternatives to Base64 which are 
 | 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
 | **ZTML Base125**                                                                          | html (utf8)   | 26.5 kB (42%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
-| **ZTML crEnc**                                                                            | html (cp1252) | 23.8 kB (37%) `mtf=0`                                            | 818 kB (25%) `mtf=80`                                             |
+| **ZTML crEnc**                                                                            | html (cp1252) | 23.7 kB (37%) `mtf=0`                                            | 818 kB (25%) `mtf=80`                                             |
 
 ### Installation
 ```

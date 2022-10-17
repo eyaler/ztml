@@ -2,7 +2,7 @@
 
 In the premise of yEnc (why encode?), we only encode symbols where absolutely required,
 which in this use case is just the carriage-return (CR).
-When the HTML or JS charset can be set to a single-byte encoding as cp1252 (ascii, latin1),
+When the HTML or JS charset can be set to a single-byte encoding as cp1252 (or latin1,
 we can use 254 byte values out of 256 (excluding only CR and an escape character),
 and embed in JS template literals quotes ``, after escaping \, ` and ${ with a \
 The escape character can be predetermined or optimized per message as an infrequent symbol.
@@ -25,34 +25,31 @@ from collections import Counter
 import re
 from typing import AnyStr, Optional, overload, Tuple, Union
 
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
 if not __package__:
     import default_vars
 else:
+    # noinspection PyPackages
     from . import default_vars
 
 
 def find_best_escape(data: bytes) -> int:
     chars = [k for k, v in Counter(data).most_common()]
     chars += [c for c in range(256) if c not in chars]
-    return sorted([c for c in chars if c not in b'\f\r'], key=lambda c: [c != x for x in b'\\`[_$#'])[-1]
+    chars = [c for c in chars if c not in b'\f\r']
+    return sorted(chars, key=lambda c: [c != x for x in b'\\`[_$#'])[-1]
 
 
 @overload
-def encode(data: bytes, escape: Union[int, AnyStr], offset) -> bytes:
-    ...
+def encode(data: bytes, escape: Union[int, AnyStr] = ..., offset : int = ...
+           ) -> bytes: ...
 
 
 @overload
-def encode(data: bytes, escape: Literal[None], offset) -> Tuple[bytes, int]:
-    ...
+def encode(data: bytes, escape: None = ..., offset : int = ...
+           ) -> Tuple[bytes, int]: ...
 
 
-def encode(data: bytes, escape=None, offset: int = 0):
+def encode(data, escape=None, offset=0):
     if offset:
         data = bytes(byte+offset & 255 for byte in data)
     return_escape = False
@@ -69,23 +66,23 @@ def encode(data: bytes, escape=None, offset: int = 0):
             byte = byte+1 & 255
         assert byte != 13
         out.append(byte)
-    out = re.sub(br'\\|`|\${', br'\\\g<0>', out)
+    out = re.sub(rb'\\|`|\${', rb'\\\g<0>', out)
     if return_escape:
         out = out, escape
     return out
 
 
 @overload
-def optimize_encode(data, escape: Union[int, AnyStr]) -> Tuple[bytes, int, int]:
-    ...
+def optimize_encode(data: bytes, escape: Union[int, AnyStr] = ...
+                    ) -> Tuple[bytes, int, int]: ...
 
 
 @overload
-def optimize_encode(data, escape: Literal[None]) -> Tuple[Tuple[bytes, int], int, int]:
-    ...
+def optimize_encode(data: bytes, escape: None = ...
+                    ) -> Tuple[Tuple[bytes, int], int, int]: ...
 
 
-def optimize_encode(data: bytes, escape=None):
+def optimize_encode(data, escape=None):
     best_offset = 0
     for offset in range(256):
         out = encode(data, escape, offset)
@@ -102,7 +99,6 @@ def optimize_encode(data: bytes, escape=None):
 def get_js_decoder(data: bytes,
                    escape: Optional[Union[int, AnyStr]] = None,
                    offset: Optional[int] = None,
-                   payload_var: str = default_vars.payload,
                    output_var: str = default_vars.bytearray
                    ) -> bytes:
     if offset is None:
@@ -113,10 +109,6 @@ def get_js_decoder(data: bytes,
         encoded, escape = encoded
     elif isinstance(escape, (bytes, str)):
         escape = ord(escape)
-    last_part = f'''`
-{output_var}=new Uint8Array({payload_var}.length)
-j=e=0
-for(c of {payload_var})i=c.charCodeAt()%65533,i>>8&&(i=128+'€ ‚ƒ„…†‡ˆ‰Š‹Œ Ž  ‘’“”•–—˜™š›œ žŸ'.indexOf(c)),i=={escape}&&!e?e=1:(e&&(e=0,i--),{output_var}[j++]=i{-offset if offset else ''})
-{output_var}={output_var}.slice(0,j)
-'''
-    return f'{payload_var}=`'.encode() + encoded + last_part.encode('cp1252')
+    first_part = f'e=0;{output_var}=new Uint8Array([...`'
+    last_part = f"`].flatMap(c=>(i=c.charCodeAt()%65533,i>>8&&(i=128+'\x80 \x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c \x8e  \x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c \x9e\x9f'.indexOf(c)),i=={escape}&&!e?(e=1,[]):(e&&(e=0,i--),[i{-offset or ''}]))))\n"
+    return first_part.encode() + encoded + last_part.encode('l1')  # Encode with l1 as I used explicit bytes above
