@@ -139,13 +139,13 @@ def html_wrap(script: AnyStr,
               mobile: bool = False,
               title: str = '',
               ) -> AnyStr:
-    mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
-    title_element = f'<title>{title}</title>' * bool(title)
     encoding = encoding.lower()
     if encoding == 'utf-8':
         encoding = 'utf8'
-    if encoding in ['cp1252', 'latin1']:
+    elif encoding in ['cp1252', 'latin1']:
         encoding = 'l1'  # HTML5 treats these the same
+    mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
+    title_element = f'<title>{title}</title>' * bool(title)
     html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}{title_element}<body><script>'
     html_footer = '</script>'
     sep = ''
