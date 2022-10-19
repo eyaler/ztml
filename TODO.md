@@ -18,15 +18,14 @@
 - Dictionary compression for long texts
 - [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
 - [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
-- Compress the JS itself and use eval, considering also js packing e.g. [JSCrush](https://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller)
+- Compress the JS itself and use eval, considering also JS packing e.g. [JSCrush](https://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller)
 - Benchmark [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coding
-- Strip whitespace from script lines not part of multi-line content strings
+- Strip whitespace from code lines not part of multi-line content strings
 
   #### MTF:
 - Improve JS MTF decoding times for large files
 - Automatic optimizing over MTF variants
 - Benchmark alternatives to MTF
-- Run-length encoding after MTF
 
   #### Deflate:
 - **Investigate effect of PNG aspect ratio on compression / optimize over it**

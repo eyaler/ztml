@@ -1,8 +1,8 @@
 """PNG / DEFLATE encoding optimized for arbitrary data compression
 
-Encoding data as a PNG image gives efficient DEFLATE compression,
+Encoding data as a PNG image allows efficient DEFLATE compression,
 while allowing use of the browser's native decompression capability,
-thus avoiding the need of external decompression library dependencies.
+thus saving the need of an additional decoder, AKA PNG bootstarpping.
 The data is then read from the HTML canvas element.
 The image aspect ratio is optimized to be squarish (for higher browser compatibility) with minimal padding.
 We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
@@ -10,15 +10,20 @@ A minimalistic JS decoder code is generated.
 
 Notes:
 https://github.com/fhanau/Efficient-Compression-Tool gives a 1.4% improvement on 2600.txt
-WEBP gave worse results (using 8-bit cwebp).
-
+WEBP gave worse overall results (using 8-bit cwebp).
 
 References:
 https://web.archive.org/web/20090826082743/http://blog.nihilogic.dk:80/2008/05/compression-using-canvas-and-png.html
 https://web.archive.org/web/20130310075429/http://daeken.com/superpacking-js-demos
+https://web.archive.org/web/20130219050720/http://alexle.net/archives/306
+https://www.iamcal.com/png-store
+https://github.com/iamcal/PNGStore
+http://bwirl.blogspot.com/2011/11/optimize-web-apps-with-png.html
 https://gist.github.com/tlack/3039247
 https://gist.github.com/gasman/2560551
 https://www.pouet.net/prod.php?which=59298
+https://www.pouet.net/topic.php?which=8770
+https://github.com/codegolf/zpng
 https://github.com/xem/miniBook
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy
@@ -118,10 +123,11 @@ def get_js_image_data(length: int,
     return f'''{image_var}.decode().then(()=>{{
 c=document.createElement`canvas`
 x=c.getContext`2d`
-c=[c.width,c.height]=[{image_var}.width,{image_var}.height]
+c=[c.width={image_var}.width,c.height={image_var}.height]
 x.drawImage({image_var},0,0)
-{bitarray_var}=[...x.getImageData(0,0,...c).data].flatMap((i,j)=>j%4||j>{length*4 - 1}?[]:[i>>7])
-{decoder_script.strip()}}})'''  # Using >>7 to deal with Safari rendering inaccuracy
+s=x.getImageData({bitarray_var}=[],0,...c).data
+for(j={length};j--;){bitarray_var}[j]=s[j*4]>>7
+{decoder_script.strip()}}})'''  # Applying >>7 before the Huffman &1 to deal with Safari PNG rendering inaccuracy
 
 
 def get_js_image_decoder(length: int,

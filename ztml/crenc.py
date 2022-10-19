@@ -2,7 +2,7 @@
 
 In the premise of yEnc (why encode?), we only encode symbols where absolutely required,
 which in this use case is just the carriage-return (CR).
-When the HTML or JS charset can be set to a single-byte encoding as cp1252 (or latin1,
+When the HTML or JS charset can be set to a single-byte encoding as cp1252 (or latin1),
 we can use 254 byte values out of 256 (excluding only CR and an escape character),
 and embed in JS template literals quotes ``, after escaping \, ` and ${ with a \
 The escape character can be predetermined or optimized per message as an infrequent symbol.
