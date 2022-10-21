@@ -27,8 +27,6 @@ else:
     from . import default_vars
 
 
-default_lang = 'en'
-
 default_aliases = '''
 D = document
 A = (e, d) => e.setAttribute('style', d)
@@ -134,11 +132,12 @@ def html_wrap(script: AnyStr,
               replace_quoted: bool = True,
               min_cnt: int = 2,
               prevent_grow: bool = True,
-              lang: str = default_lang,
+              lang: str = '',
               encoding: str = 'utf8',
               mobile: bool = False,
               title: str = '',
               ) -> AnyStr:
+    html_lang = f'<html lang={lang}>' * bool(lang)
     encoding = encoding.lower()
     if encoding == 'utf-8':
         encoding = 'utf8'
@@ -146,7 +145,7 @@ def html_wrap(script: AnyStr,
         encoding = 'l1'  # HTML5 treats these the same
     mobile_meta = '<meta name=viewport content="width=device-width,initial-scale=1">' * mobile
     title_element = f'<title>{title}</title>' * bool(title)
-    html_header = f'<!DOCTYPEhtml><html lang={lang}><meta charset={encoding}>{mobile_meta}{title_element}<body><script>'
+    html_header = f'<!DOCTYPEhtml>{html_lang}<meta charset={encoding}>{mobile_meta}{title_element}<p><script>'
     html_footer = '</script>'
     sep = ''
     if isinstance(script, bytes):

@@ -75,7 +75,7 @@ def ztml(data,
          js=False,
          uglify=True,
          replace_quoted=True,
-         lang=webify.default_lang,
+         lang='',
          mobile=False,
          title='',
          validate=False,
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--js', action='store_true', help='May also be inferred from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
     parser.add_argument('--skip_replace_quoted', action='store_true')
-    parser.add_argument('--lang', default=webify.default_lang)
+    parser.add_argument('--lang', nargs='?', const='', default='')
     parser.add_argument('--mobile', action='store_true')
     parser.add_argument('--title', nargs='?', const='', default='')
     parser.add_argument('--validate', action='store_true')

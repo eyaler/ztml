@@ -13,8 +13,8 @@
 - Fix slow rendering with Selenium in validation
 
 ### Compression
-- **Ablation benchmarks**
-- **Auto-caps should use modifiers for next letter/word/sentence/paragraph or block-level, over simple mode instead of falling back to raw**
+- Ablation benchmarks
+- Auto-caps should use modifiers for next letter/word/sentence/paragraph or block-level, over simple mode instead of falling back to raw
 - Dictionary compression for long texts
 - [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
 - [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
@@ -28,8 +28,8 @@
 - Benchmark alternatives to MTF
 
   #### Deflate:
-- **Investigate effect of PNG aspect ratio on compression / optimize over it**
-- **Integrate https://github.com/fhanau/Efficient-Compression-Tool** (1.4% improvement on 2600.txt)
+- Investigate effect of PNG aspect ratio on compression / optimize over it
+- Integrate https://github.com/fhanau/Efficient-Compression-Tool (1.4% improvement on 2600.txt)
 - Investigate Safari canvas size limits
 - Allow using higher bit-depth to overcome canvas size limits (for larger content and maybe more compressible aspect ratios)
 - Compress metadata into PNG 
