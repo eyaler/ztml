@@ -245,7 +245,7 @@ def validate_files(filenames: Mapping[str, str],
             ext = os.path.splitext(filename)[-1][1:]
             if raw_size is not None and ext != 'html':
                 continue
-            if (data is None or label == 'raw') and ext.lower() in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
+            if (data is None or label == 'raw') and ext.lower() in ['bmp', 'gif', 'jfif', 'jpe', 'jpeg', 'jpg', 'png', 'webp']:
                 image = True
             if data is None:
                 with open(filename, 'rb') as f:

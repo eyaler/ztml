@@ -191,7 +191,7 @@ if __name__ == '__main__':
     ext = os.path.splitext(args.input_filename)[-1][1:].lower()
     if ext == 'html':
         args.raw = True
-    elif ext in ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp']:
+    elif ext in ['bmp', 'gif', 'jfif', 'jpe', 'jpeg', 'jpg', 'png', 'webp']:
         args.image = True
     with open(args.input_filename, 'rb') as f:
         data = f.read()
