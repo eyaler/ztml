@@ -203,7 +203,7 @@ def validate_html(file: FilenameOrBytes,  # Don't use AnyStr as it does not have
             data = text_prep.decode_caps_simple(data.lower())
         if not raw:
             if unicode_A:
-                rendered = regex.sub('[^\\p{Z}\\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), rendered)
+                rendered = regex.sub(r'[^\p{Z}\p{C}]', lambda m: chr(ord(m[0]) - unicode_A + 65 + (6 if ord(m[0]) - unicode_A + 65 > 90 else 0)), rendered)
             rendered = regex.sub(ignore_regex, '', rendered)
     if rendered == data:
         return True

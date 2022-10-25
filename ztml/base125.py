@@ -4,15 +4,15 @@ If we must use utf8 encoding for HTML or JS, crEnc will not work.
 Instead, we can use this unnecessarily optimized version of the variable length Base122.
 The original byte stream is split into 7 bit chunks,
 which are encoded as a single byte: 0xxxxxxx, to comply with utf8 code point scheme.
-We only use 125 byte values out of 128 (excluding CR, \ and `)
-and encode the remaining three in a double byte scheme: 110ssxxx 10xxxxxx,
+We only use 125 byte values out of 128 (excluding CR, backslash and `)
+and encode the remaining three with a double byte scheme: 110ssxxx 10xxxxxx,
 where ss is 01, 10 or 11, and 9 bits are left for next data.
-alternatively, if these are the final 7 bits, we instead encode as: 1100010x 10xxxxxx.
-We then embed in JS template literals quotes ``, after escaping ${ with a \
-An optimal overall offset can be added to minimize escaping as suggested in dynEncode.
+Alternatively, if these are the final 7 bits, we instead encode as: 1100010x 10xxxxxx.
+As, we embed in JS template literals quotes ``, we further escape ${ with backslash.
+The overhead is ~ 8/7 * 253/256 + 16/11 * 3/256 - 1 ~ 14.7% (compared to 33.3% for Base64).
 The decoder further takes care of HTML character override for NUL.
+An optimal overall offset can be added to minimize escaping, similar to dynEncode.
 A minimalistic JS decoder code is generated.
-The overhead is ~ 8/log2(125)-1 ~ 15% (compared to 33.3% for Base64).
 
 References:
 https://en.wikipedia.org/wiki/Binary-to-text_encoding
@@ -115,7 +115,7 @@ def decode(data: bytes, offset: int = 0) -> bytes:
         next_byte |= bits << (length < 8) >> k >> (length > 8)
         k += length
         if k > 7:
-            out.append(((next_byte&255)-offset) % 256)
+            out.append((next_byte&255)-offset & 255)
             k -= 8
             next_byte = bits << 8-k
 

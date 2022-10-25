@@ -19,9 +19,8 @@ https://web.archive.org/web/20130219050720/http://alexle.net/archives/306
 https://www.iamcal.com/png-store
 https://github.com/iamcal/PNGStore
 http://bwirl.blogspot.com/2011/11/optimize-web-apps-with-png.html
-https://gist.github.com/tlack/3039247
-https://gist.github.com/gasman/2560551
-https://www.pouet.net/prod.php?which=59298
+https://gist.github.com/gasman/2560551 (pnginator)
+https://www.pouet.net/prod.php?which=59298 (JsExe)
 https://www.pouet.net/topic.php?which=8770
 https://github.com/codegolf/zpng
 https://github.com/xem/miniBook
@@ -120,7 +119,7 @@ def get_js_image_data(length: int,
                       image_var: str = default_vars.image,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
-    return f'''{image_var}.decode().then(()=>{{
+    return f'''{image_var}.decode().then(_=>{{
 c=document.createElement`canvas`
 x=c.getContext`2d`
 c=[c.width={image_var}.width,c.height={image_var}.height]

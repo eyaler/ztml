@@ -102,7 +102,7 @@ def ztml(data,
             writer = f'document.write({default_vars.text});document.close()'  # document.close() needed to ensure that any style changes added after a script are applied
         elif element_id:
             writer = f'''document.body.appendChild(document.createElement`pre`).id='{element_id}'
-document.getElementById`{element_id}`.textContent={default_vars.text}'''
+{element_id}.textContent={default_vars.text}'''
         else:
             writer = f"document.body.style.whiteSpace='pre';document.body.textContent={default_vars.text}"
         bits_decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{writer}'
@@ -128,7 +128,7 @@ document.getElementById`{element_id}`.textContent={default_vars.text}'''
     if image:
         if element_id:
             out = f"""document.body.appendChild(new Image).id='{element_id}'
-document.getElementById`{element_id}`.src='""".encode() + image_url + b"'"
+{element_id}.src='""".encode() + image_url + b"'"
         else:
             out = f"document.body.style.background='url(".encode() + image_url + b")no-repeat'"
 
@@ -139,7 +139,7 @@ document.getElementById`{element_id}`.src='""".encode() + image_url + b"'"
     if js and uglify:
         out = webify.uglify(out, replace_quoted=replace_quoted, encoding=encoding)
     elif not js:
-        out = webify.html_wrap(out, aliases=webify.default_aliases if uglify else '',
+        out = webify.html_wrap(out, aliases=webify.default_aliases * uglify,
                                replace_quoted=replace_quoted, lang=lang,
                                encoding=encoding, mobile=mobile, title=title)
     if filename:

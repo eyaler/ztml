@@ -10,12 +10,12 @@ else:
     from . import default_vars
 
 
-newline = '\\n\\v\\f\\r\\x85\\u2028'
+newline = r'\n\v\f\r\x85\u2028'
 single_quote = '[\u2018-\u201b\u05f3\uff07]'
 double_quote = '[\u201c-\u201f\u05f4\uff02]'
 apos = "['’]"  # \\uff07
-eos = '[!.?]'  # \\uff01\\uff0e\\uff1f\\ufe52\\ufe56\\ufe57
-nonword = '\\p{L}\\p{M}\\p{N}'
+eos = '[!.?]'  # r'\uff01\uff0e\uff1f\ufe52\ufe56\ufe57'
+nonword = r'\p{L}\p{M}\p{N}'
 caps_modes = ['auto', 'lower', 'raw', 'simple', 'upper']
 default_caps = 'auto'
 
@@ -25,10 +25,11 @@ def normalize(text: str,
               unix_newline: bool = True,
               fix_punct: bool = False
               ) -> str:
+
     if reduce_whitespace:
-        text = regex.sub(f'\\s*[{newline}]\\s*[{newline}]\\s*', '\n\n', text.replace('\u2029', '\n\n'))
-        text = regex.sub(f'[^\\S{newline}]*[{newline}][^\\S{newline}]*', '\n', text)
-        text = regex.sub(f'[^\\S{newline}]+', ' ', text)
+        text = regex.sub(rf'\s*[{newline}]\s*[{newline}]\s*', '\n\n', text.replace('\u2029', '\n\n'))
+        text = regex.sub(rf'[^\S{newline}]*[{newline}][^\S{newline}]*', '\n', text)
+        text = regex.sub(rf'[^\S{newline}]+', ' ', text)
         text = text.strip()
     elif unix_newline:
         text = regex.sub('\r\n?', '\n', text)
@@ -40,7 +41,7 @@ def normalize(text: str,
     return text.lstrip('\ufeff')  # Remove BOM
 
 
-caps_regex = f'(((?=(\\r\\n|[{newline}]))\\3){{2,}}|\\u2029|^|{eos})\\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
+caps_regex = rf'(((?=(\r\n|[{newline}]))\3){{2,}}|\u2029|^|{eos})\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
 
 
 def decode_caps_simple(text: str) -> str:
@@ -54,7 +55,7 @@ def encode_caps(text: str, caps: str = default_caps) -> str:
 
 def remove_the(text: str) -> str:
     the_str = 'THE' if text == text.upper() else 'the'
-    return regex.sub(f'(^| ){the_str} ', '\\1 ', text, flags=regex.MULTILINE)
+    return regex.sub(f'(^(?!{the_str}$)| ){the_str}( |$)', r'\1\2', text, flags=regex.MULTILINE)
 
 
 def get_qu_regex(next_letter_case: str, u_caps: Optional[bool] = None) -> str:
@@ -125,7 +126,7 @@ def encode_with_fallbacks(text: str,
         if the_fallback:
             if theless == text:
                 the = False
-            if the and regex.search('(^| ) ', text, regex.MULTILINE):
+            if the and regex.search('^ |  | $', text, regex.MULTILINE):
                 the = False
                 if verbose:
                     print(f'Falling back to the={the}', file=sys.stderr)
@@ -161,7 +162,7 @@ def get_js_decoder(text: Optional[str] = None,
         js_decoder += get_quq_js_decoder(caps)
     if the:
         the_str = 'THE' if caps == 'upper' else 'the'
-        js_decoder += f".replace(/(^| ) /gm,'$1{the_str} ')"
+        js_decoder += f".replace(/(^(?!$)| )( |$)/gm,'$1{the_str}$2')"
     if caps in ['auto', 'simple']:
         js_decoder += f'.replace(/{caps_regex}/gu,m=>m.toUpperCase())'
     if js_decoder:

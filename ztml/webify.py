@@ -1,5 +1,11 @@
 """ Minification by way of aliasing AKA uglification
 
+Substitutes recurring element, attribute and function names with short aliases.
+This is far from being a full-featured JS minifier, and only addresses specific forms of aliasing
+(with defaults tuned for the author's own hand-minified use cases)
+You may be able to reduce your script further with JS minifiers and packers (see references),
+however these might not be compatible with ZTML (especially when using the non-utf8 crEnc).
+
 Warnings:
 1. The two-parameter aliases would miss substitutions involving tag function syntax, i.e.
    func`str`, even if you specify such forms explicitly. However, see following examples.
@@ -13,18 +19,20 @@ Warnings:
 4. You may need to set replace_quoted=False if you do not want e.g. all 'length', "Length"
    to be replaced by: L
 5. Aliases to be used in other aliases e.g. document, should be specified before the latter.
+
+References:
+http://iteral.com/jscrush
+http://www.crockford.com/jsmin.html
+https://github.com/xem/miniMinifier
+https://siorki.github.io/regPack
+https://lifthrasiir.github.io/roadroller
+https://github.com/mishoo/UglifyJS
 """
 
 
 import re
 import sys
 from typing import AnyStr
-
-if not __package__:
-    import default_vars
-else:
-    # noinspection PyPackages
-    from . import default_vars
 
 
 default_aliases = '''
@@ -45,7 +53,7 @@ N = speechSynthesis
 O = setTimeout
 '''
 
-literals_regex = rf'((?:\[\.\.\.)`(?:\\.|[^`\\])*`])'
+literals_regex = rf'(`(?:\\.|[^`\\])*`)'
 
 
 def safe_encode(s: str, encoding: str, get_back_unused: bool = False) -> bytes:
@@ -80,11 +88,11 @@ def uglify(script: AnyStr,
         shorts.add(short)
         prefix = ''
         comma = ''
-        if re.search('(\\b\\w+\\b)[^>]*=>[^.]*\\b\\1\\.', long):
-            prefix = '(\\w[\\w.[\\]]*)\\.'
+        if re.search(r'(\b\w+\b)[^>]*=>[^.]*\b\1\.', long):
+            prefix = r'(\w[\w.[\]]*)\.'
             if re.search('[^,]+,[^>]+=>', long):
                 comma = ','
-        long = re.sub('[^>]*(?P<prefix>\\b\\w+\\b)[^>]*=>[^.]*\\b(?P=prefix)\\.|[^>]+=>|\\([^,)]*\\)|,.*', '', long)
+        long = re.sub(r'[^>]*(?P<prefix>\b\w+\b)[^>]*=>[^.]*\b(?P=prefix)\.|[^>]+=>|\([^,)]*\)|,.*', '', long)
         if prefix:
             short += '(\\1'
             if '(' not in long:

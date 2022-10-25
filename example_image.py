@@ -50,7 +50,7 @@ for url in image_urls:
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate data is recovered
-    error |= validation.validate_files(filenames, by='id' if element_id else '', element=element_id, image=True)
+    error |= validation.validate_files(filenames, by='id' * bool(element_id), element=element_id, image=True)
     print()
 
 if error:

@@ -1,7 +1,7 @@
 """Burrows-Wheeler and Move-to-front transforms
 
 Applies alphabet reordering by default to concentrate the vowels together.
-BWT Implementation follows pydivsufsort tests, to unnecessitate adding an EOF token.
+BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
 MTF includes new variants (50-90), where larger texts benefit from higher MTF settings.
 Additional BWT on bits (after entropy coding) was found beneficial for large texts.
 
@@ -201,6 +201,7 @@ def get_js_decoder(data: Union[str, Iterable[int]],
             mtf_op = f"d.splice(k*{str(mtf / 100).lstrip('0')}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])"
         if is_str and any(ord(c) > surrogate_lo for c in data):
             mtf_op = f'k-={surrogate_hi - surrogate_lo + 1}*(k>{surrogate_lo}),{mtf_op}'
+        # Use reduce instead of Math.max(...array) due to argument limit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#using_apply_and_built-in_functions
         js_decoder += f'''d=[...Array({data_var}.reduce((a,b)=>a>b?a:b+1,0)).keys()]
 j=0
 for(k of {data_var}){mtf_op}
@@ -222,7 +223,8 @@ for(k of {data_var}){mtf_op}
 {data_var}={data_var}.map(i=>{'d[c=String.fromCodePoint(i)]||c).join``' if is_str else '(d[c=String.fromCodePoint(i)]||c).codePointAt())'}
 '''
     if is_str and not dyn_orders:
-        js_decoder += f'{data_var}=String.fromCodePoint(...{data_var})\n'
+        # Don't use String.fromCodePoint(...array) due to argument limit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#using_apply_and_built-in_functions
+        js_decoder += f'{data_var}={data_var}.map(i=>String.fromCodePoint(i)).join``\n'
     return js_decoder
 
 

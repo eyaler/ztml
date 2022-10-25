@@ -13,7 +13,7 @@ These file sizes include the decoder code which is ~ 1.5 kB (including auxiliary
 The approach makes sense and is optimized for small texts (tens of kB), but performs quite well also on large texts.
 The pipeline includes efficient binary-to-text alternatives to Base64 which are also useful for inline images.
 
-|                                                                                           | File format   | [Micromegas (en)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (en)](https://gutenberg.org/files/2600/2600-0.txt) |
+|                                                                                           | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
 |-------------------------------------------------------------------------------------------|---------------|------------------------------------------------------------------|-------------------------------------------------------------------|
 | Project Gutenberg plain text utf8                                                         | txt           | 63.7 kB                                                          | 3.2 MB                                                            |
 | [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12RT (excluding decoder) | paq           | 13.3 kB (21%)                                                    | 575 kB (18%)                                                      |
@@ -21,7 +21,7 @@ The pipeline includes efficient binary-to-text alternatives to Base64 which are 
 | 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
 | **ZTML Base125**                                                                          | html (utf8)   | 26.5 kB (42%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
-| **ZTML crEnc**                                                                            | html (cp1252) | 23.7 kB (37%) `mtf=0`                                            | 818 kB (25%) `mtf=80`                                             |
+| **ZTML crEnc**                                                                            | html (cp1252) | 23.6 kB (37%) `mtf=0`                                            | 815 kB (25%) `mtf=80`                                             |
 
 ### Installation
 ```
@@ -58,8 +58,8 @@ A quick and dirty way to compress an existing single-page HTML websites with emb
 6. [PNG / DEFLATE compression](ztml/deflate.py) (allowing [native decompression](https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/compression-using-canvas-and-png.html
 ), aspect ratio optimized for minimal padding, [Zopfli optimization](https://github.com/google/zopfli))
 7. [Binary-to-text encoding](https://en.wikipedia.org/wiki/Binary-to-text_encoding) embedded in JS template literals:
-     1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant with 1.6% overhead, to be used with single-byte charset)
-     2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant with 15% overhead, to be used with utf8 charset)
+     1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant, with 1.2% overhead, to be used with single-byte charset)
+     2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant, with 14.7% overhead, to be used with utf8 charset)
 8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
 9. [Validation](ztml/validation.py) of content reproduction on Chrome, Edge and Firefox
 
