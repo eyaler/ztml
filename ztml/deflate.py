@@ -8,7 +8,7 @@ The image aspect ratio is optimized to be squarish (for higher browser compatibi
 We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
 A minimalistic JS decoder code is generated.
 
-Notes:
+Other experiments:
 https://github.com/fhanau/Efficient-Compression-Tool gives a 1.4% improvement on 2600.txt
 WEBP gave worse overall results (using 8-bit cwebp).
 

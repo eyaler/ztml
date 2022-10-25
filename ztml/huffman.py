@@ -2,7 +2,10 @@
 
 Even though we later compress with DEFLATE which does its own Huffman encoding internally,
 I found that for text compression, it is significantly beneficial to pre-encode with Huffman.
-Canonical encoding alleviates the necessity to save or to reconstruct the codebook.
+Canonical encoding obviates saving or reconstructing an explicit codebook.
+Instead, we save a string of symbols ordered by increasing frequency,
+and a sparse dictionary from codeword lengths to bases and offsets
+(see paper, but note it is my custom implementation).
 A minimalistic JS decoder code is generated.
 
 References:
@@ -47,7 +50,7 @@ def encode(text: str,
             symbols = []
         charset = ''.join(symbols[::-1])
         canonical_table = {len(code): [2**len(code) - ba2int(code), len(codebook) - i - 1]
-                           for i, (symbol, code) in enumerate(codebook.items())}
+                           for i, code in enumerate(codebook.values())}
         canonical_table = str(canonical_table).replace(' ', '').replace("'", '')
 
     bits = bitarray()

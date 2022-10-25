@@ -5,8 +5,9 @@ BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
 MTF includes new variants (50-90), where larger texts benefit from higher MTF settings.
 Additional BWT on bits (after entropy coding) was found beneficial for large texts.
 
-Notes:
-Zero run-length encoding (ZLE) after MTF gave worse overall results.
+Other experiments:
+Run-length encoding for spaces before BWT gave worse overall results.
+Run-length encoding for zeros (ZLE) after MTF gave worse overall results.
 
 References:
 https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf
