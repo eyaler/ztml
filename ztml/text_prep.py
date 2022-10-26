@@ -23,9 +23,9 @@ default_caps = 'auto'
 def normalize(text: str,
               reduce_whitespace: bool = False,
               unix_newline: bool = True,
-              fix_punct: bool = False
+              fix_punct: bool = False,
+              strip_bom: bool = True
               ) -> str:
-
     if reduce_whitespace:
         text = regex.sub(rf'\s*[{newline}]\s*[{newline}]\s*', '\n\n', text.replace('\u2029', '\n\n'))
         text = regex.sub(rf'[^\S{newline}]*[{newline}][^\S{newline}]*', '\n', text)
@@ -38,7 +38,9 @@ def normalize(text: str,
         text = regex.sub(single_quote, "'", text)
         text = regex.sub(double_quote, '"', text)
         text = regex.sub('\u2026', '...', text)
-    return text.lstrip('\ufeff')  # Remove BOM
+    if strip_bom:
+        text = regex.sub('^\ufeff', '', text)
+    return text
 
 
 caps_regex = rf'(((?=(\r\n|[{newline}]))\3){{2,}}|\u2029|^|{eos})\P{{L}}*.|(^|[^{nonword}])i(?![{nonword}])'  # Avoid lookbehind to support Safari
