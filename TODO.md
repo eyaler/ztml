@@ -13,7 +13,7 @@
 - Ablation benchmarks
 - Auto-caps should use modifiers for next letter/word/sentence/paragraph or block-level, over simple mode instead of falling back to raw
 - Dictionary compression for long texts
-- [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes)
+- [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes), or [follow-up](https://arxiv.org/pdf/1410.3438.pdf) [works](https://arxiv.org/pdf/2108.05495.pdf)
 - [Base139](https://github.com/kevinAlbs/Base122/issues/3#issuecomment-263787763)
 - Compress the JS itself and use eval, considering also JS packing e.g. [JSCrush](http://iteral.com/jscrush), [RegPack](https://siorki.github.io/regPack), [Roadroller](https://lifthrasiir.github.io/roadroller)
 - Benchmark [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coding

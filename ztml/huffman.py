@@ -3,15 +3,16 @@
 Even though we later compress with DEFLATE which does its own Huffman encoding internally,
 I found that for text compression, it is significantly beneficial to pre-encode with Huffman.
 Canonical encoding obviates saving or reconstructing an explicit codebook.
-Instead, we save a string of symbols ordered by increasing frequency,
-and a sparse dictionary from codeword lengths to bases and offsets
-(see paper, but note it is my custom implementation).
+Instead, we save a string of symbols and a sparse dictionary from codeword lengths to bases and offsets
+(see Moffat paper, but note it is my custom implementation).
 A minimalistic JS decoder code is generated.
 
 References:
 https://wikipedia.org/wiki/Canonical_Huffman_code
 https://github.com/ilanschnell/bitarray/blob/master/doc/canonical.rst
-https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes
+https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes (Moffat)
+https://arxiv.org/pdf/1410.3438.pdf
+https://arxiv.org/pdf/2108.05495.pdf
 """
 
 
