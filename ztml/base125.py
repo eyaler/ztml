@@ -142,7 +142,7 @@ def get_js_decoder(data: bytes,
         encoded = encode(data, offset, validate)
     illegal_str = ','.join(str(i) for i in illegal)
     first_part = f'''k=n=0
-p=(b,l=7)=>(n|=b<<(l<8)>>k>>(l>8),k+=l,k>7?(r=n{-offset or ''},k-=8,n=b<<8-k,r):[])
+p=(b,l=7)=>(n|=b<<(l<8)>>k>>(l>8),k+=l,k>7?(v=n{-offset or ''},k-=8,n=b<<8-k,v):[])
 {output_var}=new Uint8Array([...`'''
     last_part = f'`].flatMap(c=>(i=c.charCodeAt()%65533,i>127?(e=i>>9,[e?p([{illegal_str}][e]):[],p(i<<2*!e&511,9)].flat()):p(i))))\n'
     return first_part.encode() + encoded + last_part.encode()
