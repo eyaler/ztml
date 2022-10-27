@@ -11,8 +11,10 @@ On-chain media storage can require efficient compression for text embedded inlin
 ZTML is a custom pipeline that generates stand-alone HTML or JS files which embed competitively compressed self-extracting text, with file sizes of 25% - 40% the original.
 These file sizes include the decoder code which is ~ 1.5 kB (including auxiliary indices and tables).
 The approach makes sense and is optimized for small texts (tens of kB), but performs quite well also on large texts.
-The pipeline includes efficient binary-to-text alternatives to Base64 which are also useful for inline images.
+The pipeline includes low overhead binary-to-text alternatives to Base64 which are also useful for inline images.
+You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com).
 
+### Benchmark
 |                                                                                           | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
 |-------------------------------------------------------------------------------------------|---------------|------------------------------------------------------------------|-------------------------------------------------------------------|
 | Project Gutenberg plain text utf8                                                         | txt           | 63.7 kB                                                          | 3.2 MB                                                            |
@@ -67,5 +69,5 @@ Note: image encoding only uses steps 7 and later.
 
 ### Projects using this
 - [fragium](https://fragium.com)
-- [miniBook](https://xem.github.io/miniBook) submission by Eyal Gruss
+- [miniBook](https://xem.github.io/miniBook) submission by Eyal Gruss ([source code](misc/minibook.py))
 - [WEBZOS](https://wbtz.github.io)

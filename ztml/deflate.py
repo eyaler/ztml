@@ -119,7 +119,7 @@ def get_js_image_data(length: int,
                       image_var: str = default_vars.image,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
-    return f'''{image_var}.decode().then(_=>{{
+    return f'''{image_var}.decode().then(c=>{{
 c=document.createElement`canvas`
 x=c.getContext`2d`
 c=[c.width={image_var}.width,c.height={image_var}.height]

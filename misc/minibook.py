@@ -1,9 +1,11 @@
 # https://xem.github.io/miniBook
 
 
+import sys
 from urllib.request import urlopen
 
-from ztml.ztml import ztml
+sys.path.append('..')
+from ztml import ztml
 
 
 with urlopen('https://xem.github.io/miniBook/example') as f:

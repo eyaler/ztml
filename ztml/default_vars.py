@@ -1,5 +1,5 @@
-bwt_func = '$'
 bitarray = 'b'
+bwt_func = 'f'
 bytearray = 'o'
 image = 'i'
 text = 't'

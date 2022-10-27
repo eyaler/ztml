@@ -31,10 +31,10 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
          raw: bool = ..., image: bool = ..., js: bool = ...,
          uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., validate: Literal[False] = ...,
-         ignore_regex: str = ..., browser: validation.BrowserType = ...,
-         timeout: int = ..., verbose: bool = ...
-         ) -> bytes: ...
+         mobile: bool = ..., title: str = ..., text_var: str = ...,
+         validate: Literal[False] = ..., ignore_regex: str = ...,
+         browser: validation.BrowserType = ..., timeout: int = ...,
+         verbose: bool = ...) -> bytes: ...
 
 
 @overload
@@ -43,10 +43,10 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
          raw: bool = ..., image: bool = ..., js: bool = ...,
          uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., validate: Literal[True] = ...,
-         ignore_regex: str = ..., browser: validation.BrowserType = ...,
-         timeout: int = ..., verbose: bool = ...
-         ) -> Tuple[bytes, int]: ...
+         mobile: bool = ..., title: str = ..., text_var: str = ...,
+         validate: Literal[True] = ..., ignore_regex: str = ...,
+         browser: validation.BrowserType = ..., timeout: int = ...,
+         verbose: bool = ...) -> Tuple[bytes, int]: ...
 
 
 @overload
@@ -55,10 +55,10 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
          raw: bool = ..., image: bool = ..., js: bool = ...,
          uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., validate: bool = ...,
-         ignore_regex: str = ..., browser: validation.BrowserType = ...,
-         timeout: int = ..., verbose: bool = ...
-         ) -> Union[bytes, Tuple[bytes, int]]: ...
+         mobile: bool = ..., title: str = ..., text_var: str = ...,
+         validate: bool = ..., ignore_regex: str = ...,
+         browser: validation.BrowserType = ..., timeout: int = ...,
+         verbose: bool = ...) -> Union[bytes, Tuple[bytes, int]]: ...
 
 
 def ztml(data,
@@ -78,6 +78,7 @@ def ztml(data,
          lang='',
          mobile=False,
          title='',
+         text_var=default_vars.text,
          validate=False,
          ignore_regex='',
          browser=validation.default_browser,
@@ -94,17 +95,17 @@ def ztml(data,
         if isinstance(data, bytes):
             data = data.decode()
         data = text_prep.normalize(data, reduce_whitespace, unix_newline, fix_punct)  # Reduce whitespace
-        condensed, string_decoder = text_prep.encode_and_get_js_decoder(data, caps)  # Lower case and shorten common strings
-        bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False)  # Burrows-Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
-        huffman_bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text)  # Huffman encode
+        condensed, string_decoder = text_prep.encode_and_get_js_decoder(data, caps, text_var=text_var)  # Lower case and shorten common strings
+        bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False, data_var=text_var)  # Burrows-Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
+        huffman_bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text, text_var=text_var)  # Huffman encode
         bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(huffman_bits)  # Burrows-Wheeler transform on bits
         if raw:
-            writer = f'document.write({default_vars.text});document.close()'  # document.close() needed to ensure that any style changes added after a script are applied
+            writer = f'document.write({text_var});document.close()'  # document.close() needed to ensure that any style changes added after a script are applied
         elif element_id:
             writer = f'''document.body.appendChild(document.createElement`pre`).id='{element_id}'
-{element_id}.textContent={default_vars.text}'''
+{element_id}.textContent={text_var}'''
         else:
-            writer = f"document.body.style.whiteSpace='pre';document.body.textContent={default_vars.text}"
+            writer = f"document.body.style.whiteSpace='pre';document.body.textContent={text_var}"
         bits_decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{writer}'
         image_data = deflate.to_png(bits)  # PNG encode. Time-consuming op.
 
@@ -155,6 +156,7 @@ def ztml(data,
             element = element_id
         valid = validation.validate_html(file, data, caps, by, element, raw,
                                          browser, timeout,
+                                         content_var=text_var,
                                          ignore_regex=ignore_regex,
                                          verbose=True)
         out = out, not valid
@@ -182,6 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--lang', nargs='?', const='', default='')
     parser.add_argument('--mobile', action='store_true')
     parser.add_argument('--title', nargs='?', const='', default='')
+    parser.add_argument('--text_var', default=default_vars.text)
     parser.add_argument('--validate', action='store_true')
     parser.add_argument('--ignore_regex', nargs='?', const='', default='')
     parser.add_argument('--browser', type=str.lower, choices=list(validation.drivers), default=validation.default_browser)
@@ -209,8 +212,9 @@ if __name__ == '__main__':
                not args.skip_unix_newline, args.fix_punct, args.caps,
                args.mtf, args.bin2txt, args.element_id, args.raw, args.image,
                args.js, not args.skip_uglify, not args.skip_replace_quoted,
-               args.lang, args.mobile, args.title, args.validate,
-               args.ignore_regex, args.browser, args.timeout, args.verbose)
+               args.lang, args.mobile, args.title, args.text_var,
+               args.validate, args.ignore_regex, args.browser, args.timeout,
+               args.verbose)
     result = False
     if args.validate:
         out, result = out

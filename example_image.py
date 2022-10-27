@@ -1,4 +1,5 @@
 import os
+import sys
 from time import time
 from urllib.request import urlopen
 
@@ -57,3 +58,4 @@ if error:
     print('Error: some renderings timed out')
 else:
     print(f'Total of {len(image_urls)} images took {(time()-start_time) / 60 :.1f} min.')
+sys.exit(int(error))

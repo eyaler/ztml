@@ -144,6 +144,7 @@ def render_html(file,
                     data_url = wait.until(lambda x: regex.sub('^none$', '', x.find_element(by, element).value_of_css_property('background-image')))
                 else:
                     data_url = wait.until(lambda x: x.find_element(by, element).get_property('src'))
+                assert isinstance(data_url, str), type(data_url)
                 if ';base64,' in data_url:
                     return b64decode(data_url.split(';base64,', 1)[1].split('"', 1)[0], validate=True)
                 image_data = browser.execute_script(f'return {content_var or default_vars.bytearray}')
@@ -152,10 +153,12 @@ def render_html(file,
                 return bytes(image_data)
             if raw:
                 sleep(0.1)
-            wait.until(lambda x: x.find_element(by, element).text)
-            if raw:
-                return browser.execute_script(f'return {content_var or default_vars.text}')
-            return str(browser.find_element(by, element).get_property('innerText'))
+                get_text = lambda x: x.execute_script(f'return {content_var or default_vars.text}')
+            else:
+                get_text = lambda x: x.find_element(by, element).get_property('innerText')
+            text = wait.until(get_text)
+            assert isinstance(text, str), type(text)
+            return text
         except TimeoutException:
             return None
         except Exception:
@@ -191,6 +194,7 @@ def validate_html(file: FilenameOrBytes,  # Don't use AnyStr as it does not have
                   verbose: bool = True
                   ) -> Optional[bool]:
     image = isinstance(data, bytes)
+    assert data, 'Error: Cannot validate against empty data'
     rendered = render_html(file, by, element, raw, image, browser, timeout, content_var)
     if rendered is None:
         return None
