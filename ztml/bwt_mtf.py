@@ -1,19 +1,24 @@
 """Burrows-Wheeler and Move-to-front transforms
 
-Applies alphabet reordering by default to concentrate the vowels together.
+Applies alphabet vowel reordering by default to concentrate the vowels together.
 BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
 MTF includes new variants (50-90), where larger texts benefit from higher MTF settings.
 Additional BWT on bits (after entropy coding) was found beneficial for large texts.
 
 Other experiments:
 Run-length encoding for spaces before BWT gave worse overall results.
+Run-length encoding after text BWT, and MTF over run characters (just this part of Neimi&Teuhola) gave worse overall results.
 Run-length encoding for zeros (ZLE) after MTF gave worse overall results.
 
 References:
 https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf
 https://github.com/louisabraham/pydivsufsort/blob/master/tests/reference.py
-https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.43.1175&rep=rep1&type=pdf
+https://www.cs.auckland.ac.nz/~peter-f/FTPfiles/2002%20VL%20coding%20BWT.pdf
+https://www.juergen-abel.info/files/preprints/preprint_post_bwt_stages.pdf
 https://www.juergen-abel.info/files/preprints/preprint_universal_text_preprocessing.pdf
+https://home.uncg.edu/cmp/faculty/srtate/papers/bwtsort.pdf
+https://www.math.uni-bielefeld.de/sfb343/preprints/pr99133.ps.gz
+https://onlinelibrary.wiley.com/doi/full/10.1002/spe.2873 (Neimi&Teuhola)
 http://groups.di.unipi.it/~gulli/tutorial/burrows_wheeler.pdf (note: has errors afaict)
 """
 
