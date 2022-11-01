@@ -40,7 +40,7 @@ def encode(data: bytes, offset: int = 0, validate: bool = True) -> bytes:
     out = bytearray()
 
     # Get 7 or 9 bits of input data. Returns None if there is no input left
-    def get_bits(length : int) -> Optional[int]:
+    def get_bits(length: int) -> Optional[int]:
         nonlocal cur_index, cur_bit
         if cur_index >= len(data):
             return None

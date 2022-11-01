@@ -296,7 +296,7 @@ def validate_files(filenames: Mapping[str, str],
                     if not valid:
                         error = True
                     if verbose:
-                        if not i:
+                        if i == 0:
                             print(f' rendering secs:', end='', file=sys.stderr)
                         print(f' {browser.name}=' + (f'{time() - start_time :.1f}' if valid else f'{timeout}(TIMEOUT)'), end='', file=sys.stderr)
                 if verbose:

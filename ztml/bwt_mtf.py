@@ -2,7 +2,8 @@
 
 Applies alphabet vowel reordering by default to concentrate the vowels together.
 BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
-MTF includes new variants (50-90), where larger texts benefit from higher MTF settings.
+MTF includes new variants (50-90) inspired by Fenwick's Sticky MTF,
+and larger texts show benefit from higher MTF settings.
 Additional BWT on bits (after entropy coding) was found beneficial for large texts.
 
 Other experiments:
@@ -13,7 +14,7 @@ Run-length encoding for zeros (ZLE) after MTF gave worse overall results.
 References:
 https://www.hpl.hp.com/techreports/Compaq-DEC/SRC-RR-124.pdf
 https://github.com/louisabraham/pydivsufsort/blob/master/tests/reference.py
-https://www.cs.auckland.ac.nz/~peter-f/FTPfiles/2002%20VL%20coding%20BWT.pdf
+https://www.cs.auckland.ac.nz/~peter-f/FTPfiles/2002%20VL%20coding%20BWT.pdf (Fenwick)
 https://www.juergen-abel.info/files/preprints/preprint_post_bwt_stages.pdf
 https://www.juergen-abel.info/files/preprints/preprint_universal_text_preprocessing.pdf
 https://home.uncg.edu/cmp/faculty/srtate/papers/bwtsort.pdf
@@ -50,6 +51,7 @@ max_ord_for_mtf = max_unicode - (surrogate_hi-surrogate_lo) - 1
 
 
 def mtf_rank(mtf: int, rank: int, prev: int) -> int:
+    assert mtf is not None
     assert mtf in mtf_variants, f'Error: mtf={mtf} not in {mtf_variants}'
     if mtf == 0:
         new_rank = 0

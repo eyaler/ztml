@@ -1,16 +1,19 @@
 """PNG / DEFLATE encoding optimized for arbitrary data compression
 
-Encoding data as a PNG image allows efficient DEFLATE compression,
-while allowing use of the browser's native decompression capability,
+Encoding data as a PNG image allows efficient DEFLATE compression (similar to ZIP),
+while allowing use of the browser's native decompression capability for free,
 thus saving the need of an additional decoder, AKA PNG bootstarpping.
 The data is then read from the HTML canvas element.
 The image aspect ratio is optimized to be squarish (for higher browser compatibility) with minimal padding.
+We do not use the alpha channel due to the browser's alpha pre-multiplication in Canvas 2D causing inaccuracies.
+In Safari, even without an alpha channel, similar inaccuracies prevent using 8-bit and 24-bit depths for PNGs.
 We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
 A minimalistic JS decoder code is generated.
 
 Other experiments:
-https://github.com/fhanau/Efficient-Compression-Tool gives a 1.4% improvement on 2600.txt
-WEBP gave worse overall results (using 8-bit cwebp).
+8-bit and 24-bit (RGB) give similar overall results to 1-bit (but does not work on Safari)
+https://github.com/fhanau/Efficient-Compression-Tool gives a 1.4% overall improvement on 2600.txt
+WEBP gave worse overall results (libwebp/cwebp from 8-bit and 24-bit PNG, but does seem to work on Safari).
 
 References:
 https://web.archive.org/web/20090826082743/http://blog.nihilogic.dk:80/2008/05/compression-using-canvas-and-png.html
@@ -26,6 +29,8 @@ https://github.com/codegolf/zpng
 https://github.com/xem/miniBook
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy
+https://stackoverflow.com/questions/60074569/html-canvas-returns-off-by-some-bytes-from-getimagedata
+https://stackoverflow.com/questions/23497925/how-can-i-stop-the-alpha-premultiplication-with-canvas-imagedata/#60564905
 https://github.com/jhildenbiddle/canvas-size#test-results
 https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit
 https://bugs.webkit.org/show_bug.cgi?id=230855
@@ -35,7 +40,7 @@ https://bugs.webkit.org/show_bug.cgi?id=230855
 from io import BytesIO
 import math
 import sys
-from typing import List, Iterable
+from typing import List, Iterable, Optional
 
 import png
 # noinspection PyPackageRequirements
@@ -50,40 +55,56 @@ else:
 
 max_dim = 32767
 max_len = 11180 ** 2
-default_padding_bit = 0
+allowed_bitdepths = [1, 8, 24]  # Warning: 8-bit and 24-bit do not work on Safari
+default_bitdepth = 1
 
 
 def to_png(bits: Iterable[int],
-           padding_bit: int = default_padding_bit,
-           compression: int = 9,
-           filter_strategies: str = '',  # Any subset of 01234mepb, '' means auto
+           bitdepth: int = default_bitdepth,  # 1, 8, 24
+           compression: Optional[int] = 9,
+           filter_strategies: str = '',  # Any subset of 01234mepb or '' for auto
            iterations: int = 15,
            iterations_large: int = 5,
            omit_iend: bool = True,
            filename: str = '',
            verbose: bool = False) -> bytes:
-    bits = list(bits)
-    assert len(bits)
-    width = height = pad_len = 0
+    data = list(bits)
+    bit_len = len(data)
+    assert bit_len
+    assert bitdepth in allowed_bitdepths
+    assert compression is None or -1 <= compression <= 9
+    pad_bits = (bitdepth - bit_len) % bitdepth
+    if bitdepth > 1:
+        data += [data[-1]] * pad_bits
+        data = [int(''.join(str(b) for b in data[i : i + bitdepth]), 2) for i in range(0, len(data), bitdepth)]
+    width = height = pad_pixels = 0
     length = None
     while width * height != length:
         if length is not None:
-            bits.append(padding_bit)
-            pad_len += 1
-        length = len(bits)
+            data.append(data[-1])
+            pad_pixels += 1
+        length = len(data)
         assert length <= max_len, length
         height = int(math.sqrt(length))
         while length % height and height > 1 and length // (height-1) <= max_dim:
             height -= 1
         width = length // height
         assert width <= max_dim, width
-    bits = [bits[i : i + width] for i in range(0, length, width)]
+    width_with_channels = width
+    length_with_channels = length
+    if bitdepth > 8:
+        data = [b for i in data for b in i.to_bytes(bitdepth // 8, 'big')]
+        width_with_channels *= bitdepth // 8
+        length_with_channels *= bitdepth // 8
+    data = [data[i : i + width_with_channels] for i in range(0, length_with_channels, width_with_channels)]
     png_data = BytesIO()
-    png.Writer(width, height, greyscale=True, bitdepth=1, compression=compression
-               ).write(png_data, bits)
+    png.Writer(width, height, greyscale=bitdepth <= 8,
+               bitdepth=1 if bitdepth == 1 else 8,
+               compression=compression).write(png_data, data)
     png_data.seek(0)
     png_data = png_data.read()
     out = png_data
+
     if iterations > 0 and iterations_large > 0:
         out = zopfli.ZopfliPNG(filter_strategies=filter_strategies,
                                iterations=iterations,
@@ -92,7 +113,7 @@ def to_png(bits: Iterable[int],
     if omit_iend:
         out = out[:-12]  # IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes). Note: do not omit the IDAT zlib Adler-32 or the IDAT CRC-32 as this will break Safari
     if verbose:
-        print(f'width={width} height={height} pad_len={pad_len} bits={length} bytes={length+7 >> 3} png={len(png_data)} final={len(out)}', file=sys.stderr)
+        print(f'input_bits={bit_len} pad_bits={pad_bits} width={width} height={height} pad_pixels={pad_pixels} total_pad_bits={length*bitdepth - bit_len} bits={length * bitdepth} bytes={length*bitdepth+7 >> 3} png={len(png_data)} final={len(out)}', file=sys.stderr)
     if filename:
         with open(filename, 'wb') as f:
             f.write(out)
@@ -114,26 +135,36 @@ def get_js_create_image(image_var: str = default_vars.image,
 '''
 
 
-def get_js_image_data(length: int,
+def get_js_image_data(bit_len: int,
                       decoder_script: str = '',
+                      bitdepth: int = default_bitdepth,
                       image_var: str = default_vars.image,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
-    return f'''{image_var}.decode().then(c=>{{
+    assert bitdepth in allowed_bitdepths
+    js_image_data = f'''{image_var}.decode().then(c=>{{
 c=document.createElement`canvas`
 x=c.getContext`2d`
 c=[c.width={image_var}.width,c.height={image_var}.height]
 x.drawImage({image_var},0,0)
-s=x.getImageData({bitarray_var}=[],0,...c).data
-for(j={length};j--;){bitarray_var}[j]=s[j*4]>>7
-{decoder_script.strip()}}})'''  # Applying >>7 before the Huffman &1 to deal with Safari PNG rendering inaccuracy
+s=x.getImageData({bitarray_var}=[],0,...c).data{'.filter((v,i)=>(i+1)%4)' * (bitdepth == 24)}
+'''
+    if bitdepth == 1:
+        js_image_data += f'for(j={bit_len};j--;){bitarray_var}[j]=s[j*4]>>7&1\n'  # Applying >>7 to deal with Safari PNG rendering inaccuracy
+    else:  # Will break Safari
+        js_image_data += f'''for(j={(bit_len+(bitdepth-bit_len)%bitdepth) // 8};j--;)for(k=8;k--;){bitarray_var}[j*8+k]=s[j{'*4' * (bitdepth <= 8)}]>>7-k&1
+{bitarray_var}={bitarray_var}.slice(0,{bit_len})
+'''
+    js_image_data += f'{decoder_script.strip()}}})'
+    return js_image_data
 
 
-def get_js_image_decoder(length: int,
+def get_js_image_decoder(bit_len: int,
                          decoder_script: str = '',
+                         bitdepth: int = default_bitdepth,
                          image_var: str = default_vars.image,
                          bytearray_var: str = default_vars.bytearray,
                          bitarray_var: str = default_vars.bitarray
                          ) -> str:
     return get_js_create_image(image_var, bytearray_var) + get_js_image_data(
-        length, decoder_script, image_var, bitarray_var)
+        bit_len, decoder_script, bitdepth, image_var, bitarray_var)

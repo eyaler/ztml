@@ -4,7 +4,7 @@ Even though we later compress with DEFLATE which does its own Huffman encoding i
 I found that for text compression, it is significantly beneficial to pre-encode with Huffman.
 Canonical encoding obviates saving or reconstructing an explicit codebook.
 Instead, we save a string of symbols and a sparse dictionary from codeword lengths to bases and offsets
-(see Moffat&Turpin paper, but note it is my custom implementation).
+(see Moffat&Turpin, but note it is my custom implementation).
 A minimalistic JS decoder code is generated.
 
 References:
@@ -78,7 +78,7 @@ def get_js_decoder(charset: str,
     charset = charset.replace('\\', '\\\\').replace('\0', '\\0').replace('\r', '\\r').replace('`', '\\`').replace('${', '\\${')  # Note that charset may include more characters requiring safe encoding as regard to encoding domains as well as HTML character overrides
     return f'''s=[...`{charset}`]
 d={canonical_table}
-for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-('0b'+c))>=0);j++)c+={bitarray_var}[j]&1
+for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k][1]+m])for(c='',k=-1;!((m=2**++k-d[k]?.[0]-('0b'+c))>=0);j++)c+={bitarray_var}[j]
 '''
 
 

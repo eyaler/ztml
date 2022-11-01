@@ -28,35 +28,35 @@ default_bin2txt = 'crenc'
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
-         mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
-         raw: bool = ..., image: bool = ..., js: bool = ...,
-         uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., text_var: str = ...,
-         validate: Literal[False] = ..., ignore_regex: str = ...,
-         browser: validation.BrowserType = ..., timeout: int = ...,
-         verbose: bool = ...) -> bytes: ...
+         mtf: Optional[int] = ..., bitdepth: int = ...,
+         bin2txt: str = ..., element_id: str = ..., raw: bool = ...,
+         image: bool = ..., js: bool = ..., uglify: bool = ...,
+         replace_quoted: bool = ..., lang: str = ..., mobile: bool = ...,
+         title: str = ..., text_var: str = ..., validate: Literal[False] = ...,
+         ignore_regex: str = ..., browser: validation.BrowserType = ...,
+         timeout: int = ..., verbose: bool = ...) -> bytes: ...
 
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
-         mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
-         raw: bool = ..., image: bool = ..., js: bool = ...,
-         uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., text_var: str = ...,
-         validate: Literal[True] = ..., ignore_regex: str = ...,
-         browser: validation.BrowserType = ..., timeout: int = ...,
-         verbose: bool = ...) -> Tuple[bytes, int]: ...
+         mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
+         element_id: str = ..., raw: bool = ..., image: bool = ...,
+         js: bool = ..., uglify: bool = ..., replace_quoted: bool = ...,
+         lang: str = ..., mobile: bool = ..., title: str = ...,
+         text_var: str = ..., validate: Literal[True] = ...,
+         ignore_regex: str = ..., browser: validation.BrowserType = ...,
+         timeout: int = ..., verbose: bool = ...) -> Tuple[bytes, int]: ...
 
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
-         mtf: Optional[int] = ..., bin2txt: str = ..., element_id: str = ...,
-         raw: bool = ..., image: bool = ..., js: bool = ...,
-         uglify: bool = ..., replace_quoted: bool = ..., lang: str = ...,
-         mobile: bool = ..., title: str = ..., text_var: str = ...,
-         validate: bool = ..., ignore_regex: str = ...,
+         mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
+         element_id: str = ..., raw: bool = ..., image: bool = ...,
+         js: bool = ..., uglify: bool = ..., replace_quoted: bool = ...,
+         lang: str = ..., mobile: bool = ..., title: str = ...,
+         text_var: str = ..., validate: bool = ..., ignore_regex: str = ...,
          browser: validation.BrowserType = ..., timeout: int = ...,
          verbose: bool = ...) -> Union[bytes, Tuple[bytes, int]]: ...
 
@@ -68,6 +68,7 @@ def ztml(data,
          fix_punct=False,
          caps=text_prep.default_caps,
          mtf=bwt_mtf.default_mtf,
+         bitdepth=deflate.default_bitdepth,
          bin2txt=default_bin2txt,
          element_id='',
          raw=False,
@@ -107,14 +108,14 @@ def ztml(data,
         else:
             writer = f"document.body.style.whiteSpace='pre';document.body.textContent={text_var}"
         bits_decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{writer}'
-        image_data = deflate.to_png(bits)  # PNG encode. Time-consuming op.
+        image_data = deflate.to_png(bits, bitdepth)  # PNG encode. Time-consuming op.
 
     encoding = 'cp1252' if bin2txt == 'crenc' else 'utf8'
     if bin2txt == 'base64':  # This is just for benchmarking and is not recommended
         image_url = b'data:;base64,' + b64encode(image_data)
         if not image:
             image_decoder = f"{default_vars.image}=new Image;{default_vars.image}.src='".encode() + image_url + b"'\n"
-            out = image_decoder + deflate.get_js_image_data(len(bits), bits_decoder).encode()
+            out = image_decoder + deflate.get_js_image_data(len(bits), bits_decoder, bitdepth).encode()
     else:
         if bin2txt == 'base125':
             bytes_decoder = base125.get_js_decoder(image_data)  # Time-consuming op. when offset==None
@@ -123,7 +124,7 @@ def ztml(data,
         if image:
             image_url = f"'+URL.createObjectURL(new Blob([{default_vars.bytearray}]))+'".encode()
         else:
-            image_decoder = deflate.get_js_image_decoder(len(bits), bits_decoder)
+            image_decoder = deflate.get_js_image_decoder(len(bits), bits_decoder, bitdepth)
             out = webify.safe_encode(image_decoder, encoding, get_back_unused=True)
 
     if image:
@@ -174,6 +175,7 @@ if __name__ == '__main__':
     parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps)
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants,
                         default=bwt_mtf.default_mtf)
+    parser.add_argument('--bitdepth', type=int, choices=deflate.allowed_bitdepths, default=deflate.default_bitdepth, help='Warning: 8-bit and 24-bit do not work on Safari')
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--element_id', nargs='?', const='', default='')
     parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be inferred from input_filename .html')
@@ -210,11 +212,11 @@ if __name__ == '__main__':
                         raise
     out = ztml(data, args.output_filename, args.reduce_whitespace,
                not args.skip_unix_newline, args.fix_punct, args.caps,
-               args.mtf, args.bin2txt, args.element_id, args.raw, args.image,
-               args.js, not args.skip_uglify, not args.skip_replace_quoted,
-               args.lang, args.mobile, args.title, args.text_var,
-               args.validate, args.ignore_regex, args.browser, args.timeout,
-               args.verbose)
+               args.mtf, args.bitdepth, args.bin2txt, args.element_id,
+               args.raw, args.image, args.js, not args.skip_uglify,
+               not args.skip_replace_quoted, args.lang, args.mobile,
+               args.title, args.text_var, args.validate, args.ignore_regex,
+               args.browser, args.timeout, args.verbose)
     result = False
     if args.validate:
         out, result = out
