@@ -56,6 +56,24 @@ O = setTimeout
 literals_regex = rf'(`(?:\\.|[^`\\])*`)'
 
 
+def escape(s: AnyStr, escape_nul: bool = False) -> AnyStr:
+    pattern = r'\\|`|\${'
+    repl = r'\\\g<0>'
+    cr = '\r'
+    esc_cr = '\\r'
+    nul = '\0'
+    esc_nul = '\\0'
+    if isinstance(s, bytes):
+        pattern = pattern.encode()
+        repl = repl.encode()
+        cr = cr.encode()
+        esc_cr = esc_cr.encode()
+    s = re.sub(pattern, repl, s).replace(cr, esc_cr)
+    if escape_nul:
+        s = s.replace(nul, esc_nul)
+    return s
+
+
 def safe_encode(s: str, encoding: str, get_back_unused: bool = False) -> bytes:
     encoding = encoding.lower()
     out = s.encode(encoding, 'strict' if encoding.replace('-', '') == 'utf8' else 'backslashreplace')
@@ -89,7 +107,7 @@ def uglify(script: AnyStr,
         prefix = ''
         comma = ''
         if re.search(r'(\b\w+\b)[^>]*=>[^.]*\b\1\.', long):
-            prefix = r'(\w[\w.[\]]*)\.'
+            prefix = r'(\w([\w.]|\[[^[\]]+\])*)\.'
             if re.search('[^,]+,[^>]+=>', long):
                 comma = ','
         long = re.sub(r'[^>]*(?P<prefix>\b\w+\b)[^>]*=>[^.]*\b(?P=prefix)\.|[^>]+=>|\([^,)]*\)|,.*', '', long)

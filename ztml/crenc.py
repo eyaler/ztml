@@ -21,20 +21,19 @@ https://stackoverflow.com/a/10081375/664456
 """
 
 
-import re
 from typing import Optional, Tuple
 
 if not __package__:
-    import default_vars
+    import default_vars, webify
 else:
     # noinspection PyPackages
-    from . import default_vars
+    from . import default_vars, webify
 
 
 def encode(data: bytes, offset: int = 0) -> bytes:
     if offset:
         data = bytes(byte+offset & 255 for byte in data)
-    return re.sub(rb'\\|`|\${', rb'\\\g<0>', data).replace(b'\r', b'\\r')
+    return webify.escape(data)
 
 
 def optimize_encode(data: bytes) -> Tuple[bytes, int, int]:

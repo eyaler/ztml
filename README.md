@@ -23,8 +23,8 @@ You can find a very high-level overview in these [slides](misc/reversim2022_slid
 | 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
 | Zstandard 1.5.2 -22 --ultra (excluding decoder)                                           | zst           | 23.4 kB (37%)                                                    | 921 kB (28%)
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
-| **ZTML Base125**                                                                          | html (utf8)   | 26.5 kB (42%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
-| **ZTML crEnc**                                                                            | html (cp1252) | 23.6 kB (37%) `mtf=0`                                            | 815 kB (25%) `mtf=80`                                             |
+| **ZTML Base125**                                                                          | html (utf8)   | 26.4 kB (41%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
+| **ZTML crEnc**                                                                            | html (cp1252) | 23.5 kB (37%) `mtf=0`                                            | 815 kB (25%) `mtf=80`                                             |
 
 ### Installation
 ```
