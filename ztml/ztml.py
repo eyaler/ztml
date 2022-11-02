@@ -27,7 +27,8 @@ default_bin2txt = 'crenc'
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
-         unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
+         unix_newline: bool = ..., fix_punct: bool = ...,
+         remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
          mtf: Optional[int] = ..., bitdepth: int = ...,
          bin2txt: str = ..., element_id: str = ..., raw: bool = ...,
          image: bool = ..., js: bool = ..., uglify: bool = ...,
@@ -39,7 +40,8 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
-         unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
+         unix_newline: bool = ..., fix_punct: bool = ...,
+         remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
          mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
          element_id: str = ..., raw: bool = ..., image: bool = ...,
          js: bool = ..., uglify: bool = ..., replace_quoted: bool = ...,
@@ -51,7 +53,8 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
-         unix_newline: bool = ..., fix_punct: bool = ..., caps: str = ...,
+         unix_newline: bool = ..., fix_punct: bool = ...,
+         remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
          mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
          element_id: str = ..., raw: bool = ..., image: bool = ...,
          js: bool = ..., uglify: bool = ..., replace_quoted: bool = ...,
@@ -66,7 +69,9 @@ def ztml(data,
          reduce_whitespace=False,
          unix_newline=True,
          fix_punct=False,
+         remove_bom=True,
          caps=text_prep.default_caps,
+         bwtsort=True,
          mtf=bwt_mtf.default_mtf,
          bitdepth=deflate.default_bitdepth,
          bin2txt=default_bin2txt,
@@ -95,9 +100,9 @@ def ztml(data,
     else:
         if isinstance(data, bytes):
             data = data.decode()
-        data = text_prep.normalize(data, reduce_whitespace, unix_newline, fix_punct)  # Reduce whitespace
+        data = text_prep.normalize(data, reduce_whitespace, unix_newline, fix_punct, remove_bom)  # Reduce whitespace
         condensed, string_decoder = text_prep.encode_and_get_js_decoder(data, caps, text_var=text_var)  # Lower case and shorten common strings
-        bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, mtf=mtf, add_bwt_func=False, data_var=text_var)  # Burrows-Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
+        bwt_mtf_text, bwt_mtf_text_decoder = bwt_mtf.encode_and_get_js_decoder(condensed, bwtsort, mtf, add_bwt_func=False, data_var=text_var)  # Burrows-Wheeler + Move-to-front transforms on text. MTF is a time-consuming op.
         huffman_bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text, text_var=text_var)  # Huffman encode
         bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(huffman_bits)  # Burrows-Wheeler transform on bits
         if raw:
@@ -172,7 +177,9 @@ if __name__ == '__main__':
     parser.add_argument('--reduce_whitespace', action='store_true')
     parser.add_argument('--skip_unix_newline', action='store_true')
     parser.add_argument('--fix_punct', action='store_true')
+    parser.add_argument('--skip_remove_bom', action='store_true')
     parser.add_argument('--caps', type=str.lower, choices=text_prep.caps_modes, default=text_prep.default_caps)
+    parser.add_argument('--skip_bwtsort', action='store_true')
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants,
                         default=bwt_mtf.default_mtf)
     parser.add_argument('--bitdepth', type=int, choices=deflate.allowed_bitdepths, default=deflate.default_bitdepth, help='Warning: 8-bit and 24-bit do not work on Safari')
@@ -211,7 +218,8 @@ if __name__ == '__main__':
                     if encoding.replace('-', '') == 'utf8':
                         raise
     out = ztml(data, args.output_filename, args.reduce_whitespace,
-               not args.skip_unix_newline, args.fix_punct, args.caps,
+               not args.skip_unix_newline, args.fix_punct,
+               not args.skip_remove_bom, args.caps, not args.skip_bwtsort,
                args.mtf, args.bitdepth, args.bin2txt, args.element_id,
                args.raw, args.image, args.js, not args.skip_uglify,
                not args.skip_replace_quoted, args.lang, args.mobile,

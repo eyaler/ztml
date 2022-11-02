@@ -36,5 +36,5 @@
 - Linux installation instructions / Enable validation in Colab
 - Validation testing for Safari
 - Fix slow rendering with Selenium in validation
-- Tests for text_prep.py: normalize, caps, the; bwt_mtf.py: reorder
+- Tests for text_prep.py: normalize, caps, the
 - Automatic testing on GitHub

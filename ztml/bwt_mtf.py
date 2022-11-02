@@ -1,6 +1,6 @@
 """Burrows-Wheeler and Move-to-front transforms
 
-Applies alphabet vowel reordering by default to concentrate the vowels together.
+Applies pre-BWT alphabet vowel sorting by default to concentrate the vowels together.
 BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
 MTF includes new variants (50-90) inspired by Fenwick's Sticky MTF,
 and larger texts show benefit from higher MTF settings.
@@ -42,8 +42,8 @@ mtf_variants = [None, 0, 1, 2, 50, 52, 60, 70, 80, 90]
 default_mtf = 0
 
 
-reorder_table = str.maketrans(order1, order2)
-reverse_reorder_table = str.maketrans(order2, order1)
+bwtsort_table = str.maketrans(order1, order2)
+reverse_bwtsort_table = str.maketrans(order2, order1)
 surrogate_lo = 55296
 surrogate_hi = 57343
 max_unicode = 1114111
@@ -108,25 +108,25 @@ def mtf_decode(data: Iterable[int], mtf: int == default_mtf) -> List[int]:
 
 
 @overload
-def encode(data: str, reorder: bool = ..., mtf: Optional[int] = ...,
+def encode(data: str, bwtsort: bool = ..., mtf: Optional[int] = ...,
            validate: bool = ...) -> Tuple[str, int]: ...
 
 
 @overload
-def encode(data: Iterable[int], reorder: bool = ..., mtf: Optional[int] = ...,
+def encode(data: Iterable[int], bwtsort: bool = ..., mtf: Optional[int] = ...,
            validate: bool = ...) -> Tuple[List[int], int]: ...
 
 
-def encode(data, reorder=True, mtf=default_mtf, validate=True):
+def encode(data, bwtsort=True, mtf=default_mtf, validate=True):
     is_str = isinstance(data, str)
     if not is_str:
         data = list(data)
     out = list(data)
-    if reorder:
+    if bwtsort:
         if not is_str:
             out = [chr(i) for i in out]
-        out = ''.join(out).translate(reorder_table)
-    if is_str or reorder:
+        out = ''.join(out).translate(bwtsort_table)
+    if is_str or bwtsort:
         out = [ord(c) for c in out]
     sa = divsufsort(np.array(out)) if out else []
     out = out[-1:] + [out[i - 1] for i in sa if i]
@@ -136,7 +136,7 @@ def encode(data, reorder=True, mtf=default_mtf, validate=True):
     if is_str:
         out = ''.join(chr(i) for i in out)
     if validate:
-        decoded = decode(out, index, reorder, mtf)
+        decoded = decode(out, index, bwtsort, mtf)
         if not hasattr(data, '__getitem__'):
             data = type(decoded)(data)
         assert decoded == data, (len(decoded), len(data), decoded[:30], data[:30])
@@ -144,16 +144,16 @@ def encode(data, reorder=True, mtf=default_mtf, validate=True):
 
 
 @overload
-def decode(data: str, index: int, reorder: bool = ...,
+def decode(data: str, index: int, bwtsort: bool = ...,
            mtf: Optional[int] = ...) -> str: ...
 
 
 @overload
-def decode(data: Iterable[int], index: int, reorder: bool = ...,
+def decode(data: Iterable[int], index: int, bwtsort: bool = ...,
            mtf: Optional[int] = ...) -> List[int]: ...
 
 
-def decode(data, index, reorder=True, mtf=default_mtf):
+def decode(data, index, bwtsort=True, mtf=default_mtf):
     is_str = isinstance(data, str)
     out = list(data)
     if mtf is not None:
@@ -166,10 +166,10 @@ def decode(data, index, reorder=True, mtf=default_mtf):
     ordered.sort()
     for i in range(len(out)):
         out[i], index = ordered[index]
-    if reorder:
+    if bwtsort:
         if not is_str:
             out = [chr(i) for i in out]
-        out = ''.join(out).translate(reverse_reorder_table)
+        out = ''.join(out).translate(reverse_bwtsort_table)
         if not is_str:
             out = [ord(c) for c in out]
     elif is_str:
@@ -179,7 +179,7 @@ def decode(data, index, reorder=True, mtf=default_mtf):
 
 def get_js_decoder(data: Union[str, Iterable[int]],
                    index: int,
-                   reorder: bool = True,
+                   bwtsort: bool = True,
                    mtf: Optional[int] = default_mtf,
                    add_bwt_func: bool = True,
                    bwt_func_var: str = default_vars.bwt_func,
@@ -218,7 +218,7 @@ for(k of {data_var}){mtf_op}
         js_decoder += f"{bwt_func_var}=(d,k)=>{{s=d.map((c,i)=>[c,i-(i<=k)]).sort((a,b)=>a[0]-b[0]);for(j in s)[d[j],k]=s[k]}}\n"  # Sort on code points to respect order of char above \uffff
     js_decoder += f'{bwt_func_var}({data_var},{index})\n'
     dyn_orders = None
-    if reorder:
+    if bwtsort:
         symbols = set(data)
         if not is_str:
             symbols = {chr(i) for i in symbols}
@@ -238,7 +238,7 @@ for(k of {data_var}){mtf_op}
 
 @overload
 def encode_and_get_js_decoder(data: str,
-                              reorder: bool = ...,
+                              bwtsort: bool = ...,
                               mtf: Optional[int] = ...,
                               add_bwt_func: bool = ...,
                               bwt_func_var: str = ...,
@@ -249,7 +249,7 @@ def encode_and_get_js_decoder(data: str,
 
 @overload
 def encode_and_get_js_decoder(data: Iterable[int],
-                              reorder: bool = ...,
+                              bwtsort: bool = ...,
                               mtf: Optional[int] = ...,
                               add_bwt_func: bool = ...,
                               bwt_func_var: str = ...,
@@ -259,7 +259,7 @@ def encode_and_get_js_decoder(data: Iterable[int],
 
 
 def encode_and_get_js_decoder(data,
-                              reorder=True,
+                              bwtsort=True,
                               mtf=default_mtf,
                               add_bwt_func=True,
                               bwt_func_var=default_vars.bwt_func,
@@ -272,10 +272,10 @@ def encode_and_get_js_decoder(data,
     if not data_var:
         data_var = default_vars.text if is_str else default_vars.bitarray
     if data_var == default_vars.bitarray:
-        reorder = False
+        bwtsort = False
         mtf = None
-    encoded, index = encode(data, reorder, mtf, validate)
-    return encoded, get_js_decoder(data, index, reorder, mtf, add_bwt_func, bwt_func_var, data_var)
+    encoded, index = encode(data, bwtsort, mtf, validate)
+    return encoded, get_js_decoder(data, index, bwtsort, mtf, add_bwt_func, bwt_func_var, data_var)
 
 
 def test() -> None:
@@ -292,16 +292,16 @@ def test() -> None:
         for y in symbols:
             for z in symbols:
                 for mtf in mtf_variants:
-                    for reorder in [False, True]:
-                        encode(f'{x}{y}{z}', reorder=reorder, mtf=mtf, validate=True)
+                    for bwtsort in [False, True]:
+                        encode(f'{x}{y}{z}', bwtsort=bwtsort, mtf=mtf, validate=True)
 
     symbols = ['', '0', '1', '97', '255']
     for x in symbols:
         for y in symbols:
             for z in symbols:
                 for mtf in mtf_variants:
-                    for reorder in [False, True]:
-                        encode([int(c) for c in f'{x}{y}{z}'], reorder=reorder, mtf=mtf, validate=True)
+                    for bwtsort in [False, True]:
+                        encode([int(c) for c in f'{x}{y}{z}'], bwtsort=bwtsort, mtf=mtf, validate=True)
 
 
 if __name__ == '__main__':

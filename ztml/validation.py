@@ -221,6 +221,7 @@ def validate_files(filenames: Mapping[str, str],
                    reduce_whitespace: bool = False,
                    unix_newline: bool = True,
                    fix_punct: bool = False,
+                   remove_bom: bool = True,
                    caps: str = text_prep.default_caps,
                    by: str = default_by,
                    element: str = default_element,
@@ -257,7 +258,7 @@ def validate_files(filenames: Mapping[str, str],
             if raw_size is None:
                 raw_size = len(data.encode() if isinstance(data, str) else data)
             if not image and isinstance(data, bytes):
-                data = text_prep.normalize(data.decode(), reduce_whitespace, unix_newline, fix_punct)  # Assumes raw text file is utf8. Otherwise, pass it as a data argument
+                data = text_prep.normalize(data.decode(), reduce_whitespace, unix_newline, fix_punct, remove_bom)  # Assumes raw text file is utf8. Otherwise, pass it as a data argument
 
             if verbose:
                 size = os.path.getsize(filename)
