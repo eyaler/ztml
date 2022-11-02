@@ -4,7 +4,7 @@ Applies pre-BWT alphabet vowel sorting by default to concentrate the vowels toge
 BWT Implementation follows pydivsufsort tests, to obviate adding an EOF token.
 MTF includes new variants (50-90) inspired by Fenwick's Sticky MTF,
 and larger texts show benefit from higher MTF settings.
-Additional BWT on bits (after entropy coding) was found beneficial for large texts.
+Additional BWT on bits (after entropy coding and before DEFLATE) was found beneficial for large texts.
 
 Other experiments:
 Run-length encoding for spaces before BWT gave worse overall results.

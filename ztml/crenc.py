@@ -17,7 +17,7 @@ http://www.yenc.org
 https://github.com/eshaz/simple-yenc
 https://github.com/eshaz/simple-yenc#what-is-dynencode
 https://html.spec.whatwg.org/multipage/parsing.html#table-charref-overrides
-https://stackoverflow.com/a/10081375/664456
+https://stackoverflow.com/questions/10080605/special-character-u0098-read-as-u02dc-using-charcodeat/#10081375
 """
 
 
