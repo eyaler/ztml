@@ -15,16 +15,16 @@ The pipeline includes low overhead binary-to-text alternatives to Base64 which a
 You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com).
 
 ### Benchmark
-|                                                                                           | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
-|-------------------------------------------------------------------------------------------|---------------|------------------------------------------------------------------|-------------------------------------------------------------------|
-| Project Gutenberg plain text utf8                                                         | txt           | 63.7 kB                                                          | 3.2 MB                                                            |
-| [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12RT (excluding decoder) | paq           | 13.3 kB (21%)                                                    | 575 kB (18%)                                                      |
-| 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                                              | 7z            | 20.8 kB (32%)                                                    | 746 kB (23%)                                                      |
-| 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
-| Zstandard 1.5.2 -22 --ultra (excluding decoder)                                           | zst           | 23.4 kB (37%)                                                    | 921 kB (28%)                                                      
-| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
-| **ZTML Base125**                                                                          | html (utf8)   | 26.4 kB (41%) `mtf=0`                                            | 902 kB (28%) `mtf=80` `ect=True`                                  |
-| **ZTML crEnc**                                                                            | html (cp1252) | 23.5 kB (37%) `mtf=0`                                            | 803 kB (24%) `mtf=80` `ect=True`                                  |
+|                                                                                       | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
+|---------------------------------------------------------------------------------------|---------------|------------------------------------------------------------------|-------------------------------------------------------------------|
+| Project Gutenberg plain text utf8                                                     | txt           | 63.7 kB                                                          | 3.2 MB                                                            |
+| [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12RT (excl. decoder) | paq           | 13.3 kB (21%)                                                    | 575 kB (18%)                                                      |
+| 7-Zip 22.01 9 Ultra PPMd (excl. decoder)                                              | 7z            | 20.8 kB (32%)                                                    | 746 kB (23%)                                                      |
+| 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                            | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
+| Zstandard 1.5.2 -22 --ultra (excl. decoder)                                           | zst           | 23.4 kB (37%)                                                    | 921 kB (28%)                                                      
+| [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                     | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
+| **ZTML Base125**                                                                      | html (utf8)   | 26.4 kB (41%) `mtf=0`                                            | 902 kB (28%) `mtf=80` `ect=True`                                  |
+| **ZTML crEnc**                                                                        | html (cp1252) | 23.5 kB (37%) `mtf=0`                                            | 803 kB (24%) `mtf=80` `ect=True`                                  |
 
 ### Installation
 ```
