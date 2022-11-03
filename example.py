@@ -8,15 +8,16 @@ from ztml import validation, ztml
 
 
 books = [30123, 2600]
-mtf_variants = [0, 80]
+book_mtf = [0, 80]
+book_ect = [False, True]
 output_folder = 'output'
 skip_download_exists = True
 element_id = ''
 
 
-assert len(books) == len(mtf_variants)
+assert len(books) == len(book_mtf) == len(book_ect)
 error = False
-for item, mtf in zip(books, mtf_variants):
+for item, mtf, ect in zip(books, book_mtf, book_ect):
     item_start_time = time()
     filenames = dict(raw=f'{item}.txt',
                      # base64_js=f'{item}_64.js',
@@ -41,7 +42,7 @@ for item, mtf in zip(books, mtf_variants):
     for label, filename in filenames.items():
         if label == 'raw':
             continue
-        file = ztml.ztml(data, filename, mtf=mtf, bin2txt=label.rsplit('_', 1)[0], element_id=element_id)
+        file = ztml.ztml(data, filename, mtf=mtf, ect=ect, bin2txt=label.rsplit('_', 1)[0], element_id=element_id)
         cnt += 1
 
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')

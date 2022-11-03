@@ -29,7 +29,7 @@ default_bin2txt = 'crenc'
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
          unix_newline: bool = ..., fix_punct: bool = ...,
          remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
-         mtf: Optional[int] = ..., bitdepth: int = ...,
+         mtf: Optional[int] = ..., bitdepth: int = ..., ect: bool = ...,
          bin2txt: str = ..., element_id: str = ..., raw: bool = ...,
          image: bool = ..., js: bool = ..., uglify: bool = ...,
          replace_quoted: bool = ..., lang: str = ..., mobile: bool = ...,
@@ -40,7 +40,7 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
-         unix_newline: bool = ..., fix_punct: bool = ...,
+         unix_newline: bool = ..., fix_punct: bool = ..., ect: bool = ...,
          remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
          mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
          element_id: str = ..., raw: bool = ..., image: bool = ...,
@@ -53,7 +53,7 @@ def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
 
 @overload
 def ztml(data: AnyStr, filename: str = ..., reduce_whitespace: bool = ...,
-         unix_newline: bool = ..., fix_punct: bool = ...,
+         unix_newline: bool = ..., fix_punct: bool = ..., ect: bool = ...,
          remove_bom: bool = ..., caps: str = ..., bwtsort: bool = ...,
          mtf: Optional[int] = ..., bitdepth: int = ..., bin2txt: str = ...,
          element_id: str = ..., raw: bool = ..., image: bool = ...,
@@ -74,6 +74,7 @@ def ztml(data,
          bwtsort=True,
          mtf=bwt_mtf.default_mtf,
          bitdepth=deflate.default_bitdepth,
+         ect=False,
          bin2txt=default_bin2txt,
          element_id='',
          raw=False,
@@ -113,7 +114,7 @@ def ztml(data,
         else:
             writer = f"document.body.style.whiteSpace='pre';document.body.textContent={text_var}"
         bits_decoder = f'{bwt_bits_decoder}{huffman_decoder}{bwt_mtf_text_decoder}{string_decoder}{writer}'
-        image_data = deflate.to_png(bits, bitdepth)  # PNG encode. Time-consuming op.
+        image_data = deflate.to_png(bits, bitdepth, ect=ect)  # PNG encode. Time-consuming op.
 
     encoding = 'cp1252' if bin2txt == 'crenc' else 'utf8'
     if bin2txt == 'base64':  # This is just for benchmarking and is not recommended
@@ -183,6 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--mtf', type=lambda x: None if x.lower() == 'none' else int(x), choices=bwt_mtf.mtf_variants,
                         default=bwt_mtf.default_mtf)
     parser.add_argument('--bitdepth', type=int, choices=deflate.allowed_bitdepths, default=deflate.default_bitdepth, help='Warning: 8-bit and 24-bit do not work on Safari')
+    parser.add_argument('--ect', action='store_true')
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--element_id', nargs='?', const='', default='')
     parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be inferred from input_filename .html')
@@ -220,11 +222,11 @@ if __name__ == '__main__':
     out = ztml(data, args.output_filename, args.reduce_whitespace,
                not args.skip_unix_newline, args.fix_punct,
                not args.skip_remove_bom, args.caps, not args.skip_bwtsort,
-               args.mtf, args.bitdepth, args.bin2txt, args.element_id,
-               args.raw, args.image, args.js, not args.skip_uglify,
-               not args.skip_replace_quoted, args.lang, args.mobile,
-               args.title, args.text_var, args.validate, args.ignore_regex,
-               args.browser, args.timeout, args.verbose)
+               args.mtf, args.bitdepth, args.ect, args.bin2txt,
+               args.element_id, args.raw, args.image, args.js,
+               not args.skip_uglify, not args.skip_replace_quoted, args.lang,
+               args.mobile, args.title, args.text_var, args.validate,
+               args.ignore_regex, args.browser, args.timeout, args.verbose)
     result = False
     if args.validate:
         out, result = out

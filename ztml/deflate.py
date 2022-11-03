@@ -7,12 +7,13 @@ The data is then read from the HTML canvas element.
 The image aspect ratio is optimized to be squarish (for higher browser compatibility) with minimal padding.
 We do not use the alpha channel due to the browser's alpha pre-multiplication in Canvas 2D causing inaccuracies.
 In Safari, even without an alpha channel, similar inaccuracies prevent using 8-bit and 24-bit depths for PNGs.
-We use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
+By default, we use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
+Alternatively, you can use ECT which can be beneficial for large texts
+(e.g. ECT 0.9.3 gave 1.4% overall improvement over Zopfli on 2600.txt and minibook)
 A minimalistic JS decoder code is generated.
 
 Other experiments:
 8-bit and 24-bit (RGB) give similar overall results to 1-bit (but does not work on Safari)
-https://github.com/fhanau/Efficient-Compression-Tool gives a 1.4% overall improvement on 2600.txt
 WEBP gave worse overall results (libwebp/cwebp from 8-bit and 24-bit PNG, but does seem to work on Safari).
 
 References:
@@ -29,6 +30,8 @@ https://github.com/codegolf/zpng
 https://github.com/xem/miniBook
 https://github.com/google/zopfli
 https://github.com/hattya/zopflipy
+https://github.com/fhanau/Efficient-Compression-Tool (ECT)
+https://encode.su/threads/2274-ECT-an-file-optimizer-with-fast-zopfli-like-deflate-compression
 https://stackoverflow.com/questions/60074569/html-canvas-returns-off-by-some-bytes-from-getimagedata
 https://stackoverflow.com/questions/23497925/how-can-i-stop-the-alpha-premultiplication-with-canvas-imagedata/#60564905
 https://github.com/jhildenbiddle/canvas-size#test-results
@@ -39,7 +42,9 @@ https://bugs.webkit.org/show_bug.cgi?id=230855
 
 from io import BytesIO
 import math
+import os
 import sys
+from tempfile import NamedTemporaryFile
 from typing import List, Iterable, Optional
 
 import png
@@ -62,9 +67,12 @@ default_bitdepth = 1
 def to_png(bits: Iterable[int],
            bitdepth: int = default_bitdepth,  # 1, 8, 24
            compression: Optional[int] = 9,
-           filter_strategies: str = '',  # Any subset of 01234mepb or '' for auto
-           iterations: int = 15,
-           iterations_large: int = 5,
+           ect: bool = False,  # This will override zop settings
+           ect_compression: int = 20009,
+           ect_filters: str = 'allfilters',  # 'allfilters', 'allfilters-b' (brute), 'allfilters-c' (cheap) or ''
+           zop_filters: str = '',  # Any subset of 01234mepb or '' for auto
+           zop_iterations: int = 15,
+           zop_iterations_large: int = 5,
            omit_iend: bool = True,
            filename: str = '',
            verbose: bool = False) -> bytes:
@@ -105,12 +113,26 @@ def to_png(bits: Iterable[int],
     png_data = png_data.read()
     out = png_data
 
-    if iterations > 0 and iterations_large > 0:
-        out = zopfli.ZopfliPNG(filter_strategies=filter_strategies,
-                               iterations=iterations,
-                               iterations_large=iterations_large
+    if ect:
+        with NamedTemporaryFile(suffix='.png', delete=False) as f:  # See https://github.com/python/cpython/issues/88221
+            f.write(out)
+            filename = f.name
+        ect_filters_arg = f'--{ect_filters}' * bool(ect_filters)
+        ect_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'ect', 'ect'))
+        error = os.system(f'{ect_path} -{ect_compression} -strip -quiet --strict {ect_filters_arg} --mt-deflate {filename}')  # Time-consuming op.
+        assert not error, f'Error: could not find {ect_path} - Please install from https://github.com/fhanau/Efficient-Compression-Tool or use ect=False'
+        with open(filename, 'rb') as f:
+            out = f.read()
+        try:
+            os.remove(filename)
+        except PermissionError:
+            pass
+    elif zop_iterations > 0 and zop_iterations_large > 0:
+        out = zopfli.ZopfliPNG(filter_strategies=zop_filters,
+                               iterations=zop_iterations,
+                               iterations_large=zop_iterations_large
                                ).optimize(png_data)  # Time-consuming op.
-    if omit_iend:
+    if omit_iend:  # Warning: do this only for PNG files
         out = out[:-12]  # IEND length (4 bytes) + IEND tag (4 bytes) + IEND CRC-32 (4 bytes). Note: do not omit the IDAT zlib Adler-32 or the IDAT CRC-32 as this will break Safari
     if verbose:
         print(f'input_bits={bit_len} pad_bits={pad_bits} width={width} height={height} pad_pixels={pad_pixels} total_pad_bits={length*bitdepth - bit_len} bits={length * bitdepth} bytes={length*bitdepth+7 >> 3} png={len(png_data)} final={len(out)}', file=sys.stderr)

@@ -8,7 +8,7 @@ We embed in JS template literals quotes ``, so we also escape backslash, ` and $
 giving us an effective 253 byte values out of 256,
 with an overhead of ~ 3/256 ~ 1.2% (compared to 33.3% for Base64).
 JS does the unescaping, so the decoder only needs to take care of HTML character overrides for NUL and codes in 128 - 159.
-An optimal overall offset can be applied to minimize escaping, similar to dynEncode.
+An optimal overall offset can be applied to minimize escaping, similar to dynEncode (enabled by default).
 A minimalistic JS decoder code is generated.
 
 References:

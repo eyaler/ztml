@@ -21,10 +21,10 @@ You can find a very high-level overview in these [slides](misc/reversim2022_slid
 | [paq8px_v206fix1](http://www.mattmahoney.net/dc/text.html#1250) -12RT (excluding decoder) | paq           | 13.3 kB (21%)                                                    | 575 kB (18%)                                                      |
 | 7-Zip 22.01 9 Ultra PPMd (excluding decoder)                                              | 7z            | 20.8 kB (32%)                                                    | 746 kB (23%)                                                      |
 | 7-Zip 22.01 9 Ultra PPMd (self-extracting)                                                | exe           | 232 kB (364%)                                                    | 958 kB (29%)                                                      |
-| Zstandard 1.5.2 -22 --ultra (excluding decoder)                                           | zst           | 23.4 kB (37%)                                                    | 921 kB (28%)
+| Zstandard 1.5.2 -22 --ultra (excluding decoder)                                           | zst           | 23.4 kB (37%)                                                    | 921 kB (28%)                                                      
 | [Roadroller](https://github.com/lifthrasiir/roadroller) 2.1.0 -O2                         | js            | 26.5 kB (42%)                                                    | 1.0 MB (30%)                                                      |
-| **ZTML Base125**                                                                          | html (utf8)   | 26.4 kB (41%) `mtf=0`                                            | 916 kB (28%) `mtf=80`                                             |
-| **ZTML crEnc**                                                                            | html (cp1252) | 23.5 kB (37%) `mtf=0`                                            | 815 kB (25%) `mtf=80`                                             |
+| **ZTML Base125**                                                                          | html (utf8)   | 26.4 kB (41%) `mtf=0`                                            | 902 kB (28%) `mtf=80` `ect=True`                                  |
+| **ZTML crEnc**                                                                            | html (cp1252) | 23.5 kB (37%) `mtf=0`                                            | 803 kB (24%) `mtf=80` `ect=True`                                  |
 
 ### Installation
 ```

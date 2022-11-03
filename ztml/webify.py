@@ -21,6 +21,7 @@ Warnings:
 5. Aliases to be used in other aliases e.g. document, should be specified before the latter.
 
 References:
+https://github.com/google/closure-compiler
 http://iteral.com/jscrush
 http://www.crockford.com/jsmin.html
 https://github.com/xem/miniMinifier

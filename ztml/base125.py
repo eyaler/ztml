@@ -11,7 +11,7 @@ Alternatively, if these are the final 7 bits, we instead encode as: 1100010x 10x
 As, we embed in JS template literals quotes ``, we further escape ${ with backslash.
 The overhead is ~ 8/7 * 253/256 + 16/11 * 3/256 - 1 ~ 14.7% (compared to 33.3% for Base64).
 The decoder further takes care of HTML character override for NUL.
-An optimal overall offset can be added to minimize escaping, similar to dynEncode.
+An optimal overall offset can be added to minimize escaping, similar to dynEncode (disabled by default).
 A minimalistic JS decoder code is generated.
 
 References:
@@ -151,12 +151,9 @@ p=(b,l=7)=>(n|=b<<(l<8)>>k>>(l>8),k+=l,k>7?(v=n{-offset or ''},k-=8,n=b<<8-k,v):
 def test() -> None:
     for i in range(100):
         for j in range(100):
-            encode(b'\0'*i + b'\r'*j, validate=True)
-            encode(b'\0'*i + b'\\'*j, validate=True)
-            encode(b'\0'*i + b'`'*j, validate=True)
-            encode(b'\0'*i + b'\r'*j, offset=1, validate=True)
-            encode(b'\0'*i + b'\\'*j, offset=1, validate=True)
-            encode(b'\0'*i + b'`'*j, offset=1, validate=True)
+            for offset in [0, 1]:
+                for symbol in [b'\r', b'\\', b'`']:
+                    encode(b'\0'*i + symbol*j, offset, validate=True)
 
 
 if __name__ == '__main__':

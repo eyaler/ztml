@@ -128,7 +128,7 @@ def render_html(file,
         if isinstance(file, str):
             filename = file
         else:
-            with NamedTemporaryFile(suffix='.html', delete=False) as f:
+            with NamedTemporaryFile(suffix='.html', delete=False) as f:  # See https://github.com/python/cpython/issues/88221
                 f.write(file)
                 filename = f.name
         browser.get(full_path(filename))
