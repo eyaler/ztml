@@ -121,7 +121,7 @@ def to_png(bits: Iterable[int],
         ect_filters_arg = f'--{ect_filters}' * bool(ect_filters)
         ect_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'ect', 'ect')) + '-ubuntu' * (platform.system() == 'Linux')
         error = os.system(f'{ect_path} -{ect_compression} -strip -quiet --strict {ect_filters_arg} --mt-deflate {filename}')  # Time-consuming op.
-        assert not error, f'Error: could not find {ect_path} - Please install from https://github.com/fhanau/Efficient-Compression-Tool or use ect=False'
+        assert not error, f'Error: could not run {ect_path} - Please install from https://github.com/fhanau/Efficient-Compression-Tool or use ect=False'
         with open(filename, 'rb') as f:
             out = f.read()
         try:
