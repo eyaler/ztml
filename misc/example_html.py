@@ -50,7 +50,7 @@ for url in raw_files:
     print(f'{cnt} encodings of {item} took {(time()-item_start_time) / 60 :.1f} min.')
 
     # Compare file sizes and validate data is recovered
-    error |= validation.validate_files(filenames, data, raw=True, content_var='z')
+    error |= validation.validate_files(filenames, data, content_var='z')
     print()
 
 if error:

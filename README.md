@@ -34,18 +34,23 @@ pip install -r ztml/requirements.txt
 For running validations, you also need to have Chrome, Edge and Firefox installed.
 
 ### Usage
-A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line. See [ztml.py](ztml/ztml.py).
+A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line (CLI). See [ztml.py](ztml/ztml.py).
 Of course, there is also an accessible [Google Colab](https://colab.research.google.com/github/eyaler/ztml/blob/main/ztml.ipynb) with a simple GUI. Shortcut: [bit.ly/ztml1](https://bit.ly/ztml).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252.
 [Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 
 
 See [example.py](example.py) for a complete example reproducing the ZTML results in the above benchmark,
-and [example_image.py](example_image.py) for an inline image encoding example.
+and [example_image.py](example_image.py) for an example of encoding inline images, by using `image=True` or passing a file with a supported image extension to the CLI.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16.0 Safari.
 
-A quick and dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True`.
+A quick and dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True` or pass a '.html' file to the CLI.
+
+### What this is not
+1. Not an HTML inliner
+2. Not an image optimizer
+3. Not a full-fledged JS minifier 
 
 ### Caveats
 1. Files larger than a few MB might not work on [iOS Safari](https://pqina.nl/blog/canvas-area-exceeds-the-maximum-limit) or [macOS Safari 15](https://bugs.webkit.org/show_bug.cgi?id=230855).

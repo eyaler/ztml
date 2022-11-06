@@ -43,6 +43,7 @@ https://bugs.webkit.org/show_bug.cgi?id=230855
 from io import BytesIO
 import math
 import os
+import platform
 import sys
 from tempfile import NamedTemporaryFile
 from typing import List, Iterable, Optional
@@ -118,7 +119,7 @@ def to_png(bits: Iterable[int],
             f.write(out)
             filename = f.name
         ect_filters_arg = f'--{ect_filters}' * bool(ect_filters)
-        ect_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'ect', 'ect'))
+        ect_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'ect', 'ect')) + '-ubuntu' * (platform.system() == 'Linux')
         error = os.system(f'{ect_path} -{ect_compression} -strip -quiet --strict {ect_filters_arg} --mt-deflate {filename}')  # Time-consuming op.
         assert not error, f'Error: could not find {ect_path} - Please install from https://github.com/fhanau/Efficient-Compression-Tool or use ect=False'
         with open(filename, 'rb') as f:

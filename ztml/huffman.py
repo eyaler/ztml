@@ -64,7 +64,7 @@ def encode(text: str,
     if validate:
         assert not codebook or ''.join(bits.decode(codebook)) == text
         assert DEBUG_SKIP_HUFFMAN or ''.join(canonical_decode(bits, counts, symbols)) == text
-    canonical_table = ''.join(''.join(chr(j) for j in canonical_table[i]) if i in canonical_table else '\0\x01' for i in range(max(canonical_table) + 1))
+    canonical_table = ''.join(chr(j) for i in range(max(canonical_table) + 1) for j in (canonical_table[i] if i in canonical_table else [2**i + 1, 1]))
     rev_codebook = {v.to01(): k for k, v in codebook.items()}
     return bits.tolist(), charset, canonical_table, rev_codebook
 
@@ -79,7 +79,7 @@ def get_js_decoder(charset: str,
     canonical_table = webify.escape(canonical_table, escape_nul=True)
     return f'''s=[...`{charset}`]
 d=[...`{canonical_table}`]
-for(j=0,{text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k*2+1].codePointAt()+m])for(c='',k=-1;!((m=2**++k-(d[k*2].codePointAt()||{{}})-('0b'+c))>=0);)c+={bitarray_var}[j++]
+for(j={text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k*2-1].codePointAt()+m])for(k=c='0b0';(m=2**k-d[k++*2].codePointAt()-c)<0;)c+={bitarray_var}[j++]
 '''
 
 

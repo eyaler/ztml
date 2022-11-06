@@ -235,7 +235,6 @@ def validate_files(filenames: Mapping[str, str],
                    validate: bool = True,
                    verbose: bool = True
                    ) -> bool:
-    assert not image or (not raw and not isinstance(data, str))
     error = False
     if browsers is None:
         browsers = list(drivers)
@@ -247,11 +246,15 @@ def validate_files(filenames: Mapping[str, str],
         raw_size = None
         no_overhead_size = None
         for label, filename in sorted(filenames.items(), key=lambda x: (x[0] != 'raw', x[0] != 'base64_html')):
-            ext = os.path.splitext(filename)[-1][1:]
+            ext = os.path.splitext(filename)[-1][1:].lower()
             if raw_size is not None and ext != 'html':
                 continue
-            if (data is None or label == 'raw') and ext.lower() in ['bmp', 'gif', 'jfif', 'jpe', 'jpeg', 'jpg', 'png', 'webp']:
-                image = True
+            if data is None or label == 'raw':
+                if ext in webify.raw_extensions:
+                    raw = True
+                elif ext in webify.image_extensions:
+                    image = True
+            assert not image or (not raw and not isinstance(data, str))
             if data is None:
                 with open(filename, 'rb') as f:
                     data = f.read()

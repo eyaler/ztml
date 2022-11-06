@@ -1,7 +1,7 @@
 """ Minification by way of aliasing AKA uglification
 
 Substitutes recurring element, attribute and function names with short aliases.
-This is far from being a full-featured JS minifier, and only addresses specific forms of aliasing
+This is far from being a full-fledged JS minifier, and only addresses specific forms of aliasing
 (with defaults tuned for the author's own hand-minified use cases)
 You may be able to reduce your script further with JS minifiers and packers (see references),
 however these might not be compatible with ZTML (especially when using the non-utf8 crEnc).
@@ -34,6 +34,10 @@ https://github.com/mishoo/UglifyJS
 import re
 import sys
 from typing import AnyStr
+
+
+raw_extensions = ['htm', 'html', 'svg']
+image_extensions = ['bmp', 'gif', 'jfif', 'jpe', 'jpeg', 'jpg', 'png', 'webp']
 
 
 default_aliases = '''

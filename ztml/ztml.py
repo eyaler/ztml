@@ -187,9 +187,9 @@ if __name__ == '__main__':
     parser.add_argument('--ect', action='store_true')
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
     parser.add_argument('--element_id', nargs='?', const='', default='')
-    parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be inferred from input_filename .html')
-    parser.add_argument('--image', action='store_true', help='May also be inferred from input_filename extension')
-    parser.add_argument('--js', action='store_true', help='May also be inferred from output_filename extension')
+    parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be implied from input_filename extension')
+    parser.add_argument('--image', action='store_true', help='May also be implied from input_filename extension')
+    parser.add_argument('--js', action='store_true', help='May also be implied from output_filename extension')
     parser.add_argument('--skip_uglify', action='store_true')
     parser.add_argument('--skip_replace_quoted', action='store_true')
     parser.add_argument('--lang', nargs='?', const='', default='')
@@ -203,9 +203,9 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     ext = os.path.splitext(args.input_filename)[-1][1:].lower()
-    if ext == 'html':
+    if ext in webify.raw_extensions:
         args.raw = True
-    elif ext in ['bmp', 'gif', 'jfif', 'jpe', 'jpeg', 'jpg', 'png', 'webp']:
+    elif ext in webify.image_extensions:
         args.image = True
     with open(args.input_filename, 'rb') as f:
         data = f.read()
