@@ -11,7 +11,7 @@ Alternatively, if these are the final 7 bits, we instead encode as: 1100010x 10x
 As, we embed in JS template literals quotes ``, we further escape ${ with backslash.
 The overhead is ~ 8/7 * 253/256 + 16/11 * 3/256 - 1 ~ 14.7% (compared to 33.3% for Base64).
 The decoder further takes care of HTML character override for NUL.
-An optimal overall offset can be added to minimize escaping, similar to dynEncode (disabled by default).
+An optimal global character modular offset can be added to minimize escaping, similar to dynEncode (disabled by default).
 A minimalistic JS decoder code is generated.
 
 References:

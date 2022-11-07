@@ -80,7 +80,7 @@ def to_png(bits: Iterable[int],
     data = list(bits)
     bit_len = len(data)
     assert bit_len
-    assert bitdepth in allowed_bitdepths
+    assert bitdepth in allowed_bitdepths, f'Error: bitdepth={bitdepth} not in {allowed_bitdepths}'
     assert compression is None or -1 <= compression <= 9
     pad_bits = (bitdepth - bit_len) % bitdepth
     if bitdepth > 1:
@@ -93,12 +93,12 @@ def to_png(bits: Iterable[int],
             data.append(data[-1])
             pad_pixels += 1
         length = len(data)
-        assert length <= max_len, length
+        assert length <= max_len, f'Error: length={length:,} > max_len={max_len:,}'
         height = int(math.sqrt(length))
         while length % height and height > 1 and length // (height-1) <= max_dim:
             height -= 1
         width = length // height
-        assert width <= max_dim, width
+        assert width <= max_dim, f'Error: width={width:,} > max_dim={max_dim:,}'
     width_with_channels = width
     length_with_channels = length
     if bitdepth > 8:
@@ -164,7 +164,7 @@ def get_js_image_data(bit_len: int,
                       image_var: str = default_vars.image,
                       bitarray_var: str = default_vars.bitarray
                       ) -> str:
-    assert bitdepth in allowed_bitdepths
+    assert bitdepth in allowed_bitdepths, f'Error: bitdepth={bitdepth} not in {allowed_bitdepths}'
     js_image_data = f'''{image_var}.decode().then(c=>{{
 c=document.createElement`canvas`
 x=c.getContext`2d`

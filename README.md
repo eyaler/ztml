@@ -9,9 +9,9 @@
 
 On-chain media storage can require efficient compression for text embedded inline in HTML / JS.
 ZTML is a custom pipeline that generates stand-alone HTML or JS files which embed competitively compressed self-extracting text, with file sizes of 25% - 40% the original.
-These file sizes include the decoder code which is ~ 1.5 kB (including auxiliary indices and tables).
+These file sizes include the decoder code which is a highly golfed 1 - 1.5 kB (including auxiliary indices and tables).
 The approach makes sense and is optimized for small texts (tens of kB), but performs quite well also on large texts.
-The pipeline includes low overhead binary-to-text alternatives to Base64 which are also useful for inline images.
+The pipeline includes low-overhead [binary-to-text alternatives](https://en.wikipedia.org/wiki/Binary-to-text_encoding) to Base64 which are also useful for inline images.
 You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com).
 
 ### Benchmark
@@ -57,21 +57,25 @@ A quick and dirty way to compress an existing single-page HTML websites with emb
 2. This solution favors compression rate over compression and decompression times. Use `mtf=None` for faster decompression of large files.
 3. For [compressing word lists](http://golf.horse) (sorted lexicographically), solutions as [Roadroller](https://lifthrasiir.github.io/roadroller) do a much better job.
 
-### ZTML pipeline breakdown
-1. [Text normalization](ztml/text_prep.py) (irreversible; reduce whitespace, substitute unicode punctuation)
-2. [Text condensation](ztml/text_prep.py) (reversible; lowercase with automatic capitalization, substitute common strings as: the, qu)
-3. [Burrows–Wheeler + Move-to-front transforms](ztml/bwt_mtf.py) on text with some optional variants, including some new ones (beneficial for large texts with higher mtf settings)
-4. [Huffman encoding](ztml/huffman.py) (with a [codebook-free decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes), beneficial even as followed by DEFLATE)
-5. [Burrows–Wheeler transform](ztml/bwt_mtf.py) on bits (beneficial for large texts)
-6. [PNG / DEFLATE compression](ztml/deflate.py) (allowing [native decompression](https://web.archive.org/web/20090220141811/http://blog.nihilogic.dk/2008/05/compression-using-canvas-and-png.html
-), aspect ratio optimized for minimal padding, [Zopfli optimization](https://github.com/google/zopfli))
-7. [Binary-to-text encoding](https://en.wikipedia.org/wiki/Binary-to-text_encoding) embedded in JS template literals:
-     1. [crEnc](ztml/crenc.py) encoding (a [yEnc](http://www.yenc.org) variant, with 1.2% overhead, to be used with single-byte charset)
-     2. [Base125](ztml/base125.py) encoding (a [Base122](https://blog.kevinalbs.com/base122) variant, with 14.7% overhead, to be used with utf8 charset)
-8. [Uglification](ztml/webify.py) of the generated JS (substitute recurring element, attribute and function names with short aliases)
-9. [Validation](ztml/validation.py) of content reproduction on Chrome, Edge and Firefox
+### Pipeline and source code breakdown
+|     | Stage                                      | Source                              | Remarks                                                                                                                                                                                                                                               |
+|-----|--------------------------------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0   | Pipeline and CLI                           | [ztml.py](ztml/ztml.py)             |                                                                                                                                                                                                                                                       |
+| 1   | Text normalization (lossy)                 | [text_prep.py](ztml/text_prep.py)   | Reduce whitespace; substitute unicode punctuation                                                                                                                                                                                                     |
+| 2   | Text condensation (lossless)               | [text_prep.py](ztml/text_prep.py)   | Lowercase with automatic capitalization; substitute common strings as: the, qu                                                                                                                                                                        |
+| 3   | Burrows–Wheeler + Move-to-front transforms | [bwt_mtf.py](ztml/bwt_mtf.py)       | Alphabet pre-sorting; Various MTF variants, including some new ones; Higher MTF settings beneficial for larger texts                                                                                                                                  |
+| 4   | Huffman encoding                           | [huffman.py](ztml/huffman.py)       | Canonical encoding with a [codebook-free decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes); Benefical as a pre-DEFLATE stage                                                            |
+| 5   | Burrows–Wheeler transform on bits          | [bwt_mtf.py](ztml/bwt_mtf.py)       | Beneficial for large texts                                                                                                                                                                                                                            |
+| 6   | PNG / DEFLATE compression                  | [deflate.py](ztml/deflate.py)       | ZIP-like compression with native browser decompression; aspect ratio optimized for maximal compatibility and minimal padding; [Zopfli](https://github.com/google/zopfli) or [ECT](https://github.com/fhanau/Efficient-Compression-Tool) optimizations |
+| 7   | Binary-to-text encoding                    |                                     | Embed in template strings; Fix [HTML character overrides](https://html.spec.whatwg.org/multipage/parsing.html#table-charref-overrides); Allow [dynEncode](https://github.com/eshaz/simple-yenc#what-is-dynencode)-like optimal offset                 |
+| 7a  | Base125 (utf8)                             | [base125.py](ztml/base125.py)       | A [Base122](https://blog.kevinalbs.com/base122) variant, with 14.7% overhead                                                                                                                                                                          |
+| 7b  | crEnc (cp1252)                             | [crenc.py](ztml/crenc.py)           | A [yEnc](http://www.yenc.org) variant with 1.2% overhead; requires single-byte charset                                                                                                                                                                |
+| 8   | Uglification                               | [webify.py](ztml/webify.py)         | Substitute recurring JS names with short aliases                                                                                                                                                                                                      |
+| 9   | Validation                                 | [validation.py](ztml/validation.py) | Reproduce input content on Chrome, Edge and Firefox                                                                                                                                                                                                   |
 
-Note: image encoding only uses steps 7 and later.
+Note: image encoding only uses steps 0 and 7 and later.
+
+See source files for explanations, experiments and more references.
 
 ### Projects using this
 - [fragium](https://fragium.com)
