@@ -2,7 +2,7 @@
 
 In the spirit of yEnc (why encode?), we only encode symbols where absolutely required.
 If the HTML or JS charset can be set to a single-byte encoding as cp1252 (or latin1),
-the only symbol requiring special treatment is the carriage-return (CR),
+the only symbol requiring special treatment is the carriage-return (CR), hence crEnc,
 which can be dealt with by simple backslash escaping.
 We embed in JS template literals quotes ``, so we also escape backslash, ` and ${
 giving us an effective 253 byte values out of 256,

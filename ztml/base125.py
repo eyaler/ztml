@@ -1,7 +1,7 @@
 """Base125 encoding based on Base122 and optimized for inline HTML / JS text compression and image encoding
 
 If we must use utf8 encoding for HTML or JS, crEnc will not work.
-Instead, we can use this unnecessarily optimized version of the variable length Base122.
+Instead, we can use this original and unnecessarily-optimized version of the variable length Base122.
 The original byte stream is split into 7 bit chunks,
 which are encoded as a single byte: 0xxxxxxx, to comply with utf8 code point scheme.
 We only use 125 byte values out of 128 (excluding CR, backslash and `)
