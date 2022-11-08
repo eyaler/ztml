@@ -16,7 +16,7 @@
 - #### Entropy coding:
 - Auto-caps should use modifiers for next letter/word/sentence/paragraph or block-level, over simple mode instead of falling back to raw
 - Whitespace modelling (e.g. after punctuation)
-- Dictionary compression for long texts
+- Dictionary compression for large texts
 - [Fast Huffman one-shift decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes), or [follow-up](https://arxiv.org/pdf/1410.3438.pdf) [works](https://arxiv.org/pdf/2108.05495.pdf)
 - Consider [Roadroller](https://lifthrasiir.github.io/roadroller) entropy coder
 

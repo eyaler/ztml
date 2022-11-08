@@ -8,7 +8,7 @@ The image aspect ratio is optimized to be squarish (for higher browser compatibi
 We do not use the alpha channel due to the browser's alpha pre-multiplication in Canvas 2D causing inaccuracies.
 In Safari, even without an alpha channel, similar inaccuracies prevent using 8-bit and 24-bit depths for PNGs.
 By default, we use Google's optimized Zopfli compression which is compatible with DEFLATE decompression.
-Alternatively, you can use ECT which can be beneficial for large texts
+Alternatively, you can use ECT which can be beneficial for large texts (but may slightly hurt smaller ones)
 (e.g. ECT 0.9.3 gave 1.4% overall improvement over Zopfli on 2600.txt and minibook)
 A minimalistic JS decoder code is generated.
 

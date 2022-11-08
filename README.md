@@ -12,7 +12,7 @@ ZTML is a custom pipeline that generates stand-alone HTML or JS files which embe
 These file sizes include the decoder code which is a highly golfed 1 - 1.5 kB (including auxiliary indices and tables).
 The approach makes sense and is optimized for small texts (tens of kB), but performs quite well also on large texts.
 The pipeline includes original low-overhead [binary-to-text alternatives](https://en.wikipedia.org/wiki/Binary-to-text_encoding) to Base64 which are also useful for inline images.
-You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com), and some more technical highlights in the [encode.su forum thread](https://encode.su/threads/3973-ZTML-Extreme-inline-text-compression-for-HTML-JS).
+You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com), and some more technical highlights and discussion in the [encode.su forum thread](https://encode.su/threads/3973-ZTML-Extreme-inline-text-compression-for-HTML-JS).
 
 ### Benchmark
 |                                                                                       | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
@@ -45,7 +45,7 @@ and [example_image.py](example_image.py) for an example of encoding inline image
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
 On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6 and iOS 16.0 Safari.
 
-A quick and dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True` or pass a '.html' file to the CLI.
+A quick-and-dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True` or pass a '.html' file to the CLI.
 
 ### What this is not
 1. Not an HTML inliner
