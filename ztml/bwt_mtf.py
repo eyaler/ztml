@@ -30,10 +30,10 @@ import numpy as np
 from pydivsufsort import divsufsort
 
 if not __package__:
-    import default_vars
+    import default_vars, webify
 else:
     # noinspection PyPackages
-    from . import default_vars
+    from . import default_vars, webify
 
 
 order1 = 'AOUIEVWXYZaouievwxyz'
@@ -225,9 +225,9 @@ for(k of {data_var}){mtf_op}
         dyn_orders = list(zip(*[(c1, c2) for c1, c2 in zip(order1, order2) if c1 in symbols]))
         if dyn_orders:
             dyn_order1, dyn_order2 = dyn_orders
-            dyn_order1 = ''.join(dyn_order1)
-            dyn_order2 = ''.join(dyn_order2)
-            js_decoder += f'''d={{}};[...'{dyn_order2}'].map((c,i)=>d[c]=[...'{dyn_order1}'][i])
+            dyn_order1 = webify.escape(''.join(dyn_order1))
+            dyn_order2 = webify.escape(''.join(dyn_order2))
+            js_decoder += f'''d={{}};[...`{dyn_order2}`].map((c,i)=>d[c]=[...`{dyn_order1}`][i])
 {data_var}={data_var}.map(i=>{'d[c=String.fromCodePoint(i)]||c).join``' if is_str else '(d[c=String.fromCodePoint(i)]||c).codePointAt())'}
 '''
     if is_str and not dyn_orders:

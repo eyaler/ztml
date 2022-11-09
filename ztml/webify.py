@@ -23,10 +23,14 @@ Warnings:
 References:
 https://github.com/google/closure-compiler
 http://iteral.com/jscrush
-http://www.crockford.com/jsmin.html
+https://nikhilism.com/post/2012/demystifying-jscrush
+https://github.com/possan/jsintros/blob/master/a/src/crush.js
+https://jmperezperez.com/js-crusher
+https://crockford.com/jsmin
 https://github.com/xem/miniMinifier
 https://siorki.github.io/regPack
 https://lifthrasiir.github.io/roadroller
+https://terser.org
 https://github.com/mishoo/UglifyJS
 """
 
