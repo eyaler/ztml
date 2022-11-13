@@ -64,7 +64,7 @@ def encode(text: str,
     if validate:
         assert not codebook or ''.join(bits.decode(codebook)) == text
         assert DEBUG_SKIP_HUFFMAN or ''.join(canonical_decode(bits, counts, symbols)) == text
-    canonical_table = ''.join(chr(j) for i in range(max(canonical_table) + 1) for j in (canonical_table[i] if i in canonical_table else [2**i + 1, 1]))
+    canonical_table = ''.join(chr(j) for i in range(max(canonical_table, default=-1) + 1) for j in (canonical_table[i] if i in canonical_table else [2**i + 1, 1]))
     rev_codebook = {v.to01(): k for k, v in codebook.items()}
     return bits.tolist(), charset, canonical_table, rev_codebook
 
