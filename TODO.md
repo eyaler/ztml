@@ -8,6 +8,7 @@
 - JS library?
 - Expose more parameters and allow skipping steps in ztml() / CLI / Colab, possibly via config file
 - Stand-alone online web GUI
+- Stand-alone executable 
 
 ### Compression
 - Ablation benchmarks

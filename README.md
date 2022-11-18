@@ -12,7 +12,8 @@ ZTML is a custom pipeline that generates stand-alone HTML or JS files which embe
 These file sizes include the decoder code which is a highly golfed 1 - 1.5 kB (including auxiliary indices and tables).
 The approach makes sense and is optimized for small texts (tens of kB), but performs quite well also on large texts.
 The pipeline includes original low-overhead [binary-to-text alternatives](https://en.wikipedia.org/wiki/Binary-to-text_encoding) to Base64 which are also useful for inline images.
-You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from [Reversim Summit 2022](https://summit2022.reversim.com), and some more technical highlights and discussion in the [encode.su forum thread](https://encode.su/threads/3973-ZTML-Extreme-inline-text-compression-for-HTML-JS).
+
+You can find a very high-level overview in these [slides](misc/reversim2022_slides.pdf) from this [5-minute talk](https://www.youtube.com/watch?v=7rz_MfAIJnY) (in Hebrew) at [Reversim Summit 2022](https://summit2022.reversim.com), and some more technical highlights and discussion in the [encode.su forum thread](https://encode.su/threads/3973-ZTML-Extreme-inline-text-compression-for-HTML-JS).
 
 ### Benchmark
 |                                                                                       | File format   | [Micromegas (En)](https://gutenberg.org/files/30123/30123-8.txt) | [War and Peace (En)](https://gutenberg.org/files/2600/2600-0.txt) |
