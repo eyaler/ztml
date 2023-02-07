@@ -1,6 +1,7 @@
 # Todo
 
 ### Usability
+- Simplify the "from ztml.ztml import ztml" hierarchy
 - Support encoding video/audio/fonts/PDF/...
 - Support encoding multiple media elements
 - Provide an easy way to view and edit output HTML in Colab
@@ -38,8 +39,8 @@
 - Strip whitespace from code lines not part of multi-line content strings (see e.g. above JS packers and [closure-compiler](https://github.com/google/closure-compiler), [jsmin](https://crockford.com/jsmin), [miniMinifier](https://github.com/xem/miniMinifier), [Terser](https://terser.org), [UglifyJS](https://github.com/mishoo/UglifyJS))
 
 ### Validation and testing
+- Running full tests take too long
 - Linux installation instructions / Enable validation in Colab
-- Validation testing for Safari
 - Fix slow rendering with Selenium in validation
 - Tests for text_prep.py: normalize, caps, the
 - Automatic testing on GitHub
