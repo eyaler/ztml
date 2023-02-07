@@ -201,12 +201,12 @@ def get_js_decoder(data: Union[str, Iterable[int]],
             js_decoder += 'n=1\n'
             mtf_op = f'd.splice(k>!!n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         elif mtf == 50:
-            mtf_op = f'd.splice(k/2|0,0,{data_var}[j++]=d.splice(k,1)[0])'
+            mtf_op = f'd.splice(k/2,0,{data_var}[j++]=d.splice(k,1)[0])'
         elif mtf == 52:
             js_decoder += 'n=1\n'
-            mtf_op = f'd.splice(k>1?k/2|0:k>n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
+            mtf_op = f'd.splice(k>1?k/2:k>n,0,{data_var}[j++]=d.splice(k,1)[0]),n=k'
         else:
-            mtf_op = f"d.splice(k*{str(mtf / 100).lstrip('0')}+.5|0,0,{data_var}[j++]=d.splice(k,1)[0])"
+            mtf_op = f"d.splice(k*{str(mtf / 100).lstrip('0')}+.5,0,{data_var}[j++]=d.splice(k,1)[0])"
         if is_str and any(ord(c) > surrogate_lo for c in data):
             mtf_op = f'k-={surrogate_hi - surrogate_lo + 1}*(k>{surrogate_lo}),{mtf_op}'
         # Use reduce instead of Math.max(...array) due to argument limit: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#using_apply_and_built-in_functions

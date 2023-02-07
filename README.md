@@ -35,7 +35,16 @@ pip install -r ztml/requirements.txt
 For running validations, you also need to have Chrome, Edge and Firefox installed.
 
 ### Usage
-A standard simplified pipeline can be run by calling `ztml()` or running `python ztml.py` from the command line (CLI). See [ztml.py](ztml/ztml.py).
+A standard simplified pipeline can be run by calling `ztml()`:
+```
+from ztml import ztml
+ztml.ztml('Input text that is much longer than this one!', 'output.html')
+```
+or running `ztml.py` from the command line (CLI):
+```
+python ztml/ztml.py input.txt output.html
+```
+See [ztml.py](ztml/ztml.py).
 Of course, there is also an accessible [Google Colab](https://colab.research.google.com/github/eyaler/ztml/blob/main/ztml.ipynb) with a simple GUI. Shortcut: [bit.ly/ztml1](https://bit.ly/ztml).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252.
@@ -59,20 +68,20 @@ A quick-and-dirty way to compress an existing single-page HTML websites with emb
 3. For [compressing word lists](http://golf.horse) (sorted lexicographically), solutions as [Roadroller](https://lifthrasiir.github.io/roadroller) do a much better job.
 
 ### Pipeline and source code breakdown
-|     | Stage                                      | Source                              | Remarks                                                                                                                                                                                                                                       |
-|-----|--------------------------------------------|-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0   | Pipeline and CLI                           | [ztml.py](ztml/ztml.py)             |                                                                                                                                                                                                                                               |
-| 1   | Text normalization (lossy)                 | [text_prep.py](ztml/text_prep.py)   | Reduce whitespace; substitute unicode punctuation                                                                                                                                                                                             |
-| 2   | Text condensation (lossless)               | [text_prep.py](ztml/text_prep.py)   | Lowercase with automatic capitalization; substitute common strings as: the, qu                                                                                                                                                                |
-| 3   | Burrows–Wheeler + Move-to-front transforms | [bwt_mtf.py](ztml/bwt_mtf.py)       | Alphabet pre-sorting; Various MTF variants, including some original ones; Higher MTF settings beneficial for larger texts                                                                                                                     |
-| 4   | Huffman encoding                           | [huffman.py](ztml/huffman.py)       | Canonical encoding with a [codebook-free decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes); Benefical as a pre-DEFLATE stage                                                    |
-| 5   | Burrows–Wheeler transform on bits          | [bwt_mtf.py](ztml/bwt_mtf.py)       | Beneficial for large texts                                                                                                                                                                                                                    |
+|     | Stage                                      | Source                              | Remarks                                                                                                                                                                                                                                               |
+|-----|--------------------------------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0   | Pipeline and CLI                           | [ztml.py](ztml/ztml.py)             |                                                                                                                                                                                                                                                       |
+| 1   | Text normalization (lossy)                 | [text_prep.py](ztml/text_prep.py)   | Reduce whitespace; substitute unicode punctuation                                                                                                                                                                                                     |
+| 2   | Text condensation (lossless)               | [text_prep.py](ztml/text_prep.py)   | Lowercase with automatic capitalization; substitute common strings as: the, qu                                                                                                                                                                        |
+| 3   | Burrows–Wheeler + Move-to-front transforms | [bwt_mtf.py](ztml/bwt_mtf.py)       | Alphabet pre-sorting; Various MTF variants, including some original ones; Higher MTF settings beneficial for larger texts                                                                                                                             |
+| 4   | Huffman encoding                           | [huffman.py](ztml/huffman.py)       | Canonical encoding with a [codebook-free decoder](https://researchgate.net/publication/3159499_On_the_implementation_of_minimum_redundancy_prefix_codes); Benefical as a pre-DEFLATE stage                                                            |
+| 5   | Burrows–Wheeler transform on bits          | [bwt_mtf.py](ztml/bwt_mtf.py)       | Beneficial for large texts                                                                                                                                                                                                                            |
 | 6   | PNG / DEFLATE compression                  | [deflate.py](ztml/deflate.py)       | ZIP-like compression with native browser decompression; aspect ratio optimized for maximal compatibility and minimal padding; [Zopfli](https://github.com/google/zopfli) or [ECT](https://github.com/fhanau/Efficient-Compression-Tool) optimizations |
-| 7   | Binary-to-text encoding                    |                                     | Embed in template strings; Fix [HTML character overrides](https://html.spec.whatwg.org/multipage/parsing.html#table-charref-overrides); Allow [dynEncode](https://github.com/eshaz/simple-yenc#what-is-dynencode)-like optimal offset         |
-| 7a  | Base125 (utf8)                             | [base125.py](ztml/base125.py)       | An original variant of [Base122](https://blog.kevinalbs.com/base122), with 14.7% overhead                                                                                                                                                     |
-| 7b  | crEnc (cp1252)                             | [crenc.py](ztml/crenc.py)           | An original variant of [yEnc](http://www.yenc.org) with 1.2% overhead; requires single-byte charset                                                                                                                                           |
-| 8   | Uglification                               | [webify.py](ztml/webify.py)         | Substitute recurring JS names with short aliases                                                                                                                                                                                              |
-| 9   | Validation                                 | [validation.py](ztml/validation.py) | Reproduce input content on Chrome, Edge and Firefox                                                                                                                                                                                           |
+| 7   | Binary-to-text encoding                    |                                     | Embed in template strings; Fix [HTML character overrides](https://html.spec.whatwg.org/multipage/parsing.html#table-charref-overrides); Allow [dynEncode](https://github.com/eshaz/simple-yenc#what-is-dynencode)-like optimal offset                 |
+| 7a  | Base125 (utf8)                             | [base125.py](ztml/base125.py)       | An original variant of [Base122](https://blog.kevinalbs.com/base122), with 14.7% overhead                                                                                                                                                             |
+| 7b  | crEnc (cp1252)                             | [crenc.py](ztml/crenc.py)           | An original variant of [yEnc](http://www.yenc.org) with 1.2% overhead; requires single-byte charset                                                                                                                                                   |
+| 8   | Uglification                               | [webify.py](ztml/webify.py)         | Substitute recurring JS names with short aliases                                                                                                                                                                                                      |
+| 9   | Validation                                 | [validation.py](ztml/validation.py) | Reproduce input content on Chrome, Edge and Firefox                                                                                                                                                                                                   |
 
 Note: image encoding only uses steps 0 and 7 and later.
 

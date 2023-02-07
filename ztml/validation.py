@@ -12,7 +12,7 @@ except ImportError:
     from typing_extensions import Literal
 
 import regex
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import JavascriptException, TimeoutException, WebDriverException
 from selenium.webdriver import Chrome, Edge, Firefox, chrome, edge, firefox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -141,9 +141,14 @@ def render_html(file,
             wait = WebDriverWait(browser, timeout)
             if image:
                 if by == By.TAG_NAME and element == 'body':
-                    data_url = wait.until(lambda x: regex.sub('^none$', '', x.find_element(by, element).value_of_css_property('background-image')))
+                    data_url = wait.until(lambda x:
+                                          regex.sub('^none$', '',
+                                                    x.find_element(by, element)
+                                                    .value_of_css_property('background-image')))
                 else:
-                    data_url = wait.until(lambda x: x.find_element(by, element).get_property('src'))
+                    data_url = wait.until(lambda x:
+                                          x.find_element(by, element)
+                                          .get_property('src'))
                 assert isinstance(data_url, str), type(data_url)
                 if ';base64,' in data_url:
                     return b64decode(data_url.split(';base64,', 1)[1].split('"', 1)[0], validate=True)
@@ -156,7 +161,11 @@ def render_html(file,
                 get_text = lambda x: x.execute_script(f'return {content_var or default_vars.text}')
             else:
                 get_text = lambda x: x.find_element(by, element).get_property('innerText')
-            text = wait.until(get_text)
+            try:
+                text = wait.until(get_text)
+            except JavascriptException:
+                sleep(1)
+                text = wait.until(get_text)
             assert isinstance(text, str), type(text)
             return text
         except TimeoutException:
@@ -175,8 +184,8 @@ def find_first_diff(rendered: AnyStr, data: AnyStr, verbose: bool = True) -> int
         i += 1
     if verbose:
         print(f'\nFirst difference found at {i} / {len(rendered)}', file=sys.stderr)
-        print('Original:', repr(data[max(i - 30, 0) : i]), '->', repr(data[i : i + 50]), file=sys.stderr)
-        print('Rendered:', repr(rendered[max(i - 30, 0) : i]), '->', repr(rendered[i : i + 50]), '\n', file=sys.stderr)
+        print(f'Original: {data[max(i - 30, 0) : i]!r} -> {data[i : i + 50]!r}', file=sys.stderr)
+        print(f'Rendered: {rendered[max(i - 30, 0) : i]!r} -> {rendered[i : i + 50]!r}\n', file=sys.stderr)
     return i
 
 

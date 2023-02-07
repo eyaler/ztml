@@ -107,7 +107,7 @@ def ztml(data,
         huffman_bits, huffman_decoder = huffman.encode_and_get_js_decoder(bwt_mtf_text, text_var=text_var)  # Huffman encode
         bits, bwt_bits_decoder = bwt_mtf.encode_and_get_js_decoder(huffman_bits)  # Burrows-Wheeler transform on bits
         if raw:
-            writer = f'document.write({text_var});document.close()'  # document.close() needed to ensure that any style changes added after a script are applied
+            writer = f'document.close(document.write({text_var}))'  # document.close() needed to ensure that any style changes added after a script are applied
         elif element_id:
             writer = f'''document.body.appendChild(document.createElement`pre`).id='{element_id}'
 {element_id}.textContent={text_var}'''
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--bitdepth', type=int, choices=deflate.allowed_bitdepths, default=deflate.default_bitdepth, help='Warning: 8-bit and 24-bit do not work on Safari')
     parser.add_argument('--ect', action='store_true')
     parser.add_argument('--bin2txt', type=str.lower, choices=bin2txt_encodings, default=default_bin2txt)
-    parser.add_argument('--element_id', nargs='?', const='', default='')
+    parser.add_argument('--element_id', nargs='?', const='', default='', help='Warning: must be a valid JS variable name, and watch out for collisions with HTML namespace')
     parser.add_argument('--raw', action='store_true', help='Use document.write() to overwrite the document with the raw text. May also be implied from input_filename extension')
     parser.add_argument('--image', action='store_true', help='May also be implied from input_filename extension')
     parser.add_argument('--js', action='store_true', help='May also be implied from output_filename extension')

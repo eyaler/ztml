@@ -79,7 +79,7 @@ def get_js_decoder(charset: str,
     canonical_table = webify.escape(canonical_table, escape_nul=True)
     return f'''s=[...`{charset}`]
 d=[...`{canonical_table}`]
-for(j={text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k*2-1].codePointAt()+m])for(k=c='0b0';(m=2**k-d[k++*2].codePointAt()-c)<0;)c+={bitarray_var}[j++]
+for(j={text_var}='';j<{bitarray_var}.length;{text_var}+=s[d[k*2-1].codePointAt()+m])for(k=c=0;(m=2**k-d[k++*2].codePointAt()-c)<0;)c+=c+{bitarray_var}[j++]
 '''
 
 
