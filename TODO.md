@@ -41,6 +41,7 @@
 ### Validation and testing
 - Running full tests take too long
 - Linux installation instructions / Enable validation in Colab
+- Validation testing for Safari (consider Playwright to test WebKit)
 - Fix slow rendering with Selenium in validation
 - Tests for text_prep.py: normalize, caps, the
 - Automatic testing on GitHub

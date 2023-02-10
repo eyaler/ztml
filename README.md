@@ -53,7 +53,7 @@ Of course, there is also an accessible [Google Colab](https://colab.research.goo
 See [example.py](example.py) for a complete example reproducing the ZTML results in the above benchmark,
 and [example_image.py](example_image.py) for an example of encoding inline images, by using `image=True` or passing a file with a supported image extension to the CLI.
 Outputs of these runs can be accessed at [eyalgruss.com/ztml](https://eyalgruss.com/ztml).
-On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6, macOS Ventura 13.0 Safari 16.1 and iOS 16.0, 16.2 Safari.
+On top of the built-in validations for Chrome, Edge and Firefox, these were also manually tested on macOS Monterey 12.5 Safari 15.6, macOS Ventura 13.2 Safari 16.3 and iOS 16.0, 16.2 Safari.
 
 A quick-and-dirty way to compress an existing single-page HTML websites with embedded inline media is to use `raw=True` or pass a '.html' file to the CLI.
 
