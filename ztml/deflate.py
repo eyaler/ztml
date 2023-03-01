@@ -176,7 +176,7 @@ s=x.getImageData({bitarray_var}=[],0,...c).data{'.filter((v,i)=>(i+1)%4)' * (bit
         js_image_data += f'for(j={bit_len};j--;){bitarray_var}[j]=s[j*4]>>7&1\n'  # Applying >>7 to deal with Safari PNG rendering inaccuracy
     else:  # Will break Safari
         js_image_data += f'''for(j={(bit_len+(bitdepth-bit_len)%bitdepth) // 8};j--;)for(k=8;k--;){bitarray_var}[j*8+k]=s[j{'*4' * (bitdepth <= 8)}]>>7-k&1
-{bitarray_var}={bitarray_var}.slice(0,{bit_len})
+{bitarray_var}.length={bit_len}
 '''
     js_image_data += f'{decoder_script.strip()}}})'
     return js_image_data
