@@ -45,7 +45,7 @@ or running `ztml.py` from the command line (CLI):
 python ztml/ztml.py input.txt output.html
 ```
 See [ztml.py](ztml/ztml.py).
-Of course, there is also an accessible [Google Colab](https://colab.research.google.com/github/eyaler/ztml/blob/main/ztml.ipynb) with a simple GUI. Shortcut: [bit.ly/ztml1](https://bit.ly/ztml).
+Of course, there is also an accessible [Google Colab](https://colab.research.google.com/github/eyaler/ztml/blob/main/ZTML.ipynb) with a simple GUI. Shortcut: [bit.ly/ztml1](https://bit.ly/ztml).
 
 [crEnc](ztml/crenc.py) gives better compression but requires setting the HTML or JS charset to cp1252.
 [Base125](ztml/base125.py) is the second-best option if one must stick with utf8. 
