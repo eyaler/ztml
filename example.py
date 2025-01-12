@@ -31,9 +31,9 @@ for item, mtf, ect in zip(books, book_mtf, book_ect):
 
     # If missing, download an example file from the web
     if not skip_download_exists or not os.path.exists(filenames['raw']):
-        from gutenberg.acquire.text import load_etext
+        from gutenbergpy.textget import get_text_by_id
         with open(filenames['raw'], 'wb') as f:
-            f.write(load_etext(item).encode())
+            f.write(get_text_by_id(item))
 
     with open(filenames['raw'], 'rb') as f:
         data = f.read()
